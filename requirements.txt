@@ -1,0 +1,7 @@
+Flask<1
+Cython
+Keras
+tensorflow-gpu
+sklearn
+pandas
+h5py

@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<h2>{{ title }}.</h2>
+<h3>Create and Manage your projects for machine learning data analysis</h3>
+
+<div class="row">
+    <form method="post">
+        <div class="col-lg-4">
+            <button type="submit" class="btn btn-primary">Create</button>
+        </div>
+        <div class="col-lg-4">
+            <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+        <div class="col-lg-4">
+            <button type="submit" class="btn btn-danger">Analyze</button>
+        </div>
+    </form>
+</div>
+<div class="row">
+    <table class="table table-striped table-hover ">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Created On</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in projects %}
+            <tr>
+                <td><a href="/project/{{ row[0] }}">{{ row[1] }}</a></td>
+                <td>{{ row[4] }}</td>
+                <td>
+                    <a href="/datainsight/{{ row[0] }}?type=basic">Get Insight</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table> 
+</div>
+{% endblock %}
