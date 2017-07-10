@@ -1,6 +1,6 @@
-from SiaWizard import app
-from SiaWizard import DataManager
-from SiaWizard.dd_client import DD
+from Interface import app
+from Interface import DataManager
+from Interface.dd_client import DD
 
 setting = DataManager.GetSetting()
 

@@ -17,7 +17,7 @@
     <SuppressCollectPythonCloudServiceFiles>true</SuppressCollectPythonCloudServiceFiles>
     <Name>SiaWizard</Name>
     <RootNamespace>SiaWizard</RootNamespace>
-    <InterpreterId>MSBuild|env1|$(MSBuildProjectFullPath)</InterpreterId>
+    <InterpreterId>Global|ContinuumAnalytics|Anaconda36-64</InterpreterId>
     <EnableNativeCodeDebugging>True</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -29,65 +29,68 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Interface\api.py" />
+    <Compile Include="Interface\DataAnalyzer.py" />
+    <Compile Include="Interface\DataManager.py" />
+    <Compile Include="Interface\dd_client.py" />
+    <Compile Include="Interface\RegressionTask.py" />
+    <Compile Include="Interface\ServiceController.py" />
+    <Compile Include="testreg.py" />
+    <Compile Include="Interface\utility.py" />
+    <Compile Include="Interface\views.py" />
+    <Compile Include="Interface\__init__.py" />
     <Compile Include="runserver.py" />
-    <Compile Include="SiaWizard\DataAnalyzer.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SiaWizard\dd_client.py" />
-    <Compile Include="SiaWizard\DataManager.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SiaWizard\RegressionTask.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SiaWizard\ServiceController.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SiaWizard\api.py" />
-    <Compile Include="SiaWizard\__init__.py" />
-    <Compile Include="SiaWizard\views.py" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="SiaWizard\json\" />
-    <Folder Include="SiaWizard\data\" />
-    <Folder Include="SiaWizard\static\projects\" />
-    <Folder Include="SiaWizard\static\projects\test1\" />
-    <Folder Include="SiaWizard\" />
-    <Folder Include="SiaWizard\static\" />
-    <Folder Include="SiaWizard\static\css\" />
-    <Folder Include="SiaWizard\static\js\" />
-    <Folder Include="SiaWizard\templates\" />
+    <Folder Include="Interface\" />
+    <Folder Include="Interface\data\" />
+    <Folder Include="Interface\json\" />
+    <Folder Include="Interface\static\" />
+    <Folder Include="Interface\static\css\" />
+    <Folder Include="Interface\static\js\" />
+    <Folder Include="Interface\static\projects\" />
+    <Folder Include="Interface\static\projects\test1\" />
+    <Folder Include="Interface\static\projects\test1\.ipynb_checkpoints\" />
+    <Folder Include="Interface\templates\" />
+    <Folder Include="Interface\__pycache__\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Interface\DataAnalyzer.pyc" />
+    <Content Include="Interface\DataManager.pyc" />
+    <Content Include="Interface\json\create1.json" />
+    <Content Include="Interface\json\define1.json" />
+    <Content Include="Interface\json\train1.json" />
+    <Content Include="Interface\siawiz.db" />
+    <Content Include="Interface\static\css\cerulean.css" />
+    <Content Include="Interface\static\css\custom.min.css" />
+    <Content Include="Interface\static\js\bootstrap.js" />
+    <Content Include="Interface\static\projects\test1\.ipynb_checkpoints\Untitled-checkpoint.ipynb" />
+    <Content Include="Interface\static\projects\test1\attrcor.html" />
+    <Content Include="Interface\static\projects\test1\data.csv" />
+    <Content Include="Interface\static\projects\test1\head.html" />
+    <Content Include="Interface\static\projects\test1\stats.html" />
+    <Content Include="Interface\static\projects\test1\Untitled.ipynb" />
+    <Content Include="Interface\templates\about.html" />
+    <Content Include="Interface\templates\contact.html" />
+    <Content Include="Interface\templates\datainsight.html" />
+    <Content Include="Interface\templates\forms.html" />
+    <Content Include="Interface\templates\index.html" />
+    <Content Include="Interface\templates\layout.html" />
+    <Content Include="Interface\templates\services.html" />
+    <Content Include="Interface\templates\tables.html" />
+    <Content Include="Interface\views.pyc" />
+    <Content Include="Interface\__init__.pyc" />
+    <Content Include="Interface\__pycache__\api.cpython-36.pyc" />
+    <Content Include="Interface\__pycache__\DataAnalyzer.cpython-36.pyc" />
+    <Content Include="Interface\__pycache__\DataManager.cpython-36.pyc" />
+    <Content Include="Interface\__pycache__\ProjectsController.cpython-36.pyc" />
+    <Content Include="Interface\__pycache__\RegressionTask.cpython-36.pyc" />
+    <Content Include="Interface\__pycache__\views.cpython-36.pyc" />
+    <Content Include="Interface\__pycache__\__init__.cpython-36.pyc" />
     <Content Include="requirements.txt" />
-    <Content Include="SiaWizard\json\train1.json" />
-    <Content Include="SiaWizard\json\define1.json" />
-    <Content Include="SiaWizard\json\create1.json" />
-    <Content Include="SiaWizard\static\css\cerulean.css" />
-    <Content Include="SiaWizard\static\css\custom.min.css" />
-    <Content Include="SiaWizard\static\js\bootstrap.js" />
-    <Content Include="SiaWizard\templates\about.html" />
-    <Content Include="SiaWizard\templates\contact.html" />
-    <Content Include="SiaWizard\templates\forms.html" />
-    <Content Include="SiaWizard\templates\datainsight.html" />
-    <Content Include="SiaWizard\templates\services.html" />
-    <Content Include="SiaWizard\templates\index.html" />
-    <Content Include="SiaWizard\templates\layout.html" />
-    <Content Include="SiaWizard\templates\tables.html" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|ContinuumAnalytics|Anaconda36-64" />
-  </ItemGroup>
-  <ItemGroup>
-    <Interpreter Include="env1\">
-      <Id>env1</Id>
-      <Version>3.6</Version>
-      <Description>env1 (Anaconda 4.3.0 (3.6, 64-bit))</Description>
-      <InterpreterPath>Scripts\python.exe</InterpreterPath>
-      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
-      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
-      <Architecture>X64</Architecture>
-    </Interpreter>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.Web.targets" />
   <!-- Specify pre- and post-build commands in the BeforeBuild and 

@@ -5,9 +5,9 @@ Routes and views for the flask application.
 from datetime import datetime
 from flask import render_template
 from flask import request
-from SiaWizard import app
-from SiaWizard import DataManager
-from SiaWizard import DataAnalyzer
+from Interface import app
+from Interface import DataManager
+from Interface import DataAnalyzer
 import matplotlib.pyplot as plt
 
 @app.route('/', methods=['GET'])

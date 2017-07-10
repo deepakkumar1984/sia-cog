@@ -7,16 +7,23 @@ from keras.wrappers.scikit_learn import KerasRegressor
 
 def Run(modelDef, filename):
     dataframe = read_csv(filename)
-    array = dataframe.values
+    print(modelDef['x'])
+    X_frame = dataframe[modelDef['x']]
+    Y_frame = dataframe[modelDef['y']]
     
-    X = array[:,0:13]
-    Y = array[:,13]
+    X = X_frame.values
+    Y = Y_frame.values
     num_folds = 10
     kfold = KFold(n_splits=10, random_state=7)
     model = linear_model.LinearRegression()
-    scoring = 'neg_mean_squared_error'
+    scoring = ""
+    if modelDef.scoring.length > 0:
+        scoring = modelDef.scoring[0]
+        
     results = cross_val_score(model, X, Y, cv=kfold, scoring=scoring)
-    print("MSE: %.3f (%.3f)") % (results.mean(), results.std())
+    output = {"mean": results.mean(), "std": results.std()}
+    return output
+
 
 
 

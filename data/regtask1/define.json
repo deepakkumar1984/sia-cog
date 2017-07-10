@@ -14,12 +14,11 @@
         "TAX",
         "PTRATIO",
         "B",
-        "LSTAT",
-        "MEDV"
+        "LSTAT"
     ],
-    "y": "MEDV",
+    "y": ["MEDV"],
     "id": "",
     "scoring": [
-        "mean_squared_error"
+        "neg_mean_squared_error"
     ]
 }
