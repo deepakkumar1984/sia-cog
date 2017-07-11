@@ -12,7 +12,7 @@ from Interface import DataAnalyzer
 import matplotlib.pyplot as plt
 import os
 import json
-from Interface import RegressionTask
+from Interface import SkLearnTask
 from Interface import utility
 
 @app.route('/api/srv/create', methods=['POST'])
@@ -74,7 +74,7 @@ def train(name):
         modeldata = utility.getFileData(modelfile)
         srvjson = json.loads(srvdata)
         modeljson = json.loads(modeldata)
-        RegressionTask.Run(modeljson, trainfile)
+        SkLearnTask.Run(modeljson, trainfile)
     except Exception as e:
         code = 500
         message = e

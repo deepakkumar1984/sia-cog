@@ -1,23 +1,16 @@
 {
     "isneuralnetwork": false,
-    "model": "LinearRegression",
-    "x": [
-        "CRIM",
-        "ZN",
-        "INDUS",
-        "CHAS",
-        "NOX",
-        "RM",
-        "AGE",
-        "DIS",
-        "RAD",
-        "TAX",
-        "PTRATIO",
-        "B",
-        "LSTAT"
-    ],
-    "y": ["MEDV"],
-    "id": "",
+    "model": "SVR",
+    "dataset": {
+        "delim_whitespace": true,
+        "column_header": false,
+        "colsdefined": false,
+        "xcols": [],
+        "ycols": [],
+        "xrange": "0:13",
+        "yrange": 13,
+        "id": ""
+    },
     "scoring": [
         "neg_mean_squared_error"
     ]
