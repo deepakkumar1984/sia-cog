@@ -1,6 +1,6 @@
 import os
 import json
-from Interface import SkLearnTask
+from Interface import SkLearnTask, DLTask
 from Interface import utility
 def regtest1(name, trainfile):
     directory = "./data/" + name
@@ -11,7 +11,10 @@ def regtest1(name, trainfile):
     modeldata = utility.getFileData(modelfile)
     srvjson = json.loads(srvdata)
     modeljson = json.loads(modeldata)
-    result = SkLearnTask.CompileAndValidate(modeljson, true, trainfile)
+    if modeljson['isneuralnetwork'] == True:
+        result = DLTask.Train(modeljson, True, trainfile, directory)
+    else:
+        result = SkLearnTask.CompileAndValidate(modeljson, True, trainfile)
     print(result)
 
 def regtest2(name, trainfile, testfile, savePrediction):
@@ -25,9 +28,12 @@ def regtest2(name, trainfile, testfile, savePrediction):
     modeldata = utility.getFileData(modelfile)
     srvjson = json.loads(srvdata)
     modeljson = json.loads(modeldata)
-    result = SkLearnTask.FitAndPredict(modeljson, true, trainfile, testfile, savePrediction, predictionFile)
+    if modeljson['isneuralnetwork'] == True:
+        result = DLTask.FitAndPredict(modeljson, True, trainfile, testfile, savePrediction, predictionFile)
+    else:
+        result = SkLearnTask.FitAndPredict(modeljson, True, trainfile, testfile, savePrediction, predictionFile)
     print(result)
 
 if __name__ == '__main__':
-    regtest2('regtask1', 'housing.csv', 'housing.csv', True)
+    regtest1('regtask2', 'housing.csv')
     

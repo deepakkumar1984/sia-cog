@@ -1,5 +1,6 @@
 from pandas import read_csv
 import matplotlib.pyplot as plt
+from Interface import utility
 from sklearn.model_selection import KFold 
 from sklearn.model_selection import cross_val_score 
 from sklearn import datasets, linear_model
@@ -63,21 +64,6 @@ def getClassificationModel(modelName):
     
     return model
 
-def scaleData(name, data):
-    if name == "StandardScaler":
-        scaler = preprocessing.StandardScaler().fit(data)
-        data = scaler.transform(data)
-    elif name == "Binarizer":
-        scaler = preprocessing.Binarizer(threshold=0.0).fit(data)
-        data = scaler.transform(data)
-    elif name == "MinMaxScaler":
-        scaler = preprocessing.MinMaxScaler(feature_range=(0, 1)).fit(data)
-        data = scaler.transform(data)
-    elif name == "Normalizer":
-        scaler = preprocessing.Normalizer().fit(data)
-        data = scaler.transform(data)
-
-    return data
 def buildModel(modelDef, isregression, filename, fit, X, Y):
     num_folds = 10
     kfold = KFold(n_splits=10, random_state=7)
@@ -104,10 +90,11 @@ def CompileAndValidate(modelDef, isregression, filename):
         Y = Y_frame.values
     else:
         array = dataframe.values
-        X = array[:, 0:8]
+        rsplit = modelDef['dataset']['xrange'].split(":")
+        X = array[:, int(rsplit[0]):int(rsplit[1])]
         Y = array[:, modelDef['dataset']['yrange']]
     
-    X = scaleData(modelDef['preprocessdata'], X)
+    X = utility.scaleData(modelDef['preprocessdata'], X)
     model = buildModel(modelDef, isregression, filename, False, X, Y)
     scoring = ""
     if len(modelDef['scoring']) > 0:
@@ -130,10 +117,11 @@ def FitAndPredict(modelDef, isregression, train, test, savePrediction, predictio
         Y = Y_frame.values
     else:
         array = dataframe.values
-        X = array[:, 0:8]
+        rsplit = modelDef['dataset']['xrange'].split(":")
+        X = array[:, int(rsplit[0]):int(rsplit[1])]
         Y = array[:, modelDef['dataset']['yrange']]
     
-    X = scaleData(modelDef['preprocessdata'], X)
+    X = utility.scaleData(modelDef['preprocessdata'], X)
     model = buildModel(modelDef, isregression, train, True, X, Y)
     if modelDef['dataset']['column_header'] == True:
         dataframe_test = read_csv(test, delim_whitespace=modelDef['dataset']['delim_whitespace'])
@@ -145,9 +133,10 @@ def FitAndPredict(modelDef, isregression, train, test, savePrediction, predictio
         X_test = X_frame_test.values
     else:
         array_test = dataframe_test.values
-        X_test = array_test[:, 0:8]
+        rsplit = modelDef['dataset']['xrange'].split(":")
+        X_test = array[:, int(rsplit[0]):int(rsplit[1])]
     
-    X_test = scaleData(modelDef['preprocessdata'], X_test)
+    X_test = utility.scaleData(modelDef['preprocessdata'], X_test)
     Y_test = model.predict(X_test)
     dataframe_test['Output'] = Y_test
     

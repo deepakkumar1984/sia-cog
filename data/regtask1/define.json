@@ -11,6 +11,7 @@
         "yrange": 13,
         "id": ""
     },
+    "preprocessdata": "StandardScaler",
     "scoring": [
         "neg_mean_squared_error"
     ]

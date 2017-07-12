@@ -1,0 +1,30 @@
+{
+    "isneuralnetwork": true,
+    "model": [
+        {"type": "input", "val": 13, "init": "normal", "activation": "relu"},
+        {"type": "dense", "val": 13, "init": "normal", "activation": "relu"},
+        {"type": "dropout", "val": 0.5},
+        {"type": "output", "val": 1, "init": "normal"}
+    ],
+    "trainingparam":{
+        "loss": "mse",
+        "optimizer": "adam",
+        "epoches": 10,
+        "batch_size": 32
+    },
+    "dataset": {
+        "delim_whitespace": true,
+        "column_header": false,
+        "colsdefined": false,
+        "xcols": [],
+        "ycols": [],
+        "xrange": "0:13",
+        "yrange": 13,
+        "id": ""
+    },
+    "preprocessdata": "StandardScaler",
+    "scoring": [
+        "mean_squared_error",
+        "hinge"
+    ]
+}
