@@ -1,0 +1,18 @@
+{
+    "isneuralnetwork": false,
+    "model": "GaussianNB",
+    "dataset": {
+        "delim_whitespace": false,
+        "column_header": false,
+        "colsdefined": false,
+        "xcols": [],
+        "ycols": [],
+        "xrange": "0:8",
+        "yrange": 8,
+        "id": ""
+    },
+    "preprocessdata": "Binarizer",
+    "scoring": [
+        "accuracy"
+    ]
+}
