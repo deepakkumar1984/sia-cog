@@ -1,14 +1,14 @@
 {
     "isneuralnetwork": true,
     "model": [
-        {"type": "input", "val": 13, "init": "normal", "activation": "relu"},
+        {"type": "input", "val": 13, "dim": 13, "init": "normal", "activation": "relu"},
         {"type": "dense", "val": 13, "init": "normal", "activation": "relu"},
         {"type": "dropout", "val": 0.5},
         {"type": "output", "val": 1, "init": "normal"}
     ],
     "trainingparam":{
         "loss": "mse",
-        "optimizer": "adam",
+        "optimizer": "sgd",
         "epoches": 10,
         "batch_size": 32
     },

@@ -12,12 +12,12 @@ def regtest1(name, trainfile):
     srvjson = json.loads(srvdata)
     modeljson = json.loads(modeldata)
     if modeljson['isneuralnetwork'] == True:
-        result = DLTask.Train(modeljson, True, trainfile, directory)
+        result = DLTask.ContinueTraining(modeljson, trainfile, directory, 100, 64)
     else:
-        result = SkLearnTask.CompileAndValidate(modeljson, True, trainfile)
+        result = SkLearnTask.Evalute(modeljson, True, trainfile)
     print(result)
 
-def regtest2(name, trainfile, testfile, savePrediction):
+def regtest2(name, trainfile, testfile):
     directory = "./data/" + name
     modelfile = directory + "/define.json"
     srvfile = directory + "/service.json"
@@ -29,9 +29,9 @@ def regtest2(name, trainfile, testfile, savePrediction):
     srvjson = json.loads(srvdata)
     modeljson = json.loads(modeldata)
     if modeljson['isneuralnetwork'] == True:
-        result = DLTask.FitAndPredict(modeljson, True, trainfile, testfile, savePrediction, predictionFile)
+        result = DLTask.Predict(modeljson, directory, testfile)
     else:
-        result = SkLearnTask.FitAndPredict(modeljson, True, trainfile, testfile, savePrediction, predictionFile)
+        result = SkLearnTask.Predict(modeljson, True, trainfile, testfile, predictionFile)
     print(result)
 
 if __name__ == '__main__':

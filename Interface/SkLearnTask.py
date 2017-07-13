@@ -77,7 +77,7 @@ def buildModel(modelDef, isregression, filename, fit, X, Y):
     
     return model
 
-def CompileAndValidate(modelDef, isregression, filename):
+def Evalute(modelDef, isregression, filename):
     if modelDef['dataset']['column_header'] == True:
         dataframe = read_csv(filename, delim_whitespace=modelDef['dataset']['delim_whitespace'])
     else:
@@ -104,7 +104,7 @@ def CompileAndValidate(modelDef, isregression, filename):
     output = {"mean": results.mean(), "std": results.std()}
     return output
 
-def FitAndPredict(modelDef, isregression, train, test, savePrediction, predictionFile):
+def Predict(modelDef, isregression, train, test, predictionFile):
     if modelDef['dataset']['column_header'] == True:
         dataframe = read_csv(train, delim_whitespace=modelDef['dataset']['delim_whitespace'])
     else:
@@ -140,11 +140,10 @@ def FitAndPredict(modelDef, isregression, train, test, savePrediction, predictio
     Y_test = model.predict(X_test)
     dataframe_test['Output'] = Y_test
     
-    if savePrediction == True:
-        if modelDef['dataset']['colsdefined'] == True:
-            dataframe_test.to_csv(predictionFile, index=False, header=False)
-        else:
-            dataframe_test.to_csv(predictionFile, index=False)
+    if modelDef['dataset']['colsdefined'] == True:
+        dataframe_test.to_csv(predictionFile, index=False, header=False)
+    else:
+        dataframe_test.to_csv(predictionFile, index=False)
 
     return Y_test
 
