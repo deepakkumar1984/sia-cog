@@ -1,4 +1,9 @@
 import numpy
+import keras
+import json
+import os
+import csv
+import pandas
 from pandas import read_csv
 from Interface import utility
 from keras.models import Sequential, model_from_json
@@ -7,6 +12,36 @@ from keras.wrappers.scikit_learn import KerasRegressor, KerasClassifier
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import KFold
 from sklearn import preprocessing
+
+class LossHistory(keras.callbacks.Callback):
+    modelFolder = ""
+    id = ""
+    def init(self, jobid, path):
+        self.modelFolder = path
+        self.id = jobid
+    
+    def saveLogs(self, epoch, log):
+        taskfile = self.modelFolder + "/task/" + self.id + ".csv"
+        if not os.path.exists(taskfile):
+            columns = []
+            columns.append('epoch')
+            for k in log.keys():
+                columns.append(k)
+            with open(taskfile,'a', newline='') as f:
+                writer=csv.writer(f)
+                writer.writerow(columns)
+        
+        row = []
+        row.append(epoch)
+        for l in log.items():
+            row.append(round(float(l[1]), 4))
+        
+        with open(taskfile, 'a', newline='') as f:
+            writer=csv.writer(f)
+            writer.writerow(row)
+
+    def on_epoch_end(self, epoch, logs={}):
+        self.saveLogs(epoch, logs)
 
 def buildModel(modelDef):
     model = Sequential()
@@ -22,7 +57,7 @@ def buildModel(modelDef):
     model.compile(loss=modelDef['trainingparam']['loss'], optimizer=modelDef['trainingparam']['optimizer'], metrics=modelDef['scoring'])
     return model
 
-def Evalute(modelDef, filename, savetofolder):
+def Evalute(id, modelDef, filename, modelFolder):
     if modelDef['dataset']['column_header'] == True:
         dataframe = read_csv(filename, delim_whitespace=modelDef['dataset']['delim_whitespace'])
     else:
@@ -39,13 +74,16 @@ def Evalute(modelDef, filename, savetofolder):
         X = array[:, int(rsplit[0]):int(rsplit[1])]
         Y = array[:, modelDef['dataset']['yrange']]
     
+    X = X.astype(numpy.float32)
+    Y = Y.astype(numpy.float32)
     X = utility.scaleData(modelDef['preprocessdata'], X)
     seed = 7
     numpy.random.RandomState(seed)
     #numpy.random.seed(seed)
     kfold = KFold(n_splits=10, random_state=seed)
     model = buildModel(modelDef)
-    print(model.summary())
+    history = LossHistory()
+    history.init(id, modelFolder)
     model.fit(X, Y, epochs=modelDef['trainingparam']['epoches'], batch_size=modelDef['trainingparam']['batch_size'], verbose=1)
     scores = model.evaluate(X, Y, verbose=0)
     result = []
@@ -57,11 +95,11 @@ def Evalute(modelDef, filename, savetofolder):
     
     # serialize model to JSON
     model_json = model.to_json()
-    with open(savetofolder + "/model.json", "w") as json_file:
+    with open(modelFolder + "/model.json", "w") as json_file:
         json_file.write(model_json)
     # serialize weights to HDF5
-    model.save_weights(savetofolder + "/model.hdf5")
-
+    model.save_weights(modelFolder + "/model.hdf5")
+    keras.utils.plot_model(model, to_file=modelFolder + '/model.png', show_layer_names=True, show_shapes=True)
     return result
 
 def ContinueTraining(modelDef, trainFile, modelFolder, epoch=0, batch_size=0):

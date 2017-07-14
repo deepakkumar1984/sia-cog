@@ -24,7 +24,6 @@
     },
     "preprocessdata": "StandardScaler",
     "scoring": [
-        "mean_squared_error",
-        "hinge"
+        "mean_squared_error"
     ]
 }

@@ -1,5 +1,8 @@
 import os
 import json
+import uuid
+import keras
+import tensorflow
 from Interface import SkLearnTask, DLTask
 from Interface import utility
 def regtest1(name, trainfile):
@@ -12,9 +15,11 @@ def regtest1(name, trainfile):
     srvjson = json.loads(srvdata)
     modeljson = json.loads(modeldata)
     if modeljson['isneuralnetwork'] == True:
-        result = DLTask.ContinueTraining(modeljson, trainfile, directory, 100, 64)
+        result = DLTask.Evalute(str(uuid.uuid1()), modeljson, trainfile, directory)
     else:
         result = SkLearnTask.Evalute(modeljson, True, trainfile)
+    
+    
     print(result)
 
 def regtest2(name, trainfile, testfile):
