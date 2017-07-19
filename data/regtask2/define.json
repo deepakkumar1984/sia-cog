@@ -1,8 +1,8 @@
 {
     "isneuralnetwork": true,
     "model": [
-        {"type": "input", "val": 13, "dim": 13, "init": "normal", "activation": "relu"},
-        {"type": "dense", "val": 13, "init": "normal", "activation": "relu"},
+        {"type": "input", "val": 20, "dim": 13, "init": "normal", "activation": "relu"},
+        {"type": "dense", "val": 13, "init": "normal", "activation": "sigmoid"},
         {"type": "dropout", "val": 0.5},
         {"type": "output", "val": 1, "init": "normal"}
     ],

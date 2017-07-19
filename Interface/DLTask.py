@@ -1,6 +1,7 @@
 import numpy
 import keras
 import json
+import datetime
 import os
 import csv
 import pandas
@@ -12,36 +13,31 @@ from keras.wrappers.scikit_learn import KerasRegressor, KerasClassifier
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import KFold
 from sklearn import preprocessing
+from tinydb import TinyDB, Query
 
 class LossHistory(keras.callbacks.Callback):
     modelFolder = ""
     id = ""
+
     def init(self, jobid, path):
         self.modelFolder = path
         self.id = jobid
+        self.historydb = TinyDB(self.modelFolder + "/history_db.json")
+        self.taskdb = TinyDB(self.modelFolder + "/task_db.json")
     
     def saveLogs(self, epoch, log):
-        taskfile = self.modelFolder + "/task/" + self.id + ".csv"
-        if not os.path.exists(taskfile):
-            columns = []
-            columns.append('epoch')
-            for k in log.keys():
-                columns.append(k)
-            with open(taskfile,'a', newline='') as f:
-                writer=csv.writer(f)
-                writer.writerow(columns)
-        
-        row = []
-        row.append(epoch)
-        for l in log.items():
-            row.append(round(float(l[1]), 4))
-        
-        with open(taskfile, 'a', newline='') as f:
-            writer=csv.writer(f)
-            writer.writerow(row)
+        log['taskid'] = self.id
+        self.historydb.insert(log)
 
     def on_epoch_end(self, epoch, logs={}):
         self.saveLogs(epoch, logs)
+
+    def on_train_begin(self, logs=None):
+        self.taskdb.insert({"id": self.id, "start": str(datetime.datetime.now()), "end": "", "status": "Started"})
+
+    def on_train_end(self, logs=None):
+        Task = Query()
+        self.taskdb.update({"end": str(datetime.datetime.now()), "status": "Completed"}, Task.id == self.id)
 
 def buildModel(modelDef):
     model = Sequential()
@@ -84,7 +80,7 @@ def Evalute(id, modelDef, filename, modelFolder):
     model = buildModel(modelDef)
     history = LossHistory()
     history.init(id, modelFolder)
-    model.fit(X, Y, epochs=modelDef['trainingparam']['epoches'], batch_size=modelDef['trainingparam']['batch_size'], verbose=1)
+    model.fit(X, Y, epochs=modelDef['trainingparam']['epoches'], batch_size=modelDef['trainingparam']['batch_size'], verbose=1, callbacks=[history])
     scores = model.evaluate(X, Y, verbose=0)
     result = []
     count = 0
