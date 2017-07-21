@@ -31,12 +31,10 @@ def scaleData(name, data):
 def updateModelResetCache(name, flag):
     directory = "./data/" + name
     modelfile = directory + "/define.json"
-    print(modelfile)
-
     jsondata = getFileData(modelfile)
     if jsondata == "":
         return
-    
+
     modeljson = json.loads(jsondata)
     modeljson['reset_cache'] = flag
     json_string = json.dumps(modeljson)

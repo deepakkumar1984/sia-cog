@@ -13,7 +13,7 @@ from Interface import app, SkLearnTask, ParallelTask,utility, DLTask, DataAnalyz
 
 @app.route('/api/srv/create', methods=['POST'])
 def create():
-    message = "Completed"
+    message = "Success"
     code = 200
     try:
         servicename = request.json.get('servicename')
@@ -38,7 +38,7 @@ def create():
 
 @app.route('/api/srv/define/<name>', methods=['POST'])
 def define(name):
-    message = ""
+    message = "Success"
     code = 200
     try:
         directory = "./data/" + name
@@ -48,8 +48,6 @@ def define(name):
         file = open(file, "w")
         file.write(json_string)
         file.close()
-
-        message = "Defined"
     except Exception as e:
         code = 500
         message = e
@@ -58,7 +56,7 @@ def define(name):
 
 @app.route('/api/srv/evalute/<name>', methods=['POST'])
 def evalute(name):
-    message = "Completed"
+    message = "Success"
     code = 200
     id = ""
     try:
@@ -73,7 +71,7 @@ def evalute(name):
 
 @app.route('/api/srv/train/<name>', methods=['POST'])
 def train(name):
-    message = "Completed"
+    message = "Success"
     code = 200
     try:
         data = json.loads(request.data)
@@ -105,7 +103,7 @@ def train(name):
 
 @app.route('/api/srv/predict/<name>', methods=['POST'])
 def predict(name):
-    message = "Completed"
+    message = "Success"
     code = 200
     try:
         data = json.loads(request.data)
@@ -135,26 +133,3 @@ def predict(name):
         message = str(e)
 
     return jsonify({"statuscode": code, "message": message, "result": result})
-
-@app.route('/api/srv/reset/<name>')
-def reset(name):
-    message = "Completed"
-    code = 200
-    try:
-        directory = "./data/" + name
-        modelfile = directory + "/define.json"
-        modeldata = utility.getFileData(modelfile)
-        modeljson = json.loads(modeldata)
-
-        if modeljson['isneuralnetwork']:
-            if modeljson['modeltype'] == "normal":
-                DLTask.Restart(name)
-            elif modeljson['modeltype'] == "imagenet":
-                KApplications.restart(name)
-        
-    except Exception as e:
-        code = 500
-        print(e)
-        message = str(e)
-
-    return jsonify({"statuscode": code, "message": message})

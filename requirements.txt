@@ -1,7 +1,9 @@
 Flask<1
 Cython
 Keras
-tensorflow
+tensorflow-gpu
 sklearn
 pandas
 h5py
+pillow
+mxnet

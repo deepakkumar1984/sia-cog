@@ -102,7 +102,7 @@ def Evalute(id, modelDef, filename, modelFolder):
         json_file.write(model_json)
     # serialize weights to HDF5
     model.save_weights(modelFolder + "/model.hdf5")
-
+    utility.updateModelResetCache(name, True)
     keras.utils.plot_model(model, to_file=modelFolder + '/model.png', show_layer_names=True, show_shapes=True)
     return result
 
@@ -149,7 +149,7 @@ def ContinueTraining(modelDef, trainFile, modelFolder, epoch=0, batch_size=0):
         json_file.write(model_json)
     # serialize weights to HDF5
     model.save_weights(modelFolder + "/model.hdf5")
-
+    utility.updateModelResetCache(name, True)
     return result
 
 def Predict(modelDef, modelFolder, testFile):
@@ -161,6 +161,7 @@ def Predict(modelDef, modelFolder, testFile):
             foundModel = True
     if not foundModel:
         model = buildModel(modelDef, fromFile=True, modelFolder=modelFolder)
+        modellist.append({"name": name, "model": model})
         utility.updateModelResetCache(name, False)
     else:
         if modelDef['reset_cache']:
