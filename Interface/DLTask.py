@@ -15,6 +15,7 @@ from sklearn.model_selection import KFold
 from sklearn import preprocessing
 from tinydb import TinyDB, Query
 
+modellist = []
 class LossHistory(keras.callbacks.Callback):
     modelFolder = ""
     id = ""
@@ -39,36 +40,42 @@ class LossHistory(keras.callbacks.Callback):
         Task = Query()
         self.taskdb.update({"end": str(datetime.datetime.now()), "status": "Completed"}, Task.id == self.id)
 
-def buildModel(modelDef):
-    model = Sequential()
-    print(modelDef['model'])
-    for m in modelDef['model']:
-        if m['type'] == 'input':
-            model.add(Dense(m['val'], input_dim=m['dim'], kernel_initializer=m['init'], activation=m['activation']))   
-        elif m['type'] == 'dense':
-            model.add(Dense(m['val'], kernel_initializer=m['init'], activation=m['activation']))
-        elif m['type'] == 'output':
-            model.add(Dense(m['val'], kernel_initializer=m['init']))
+def buildModel(modelDef, fromFile = False, modelFolder=""):
+    if fromFile:
+        json_file = open(modelFolder + '/model.json', 'r')
+        loaded_model_json = json_file.read()
+        json_file.close()
+        model = model_from_json(loaded_model_json)
+        model.load_weights(modelFolder + "/model.hdf5")
+    else:
+        model = Sequential()
+        for m in modelDef['model']:
+            if m['type'] == 'input':
+                model.add(Dense(m['val'], input_dim=m['dim'], kernel_initializer=m['init'], activation=m['activation']))   
+            elif m['type'] == 'dense':
+                model.add(Dense(m['val'], kernel_initializer=m['init'], activation=m['activation']))
+            elif m['type'] == 'output':
+                model.add(Dense(m['val'], kernel_initializer=m['init']))
     
     model.compile(loss=modelDef['trainingparam']['loss'], optimizer=modelDef['trainingparam']['optimizer'], metrics=modelDef['scoring'])
     return model
 
 def Evalute(id, modelDef, filename, modelFolder):
-    if modelDef['dataset']['column_header'] == True:
-        dataframe = read_csv(filename, delim_whitespace=modelDef['dataset']['delim_whitespace'])
+    if modelDef['csv']['column_header'] == True:
+        dataframe = read_csv(filename, delim_whitespace=modelDef['csv']['delim_whitespace'])
     else:
-        dataframe = read_csv(filename, delim_whitespace=modelDef['dataset']['delim_whitespace'], header=None)
+        dataframe = read_csv(filename, delim_whitespace=modelDef['csv']['delim_whitespace'], header=None)
     
-    if modelDef['dataset']['colsdefined'] == True:
+    if modelDef['csv']['colsdefined'] == True:
         X_frame = dataframe[modelDef['xcols']]
         Y_frame = dataframe[modelDef['ycols']]
         X = X_frame.values
         Y = Y_frame.values
     else:
         array = dataframe.values
-        rsplit = modelDef['dataset']['xrange'].split(":")
+        rsplit = modelDef['csv']['xrange'].split(":")
         X = array[:, int(rsplit[0]):int(rsplit[1])]
-        Y = array[:, modelDef['dataset']['yrange']]
+        Y = array[:, modelDef['csv']['yrange']]
     
     X = X.astype(numpy.float32)
     Y = Y.astype(numpy.float32)
@@ -95,31 +102,27 @@ def Evalute(id, modelDef, filename, modelFolder):
         json_file.write(model_json)
     # serialize weights to HDF5
     model.save_weights(modelFolder + "/model.hdf5")
+
     keras.utils.plot_model(model, to_file=modelFolder + '/model.png', show_layer_names=True, show_shapes=True)
     return result
 
 def ContinueTraining(modelDef, trainFile, modelFolder, epoch=0, batch_size=0):
-    json_file = open(modelFolder + '/model.json', 'r')
-    loaded_model_json = json_file.read()
-    json_file.close()
-    model = model_from_json(loaded_model_json)
-    model.load_weights(modelFolder + "/model.hdf5")
-    model.compile(loss=modelDef['trainingparam']['loss'], optimizer=modelDef['trainingparam']['optimizer'], metrics=modelDef['scoring'])
-    if modelDef['dataset']['column_header'] == True:
-        dataframe = read_csv(trainFile, delim_whitespace=modelDef['dataset']['delim_whitespace'])
+    model = buildModel(modelDef, fromFile=True, modelFolder=modelFolder)
+    if modelDef['csv']['column_header'] == True:
+        dataframe = read_csv(trainFile, delim_whitespace=modelDef['csv']['delim_whitespace'])
     else:
-        dataframe = read_csv(trainFile, delim_whitespace=modelDef['dataset']['delim_whitespace'], header=None)
+        dataframe = read_csv(trainFile, delim_whitespace=modelDef['csv']['delim_whitespace'], header=None)
     
-    if modelDef['dataset']['colsdefined'] == True:
+    if modelDef['csv']['colsdefined'] == True:
         X_frame = dataframe[modelDef['xcols']]
         Y_frame = dataframe[modelDef['ycols']]
         X = X_frame.values
         Y = Y_frame.values
     else:
         array = dataframe.values
-        rsplit = modelDef['dataset']['xrange'].split(":")
+        rsplit = modelDef['csv']['xrange'].split(":")
         X = array[:, int(rsplit[0]):int(rsplit[1])]
-        Y = array[:, modelDef['dataset']['yrange']]
+        Y = array[:, modelDef['csv']['yrange']]
     
     X = utility.scaleData(modelDef['preprocessdata'], X)
     seed = 7
@@ -150,26 +153,39 @@ def ContinueTraining(modelDef, trainFile, modelFolder, epoch=0, batch_size=0):
     return result
 
 def Predict(modelDef, modelFolder, testFile):
-    json_file = open(modelFolder + '/model.json', 'r')
-    loaded_model_json = json_file.read()
-    json_file.close()
-    model = model_from_json(loaded_model_json)
-    model.load_weights(modelFolder + "/model.hdf5")
-    if modelDef['dataset']['column_header'] == True:
-        dataframe = read_csv(testFile, delim_whitespace=modelDef['dataset']['delim_whitespace'])
+    foundModel = False
+    name = modelDef['name']
+    for m in modellist:
+        if m['name'] == name:
+            model = m['model']
+            foundModel = True
+    if not foundModel:
+        model = buildModel(modelDef, fromFile=True, modelFolder=modelFolder)
+        utility.updateModelResetCache(name, False)
     else:
-        dataframe = read_csv(testFile, delim_whitespace=modelDef['dataset']['delim_whitespace'], header=None)
+        if modelDef['reset_cache']:
+            model = buildModel(modelDef, fromFile=True, modelFolder=modelFolder)
+            utility.updateModelResetCache(name, False)
+            for m in modellist:
+                if m['name'] == name:
+                    m['model'] = model
+                    utility.updateModelResetCache(name, False)
     
-    if modelDef['dataset']['colsdefined'] == True:
+    if modelDef['csv']['column_header'] == True:
+        dataframe = read_csv(testFile, delim_whitespace=modelDef['csv']['delim_whitespace'])
+    else:
+        dataframe = read_csv(testFile, delim_whitespace=modelDef['csv']['delim_whitespace'], header=None)
+    
+    if modelDef['csv']['colsdefined'] == True:
         X_frame = dataframe[modelDef['xcols']]
         Y_frame = dataframe[modelDef['ycols']]
         X = X_frame.values
         Y = Y_frame.values
     else:
         array = dataframe.values
-        rsplit = modelDef['dataset']['xrange'].split(":")
+        rsplit = modelDef['csv']['xrange'].split(":")
         X = array[:, int(rsplit[0]):int(rsplit[1])]
-        Y = array[:, modelDef['dataset']['yrange']]
+        Y = array[:, modelDef['csv']['yrange']]
     
     X = utility.scaleData(modelDef['preprocessdata'], X)
     Y = model.Predict(X)

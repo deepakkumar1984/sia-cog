@@ -1,7 +1,9 @@
 {
     "isneuralnetwork": false,
+    "modeltype": "normal",
+    "inputtype": "csv",
     "model": "SVR",
-    "dataset": {
+    "csv": {
         "delim_whitespace": true,
         "column_header": false,
         "colsdefined": false,

@@ -78,21 +78,21 @@ def buildModel(modelDef, isregression, filename, fit, X, Y):
     return model
 
 def Evalute(modelDef, isregression, filename):
-    if modelDef['dataset']['column_header'] == True:
-        dataframe = read_csv(filename, delim_whitespace=modelDef['dataset']['delim_whitespace'])
+    if modelDef['csv']['column_header'] == True:
+        dataframe = read_csv(filename, delim_whitespace=modelDef['csv']['delim_whitespace'])
     else:
-        dataframe = read_csv(filename, delim_whitespace=modelDef['dataset']['delim_whitespace'], header=None)
+        dataframe = read_csv(filename, delim_whitespace=modelDef['csv']['delim_whitespace'], header=None)
     
-    if modelDef['dataset']['colsdefined'] == True:
+    if modelDef['csv']['colsdefined'] == True:
         X_frame = dataframe[modelDef['xcols']]
         Y_frame = dataframe[modelDef['ycols']]
         X = X_frame.values
         Y = Y_frame.values
     else:
         array = dataframe.values
-        rsplit = modelDef['dataset']['xrange'].split(":")
+        rsplit = modelDef['csv']['xrange'].split(":")
         X = array[:, int(rsplit[0]):int(rsplit[1])]
-        Y = array[:, modelDef['dataset']['yrange']]
+        Y = array[:, modelDef['csv']['yrange']]
     
     X = utility.scaleData(modelDef['preprocessdata'], X)
     model = buildModel(modelDef, isregression, filename, False, X, Y)
@@ -105,42 +105,42 @@ def Evalute(modelDef, isregression, filename):
     return output
 
 def Predict(modelDef, isregression, train, test, predictionFile):
-    if modelDef['dataset']['column_header'] == True:
-        dataframe = read_csv(train, delim_whitespace=modelDef['dataset']['delim_whitespace'])
+    if modelDef['csv']['column_header'] == True:
+        dataframe = read_csv(train, delim_whitespace=modelDef['csv']['delim_whitespace'])
     else:
-        dataframe = read_csv(train, delim_whitespace=modelDef['dataset']['delim_whitespace'], header=None)
+        dataframe = read_csv(train, delim_whitespace=modelDef['csv']['delim_whitespace'], header=None)
 
-    if modelDef['dataset']['colsdefined'] == True:
+    if modelDef['csv']['colsdefined'] == True:
         X_frame = dataframe[modelDef['xcols']]
         Y_frame = dataframe[modelDef['ycols']]
         X = X_frame.values
         Y = Y_frame.values
     else:
         array = dataframe.values
-        rsplit = modelDef['dataset']['xrange'].split(":")
+        rsplit = modelDef['csv']['xrange'].split(":")
         X = array[:, int(rsplit[0]):int(rsplit[1])]
-        Y = array[:, modelDef['dataset']['yrange']]
+        Y = array[:, modelDef['csv']['yrange']]
     
     X = utility.scaleData(modelDef['preprocessdata'], X)
     model = buildModel(modelDef, isregression, train, True, X, Y)
-    if modelDef['dataset']['column_header'] == True:
-        dataframe_test = read_csv(test, delim_whitespace=modelDef['dataset']['delim_whitespace'])
+    if modelDef['csv']['column_header'] == True:
+        dataframe_test = read_csv(test, delim_whitespace=modelDef['csv']['delim_whitespace'])
     else:
-        dataframe_test = read_csv(test, delim_whitespace=modelDef['dataset']['delim_whitespace'], header=None)
+        dataframe_test = read_csv(test, delim_whitespace=modelDef['csv']['delim_whitespace'], header=None)
     
-    if modelDef['dataset']['colsdefined'] == True:
+    if modelDef['csv']['colsdefined'] == True:
         X_frame_test = dataframe_test[modelDef['xcols']]
         X_test = X_frame_test.values
     else:
         array_test = dataframe_test.values
-        rsplit = modelDef['dataset']['xrange'].split(":")
+        rsplit = modelDef['csv']['xrange'].split(":")
         X_test = array[:, int(rsplit[0]):int(rsplit[1])]
     
     X_test = utility.scaleData(modelDef['preprocessdata'], X_test)
     Y_test = model.predict(X_test)
     dataframe_test['Output'] = Y_test
     
-    if modelDef['dataset']['colsdefined'] == True:
+    if modelDef['csv']['colsdefined'] == True:
         dataframe_test.to_csv(predictionFile, index=False, header=False)
     else:
         dataframe_test.to_csv(predictionFile, index=False)

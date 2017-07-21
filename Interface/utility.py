@@ -1,4 +1,5 @@
 import os
+import json
 from sklearn import preprocessing
 
 def getFileData(filePath):
@@ -7,6 +8,10 @@ def getFileData(filePath):
         with open(filePath, "r") as text_file:
             data = text_file.read()
     return data
+
+def saveFileData(filePath, content):
+    with open(filePath, "w") as text_file:
+        text_file.write(content)
 
 def scaleData(name, data):
     if name == "StandardScaler":
@@ -22,3 +27,18 @@ def scaleData(name, data):
         scaler = preprocessing.Normalizer().fit(data)
         data = scaler.transform(data)
     return data
+
+def updateModelResetCache(name, flag):
+    directory = "./data/" + name
+    modelfile = directory + "/define.json"
+    print(modelfile)
+
+    jsondata = getFileData(modelfile)
+    if jsondata == "":
+        return
+    
+    modeljson = json.loads(jsondata)
+    modeljson['reset_cache'] = flag
+    json_string = json.dumps(modeljson)
+    saveFileData(modelfile, json_string)
+    

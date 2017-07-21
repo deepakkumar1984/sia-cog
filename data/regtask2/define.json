@@ -1,5 +1,7 @@
 {
     "isneuralnetwork": true,
+    "modeltype": "normal",
+    "inputtype": "csv",
     "model": [
         {"type": "input", "val": 20, "dim": 13, "init": "normal", "activation": "relu"},
         {"type": "dense", "val": 13, "init": "normal", "activation": "sigmoid"},
@@ -12,7 +14,7 @@
         "epoches": 10,
         "batch_size": 32
     },
-    "dataset": {
+    "csv": {
         "delim_whitespace": true,
         "column_header": false,
         "colsdefined": false,

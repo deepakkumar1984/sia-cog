@@ -9,11 +9,11 @@ from flask import Flask, jsonify
 import matplotlib.pyplot as plt
 import os
 import json
-from Interface import app, SkLearnTask, ParallelTask,utility, DLTask, DataAnalyzer, DataManager
+from Interface import app, SkLearnTask, ParallelTask,utility, DLTask, DataAnalyzer, DataManager, KApplications
 
 @app.route('/api/srv/create', methods=['POST'])
 def create():
-    message = ""
+    message = "Completed"
     code = 200
     try:
         servicename = request.json.get('servicename')
@@ -32,7 +32,7 @@ def create():
         message = "Created"
     except Exception as e:
         code = 500
-        message = e
+        message = str(e)
 
     return jsonify({"statuscode": code, "message": message})
 
@@ -58,7 +58,7 @@ def define(name):
 
 @app.route('/api/srv/evalute/<name>', methods=['POST'])
 def evalute(name):
-    message = ""
+    message = "Completed"
     code = 200
     id = ""
     try:
@@ -67,13 +67,13 @@ def evalute(name):
         message = "Evalute job started! Please check status."
     except Exception as e:
         code = 500
-        message = e
+        message = str(e)
 
     return jsonify({"statuscode": code, "message": message, "taskid": id})
 
 @app.route('/api/srv/train/<name>', methods=['POST'])
 def train(name):
-    message = ""
+    message = "Completed"
     code = 200
     try:
         data = json.loads(request.data)
@@ -82,6 +82,7 @@ def train(name):
         trainfile = directory + "/dataset/" + data['trainfile']
         modeldata = utility.getFileData(modelfile)
         modeljson = json.loads(modeldata)
+        modeljson['name'] = name
         epoches = 0
         batch_size = 0
         if data['epoches'] != '':
@@ -98,6 +99,62 @@ def train(name):
         print(result)
     except Exception as e:
         code = 500
-        message = e
+        message = str(e)
+
+    return jsonify({"statuscode": code, "message": message})
+
+@app.route('/api/srv/predict/<name>', methods=['POST'])
+def predict(name):
+    message = "Completed"
+    code = 200
+    try:
+        data = json.loads(request.data)
+        directory = "./data/" + name
+        modelfile = directory + "/define.json"
+        servicefile = directory + "/service.json"
+        result = {}
+        testfile = directory + "/dataset/" + data['testfile']
+        predictionFile = directory + "/dataset/prediction.csv"
+        modeldata = utility.getFileData(modelfile)
+        modeljson = json.loads(modeldata)
+        servicejson = json.loads(utility.getFileData(servicefile))
+        modeljson['name'] = name
+
+        if modeljson['isneuralnetwork']:
+            if modeljson['modeltype'] == "normal":
+                result = DLTask.Predict(modeljson, directory, testfile)
+            elif modeljson['modeltype'] == "imagenet":
+                result = KApplications.predict(modeljson, testfile)
+        else:
+            trainfile = directory + "/dataset/" + data['trainfile']
+            result = SkLearnTask.Predict(modeljson, servicejson['regression'], trainfile, testfile, predictionFile)
+        
+        print(result)
+    except Exception as e:
+        code = 500
+        message = str(e)
+
+    return jsonify({"statuscode": code, "message": message, "result": result})
+
+@app.route('/api/srv/reset/<name>')
+def reset(name):
+    message = "Completed"
+    code = 200
+    try:
+        directory = "./data/" + name
+        modelfile = directory + "/define.json"
+        modeldata = utility.getFileData(modelfile)
+        modeljson = json.loads(modeldata)
+
+        if modeljson['isneuralnetwork']:
+            if modeljson['modeltype'] == "normal":
+                DLTask.Restart(name)
+            elif modeljson['modeltype'] == "imagenet":
+                KApplications.restart(name)
+        
+    except Exception as e:
+        code = 500
+        print(e)
+        message = str(e)
 
     return jsonify({"statuscode": code, "message": message})
