@@ -111,7 +111,12 @@ def predict(name):
         modelfile = directory + "/define.json"
         servicefile = directory + "/service.json"
         result = {}
-        testfile = directory + "/dataset/" + data['testfile']
+        testfile = data['testfile']
+        if testfile.startswith('http://') or testfile.startswith('https://') or testfile.startswith('ftp://'):
+            testfile = testfile
+        else:
+            testfile = directory + "/dataset/" + testfile
+
         predictionFile = directory + "/dataset/prediction.csv"
         modeldata = utility.getFileData(modelfile)
         modeljson = json.loads(modeldata)

@@ -1,6 +1,6 @@
 {
     "isneuralnetwork": true,
-    "modeltype": "normal",
+    "modeltype": "custom",
     "inputtype": "csv",
     "model": [
         {"type": "input", "val": 20, "dim": 13, "init": "normal", "activation": "relu"},

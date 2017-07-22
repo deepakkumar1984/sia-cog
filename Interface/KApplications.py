@@ -5,6 +5,9 @@ from keras.layers import Dense, Input
 from keras import backend as K
 import numpy as np
 from Interface import utility
+import requests
+from io import BytesIO
+from PIL import Image
 
 modellist = []
 
@@ -73,8 +76,12 @@ def predict(modelDef, img_path):
                 if m['name'] == name:
                     m['model'] = model
                     utility.updateModelResetCache(modelname, False)
-
-    img = image.load_img(img_path, target_size=(target_x, target_y))
+    if img_path.startswith('http://') or img_path.startswith('https://') or img_path.startswith('ftp://'):
+        response = requests.get(img_path)
+        img = Image.open(BytesIO(response.content))
+        img = img.resize((target_x, target_y))
+    else:
+        img = image.load_img(img_path, target_size=(target_x, target_y))
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis=0)
     x = processInput(name, x)
