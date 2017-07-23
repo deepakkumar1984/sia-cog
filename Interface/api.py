@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import os
 import json
 from Interface import app, SkLearnTask, ParallelTask,utility, DLTask, DataAnalyzer, DataManager, KApplications
+import shutil
 
 @app.route('/api/srv/create', methods=['POST'])
 def create():
@@ -29,7 +30,46 @@ def create():
             code = 1001
             message = "Service already exists!"
 
-        message = "Created"
+    except Exception as e:
+        code = 500
+        message = str(e)
+
+    return jsonify({"statuscode": code, "message": message})
+
+@app.route('/api/srv/update/<name>', methods=['POST'])
+def update(name):
+    message = "Success"
+    code = 200
+    try:
+        directory = "./data/" + name
+        file = directory + "/service.json"
+        if not os.path.exists(directory):
+            code = 1001
+            message = "Service does not exists!"
+        else:
+            json_string = json.dumps(request.json)
+            file = open(file, "w")
+            file.write(json_string)
+            file.close()
+
+    except Exception as e:
+        code = 500
+        message = str(e)
+
+    return jsonify({"statuscode": code, "message": message})
+
+@app.route('/api/srv/delete/<name>', methods=['POST'])
+def delete(name):
+    message = "Success"
+    code = 200
+    try:
+        directory = "./data/" + name
+        if not os.path.exists(directory):
+            code = 1001
+            message = "Service does not exists!"
+        else:
+            shutil.rmtree(directory)
+
     except Exception as e:
         code = 500
         message = str(e)
