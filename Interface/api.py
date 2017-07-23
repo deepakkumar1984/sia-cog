@@ -5,12 +5,13 @@ Routes and views for the flask application.
 from datetime import datetime
 from flask import render_template
 from flask import request
-from flask import Flask, jsonify
+from flask import Flask, jsonify,url_for
 import matplotlib.pyplot as plt
 import os
 import json
 from Interface import app, SkLearnTask, ParallelTask,utility, DLTask, DataAnalyzer, DataManager, KApplications
 import shutil
+import werkzeug
 
 @app.route('/api/srv/create', methods=['POST'])
 def create():
@@ -70,6 +71,27 @@ def delete(name):
         else:
             shutil.rmtree(directory)
 
+    except Exception as e:
+        code = 500
+        message = str(e)
+
+    return jsonify({"statuscode": code, "message": message})
+
+@app.route('/api/srv/upload/<name>', methods=['GET','POST'])
+def upload(name):
+    message = "Success"
+    code = 200
+    try:
+        datasetFolder = "./data/" + name + "/dataset/"
+        if not os.path.exists(datasetFolder):
+            os.makedirs(datasetFolder)
+        if len(request.files) == 0:
+            code = 1002
+            message = "No file found"
+            return jsonify({"statuscode": code, "message": message})
+        
+        postedfile = request.files.items(0)[0][1]
+        postedfile.save(os.path.join(datasetFolder, werkzeug.secure_filename(postedfile.filename)))
     except Exception as e:
         code = 500
         message = str(e)
