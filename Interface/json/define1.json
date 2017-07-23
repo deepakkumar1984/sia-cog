@@ -1,7 +1,0 @@
-{
-  "isneuralnetwork":  false,
-  "x": [ "CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS", "RAD", "TAX", "PTRATIO", "B", "LSTAT", "MEDV" ],
-  "y": "MEDV",
-  "id": "",
-  "scoring": [ "neg_mean_squared_error" ]
-}
