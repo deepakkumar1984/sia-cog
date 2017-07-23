@@ -2,5 +2,5 @@
 /obj
 /data
 /Interface/deep-learning-models
-*.json
-/Interface/*.json
+*.pyc
+/Interface/*.pyc
