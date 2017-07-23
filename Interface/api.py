@@ -9,7 +9,7 @@ from flask import Flask, jsonify,url_for
 import matplotlib.pyplot as plt
 import os
 import json
-from Interface import app, SkLearnTask, ParallelTask,utility, DLTask, DataAnalyzer, DataManager, KApplications
+from Interface import app, SkLearnTask, ParallelTask,utility, DLTask, DataAnalyzer, DataManager, KApplications, DatasetTask
 import shutil
 import werkzeug
 
@@ -97,6 +97,24 @@ def upload(name):
         message = str(e)
 
     return jsonify({"statuscode": code, "message": message})
+
+@app.route('/api/srv/data/<name>', methods=['POST'])
+def datamgr(name):
+    message = "Success"
+    code = 200
+    result = []
+    try:
+        datasetFolder = "./data/" + name + "/dataset/"
+        rjson = json.loads(request.data)
+        action = rjson['action']
+        filename = rjson['filename']
+        if action == 'peek':
+            result = DatasetTask.peekData(datasetFolder, filename, rjson)
+    except Exception as e:
+        code = 500
+        message = str(e)
+
+    return jsonify({"statuscode": code, "message": message, "result": result})
 
 @app.route('/api/srv/define/<name>', methods=['POST'])
 def define(name):
