@@ -1,0 +1,14 @@
+[
+    {
+        "enable_for_prediction_data": true,
+        "name": "dropna"
+    },
+    {
+        "enable_for_prediction_data": true,
+        "name": "process",
+        "method": "StandardScaler",
+        "params":{
+            
+        }
+    }
+]

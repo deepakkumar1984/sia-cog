@@ -1,0 +1,1 @@
+{"isneuralnetwork": true, "modeltype": "imagenet", "inputtype": "image", "model": "VGG19", "image": {"target_size_x": 224, "target_size_y": 224}, "reset_cache": false}

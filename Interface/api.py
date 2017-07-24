@@ -104,17 +104,13 @@ def datamgr(name):
     code = 200
     result = []
     try:
-        datasetFolder = "./data/" + name + "/dataset/"
         rjson = json.loads(request.data)
-        action = rjson['action']
-        filename = rjson['filename']
-        if action == 'peek':
-            result = DatasetTask.peekData(datasetFolder, filename, rjson)
+        result = DatasetTask.invoke(name, rjson)
     except Exception as e:
         code = 500
         message = str(e)
 
-    return jsonify({"statuscode": code, "message": message, "result": result})
+    return result
 
 @app.route('/api/srv/define/<name>', methods=['POST'])
 def define(name):
