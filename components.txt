@@ -1,0 +1,12 @@
+LoadDataset
+    - Skip Columns
+    - Include Columns
+    - Handle Missing Values
+        - drop na - row or column
+        - fill na - mean or Values
+
+Preprocess Data
+    - Scale Data
+    - Label encoder
+
+Feature Extraction

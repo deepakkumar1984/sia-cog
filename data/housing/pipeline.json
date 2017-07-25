@@ -1,14 +1,21 @@
 [
     {
-        "enable_for_prediction_data": true,
-        "name": "dropna"
+        "name": "read1",
+        "module": "pandas",
+        "method": "read_csv",
+        "params": {
+            "filepath_or_buffer": "./data/housing/dataset/train.csv"
+        }
     },
     {
-        "enable_for_prediction_data": true,
-        "name": "process",
-        "method": "StandardScaler",
-        "params":{
-            
-        }
+        "name": "filtercols",
+        "module": "output->read1",
+        "method": "[]",
+        "params": ["crim","zn","indus","chas"]
+    },
+    {
+        "name": "describe",
+        "module": "output->filtercols",
+        "method": "describe"
     }
 ]
