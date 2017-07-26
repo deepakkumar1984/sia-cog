@@ -2,8 +2,7 @@ import pandas
 from pandas import read_csv
 import json
 from sklearn.preprocessing import Imputer
-from sklearn import preprocessing
-from sklearn import feature_selection
+from sklearn import preprocessing, feature_selection
 
 def data_loadcsv(filename, options):
     if options['params']['column_header'] == True:
@@ -13,12 +12,10 @@ def data_loadcsv(filename, options):
 
     return dataframe
 
-def data_filtercolumns(filename, options):
-    if options['params']['column_header'] == True:
-        dataframe = read_csv(filename, delim_whitespace=options['params']['delim_whitespace'])
-    else:
-        dataframe = read_csv(filename, delim_whitespace=options['params']['delim_whitespace'], header=None)
-
+def data_filtercolumns(dataframe, options):
+    cols = options["params"]["columns"]
+    dataframe = dataframe[cols]
+    
     return dataframe
 
 def data_getxy(dataframe, options):
@@ -51,21 +48,34 @@ def data_handlemissing(dataframe, options):
         return pandas.DataFrame(array, columns = dataframe.columns)
 
 def data_preprocess(dataframe, options):
-    name = options['method']
+    method = options['method']
     data = dataframe.values
-    m = getattr("preprocessing", name)
-    data = m.fit_transform(data)
-    return pandas.DataFrame(array, columns = dataframe.columns)
+    module = eval("preprocessing." + method)()
+    m = getattr(module, "fit_transform")
+    data = m(data)
+    return pandas.DataFrame(data, columns = dataframe.columns)
 
 def data_featureselection(Xframe, Yframe, options):
     method = options['method']
     transform = options['transform']
-    m = getattr("feature_selection", name)
-    m.__init__(options['params']):
-    f = m.fit(Xframe.values, Yframe.values)
-    if transform:
-        data = m.transform(Xframe.values)
+    #module = feature_selection.SelectKBest(k=2)
+    #score = eval("feature_selection." + options["params"]["score_func"])(Xframe.values, Yframe.values)
+    args = {}
+    for p in options["params"]:
+        if "score_func" in p:
+            scorefunc = eval("feature_selection." + options["params"][p])
+            args[p] = scorefunc
+            
+        args[p] = options["params"][p]
+    print(args)
+    module = eval("feature_selection." + method)(args)
+    fit = getattr(module, "fit")
+    transform = getattr(module, "transform")
+    f = fit(Xframe, Yframe)
+    print(f.pvalues_)
+    if transform is True:
+        data = transform(Xframe.values)
     
-    Xframe = pandas.DataFrame(data, columns = Xframe.columns)
+    #Xframe = pandas.DataFrame(data, columns = Xframe.columns)
     return (f, Xframe)
     

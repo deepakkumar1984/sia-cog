@@ -1,16 +1,29 @@
 [
     {
-        "name": "loadcsv",
-        "method": "loadcsv",
-        "params": {
+        "name": "data_loadcsv",
+        "module": "data_loadcsv",
+        "input": {
             "filename": "./data/housing/dataset/train.csv"
+        },
+        "params": {
+            "column_header": true,
+            "delim_whitespace": false
         }
     },
     {
-        "name": "filtercols",
-        "module": "output->read1",
-        "method": "[]",
-        "params": ["crim","zn","indus","chas"]
+        "name": "data_filtercolumns",
+        "module": "data_filtercolumns",
+        "params": {
+            "columns": ["crim", "zn", "indus", "chas", "nox", "rm", "age", "dis","rad","tax","ptratio","medv"]
+        }
+    },
+    {
+        "name": "data_getxy",
+        "module": "data_getxy",
+        "params": {
+            "xcols": ["crim", "zn", "indus", "chas", "nox", "rm", "age", "dis","rad","tax","ptratio","medv"],
+            "ycols": ["medv"]
+        }
     },
     {
         "name": "describe",

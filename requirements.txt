@@ -1,11 +1,12 @@
+setuptools
 Flask<1
 Cython
 Keras
-tensorflow-gpu
 sklearn
 pandas
+matplotlib
 h5py
 pillow
 mxnet
 tinydb
-pillow
+requests

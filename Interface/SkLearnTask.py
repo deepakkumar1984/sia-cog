@@ -96,6 +96,7 @@ def Evalute(modelDef, isregression, filename):
     
     X = utility.scaleData(modelDef['preprocessdata'], X)
     model = buildModel(modelDef, isregression, filename, False, X, Y)
+    
     scoring = ""
     if len(modelDef['scoring']) > 0:
         scoring = modelDef['scoring'][0]
