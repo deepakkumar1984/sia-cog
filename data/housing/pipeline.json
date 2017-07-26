@@ -1,10 +1,9 @@
 [
     {
-        "name": "read1",
-        "module": "pandas",
-        "method": "read_csv",
+        "name": "loadcsv",
+        "method": "loadcsv",
         "params": {
-            "filepath_or_buffer": "./data/housing/dataset/train.csv"
+            "filename": "./data/housing/dataset/train.csv"
         }
     },
     {
