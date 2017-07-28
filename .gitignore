@@ -1,5 +1,6 @@
 /.vscode
 /obj
-/Interface/deep-learning-models
 *.pyc
 /Interface/*.pyc
+/.idea
+

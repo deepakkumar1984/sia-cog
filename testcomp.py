@@ -11,9 +11,16 @@ if __name__ == '__main__':
     options = {"params": {"columns": data.columns}}
     data = PipelineComponents.data_filtercolumns(data, options)
     options = {"params": {"xcols": ["crim", "zn", "indus", "chas", "nox", "rm", "age", "dis"], "ycols": ["medv"]}}
-    (X,Y) = PipelineComponents.data_getxy(data, options)
-    options = {"method": "VarianceThreshold", "transform": True, "params": {"threshold": 0.0}}
-    (f, Xframe) = PipelineComponents.data_featureselection(X, Y, options)
-    print(f)
+    output = PipelineComponents.data_getxy(data, options)
+    #options = {"method": "VarianceThreshold", "transform": True, "params": {"threshold": 0.0}}
+    #(f, Xframe) = PipelineComponents.data_featureselection(X, Y, options)
+    for t in output:
+        print(t)
+
+
+
+
+
+
     
     

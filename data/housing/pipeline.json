@@ -1,33 +1,87 @@
 [
-    {
-        "name": "data_loadcsv",
-        "module": "data_loadcsv",
-        "input": {
-            "filename": "./data/housing/dataset/train.csv"
-        },
-        "params": {
-            "column_header": true,
-            "delim_whitespace": false
-        }
+  {
+    "name": "data_loadcsv",
+    "module": "data_loadcsv",
+    "input": {
+      "filename": "train.csv"
     },
-    {
-        "name": "data_filtercolumns",
-        "module": "data_filtercolumns",
-        "params": {
-            "columns": ["crim", "zn", "indus", "chas", "nox", "rm", "age", "dis","rad","tax","ptratio","medv"]
-        }
-    },
-    {
-        "name": "data_getxy",
-        "module": "data_getxy",
-        "params": {
-            "xcols": ["crim", "zn", "indus", "chas", "nox", "rm", "age", "dis","rad","tax","ptratio","medv"],
-            "ycols": ["medv"]
-        }
-    },
-    {
-        "name": "describe",
-        "module": "output->filtercols",
-        "method": "describe"
+    "options": {
+      "column_header": true,
+      "delim_whitespace": false
     }
+  },
+  {
+    "name": "data_getxy",
+    "module": "data_getxy",
+    "input": {
+      "dataframe": "output->data_loadcsv"
+    },
+    "options": {
+      "xcols": [
+        "crim",
+        "zn",
+        "indus",
+        "chas",
+        "nox",
+        "rm",
+        "age",
+        "dis",
+        "rad",
+        "tax",
+        "ptratio"
+      ],
+      "ycols": [
+        "medv"
+      ]
+    }
+  },
+  {
+    "name": "data_preprocess",
+    "module": "data_preprocess",
+    "method": "StandardScaler",
+    "input": {
+      "dataframe": "output->data_getxy->0"
+    }
+  },
+  {
+    "name": "data_featureselection",
+    "module": "data_featureselection",
+    "method": "SelectKBest",
+    "transform": true,
+    "input": {
+      "X": "output->data_getxy->0",
+      "Y": "output->data_getxy->1"
+    },
+    "options": {
+      "score_func": "f_classif",
+      "k": 6
+    }
+  },
+  {
+    "name": "model_build",
+    "module": "model_build",
+    "method": "BayesianRidge"
+  },
+  {
+    "name": "model_crossvalidate",
+    "module": "model_crossvalidate",
+    "input":{
+      "model": "output->model_build",
+      "X": "output->data_featureselection->0",
+      "Y": "output->data_featureselection->1"
+    },
+    "options":{
+      "kfold": 10,
+      "scoring": ["neg_mean_squared_error"]
+    }
+  },
+  {
+    "name": "model_fit",
+    "module": "model_fit",
+    "input":{
+      "model": "output->model_build",
+      "X": "output->data_getxy->0",
+      "Y": "output->data_getxy->1"
+    }
+  }
 ]
