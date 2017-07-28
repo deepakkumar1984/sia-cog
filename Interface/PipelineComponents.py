@@ -58,24 +58,57 @@ def data_preprocess(dataframe, options):
 def data_featureselection(Xframe, Yframe, options):
     method = options['method']
     transform = options['transform']
-    #module = feature_selection.SelectKBest(k=2)
-    #score = eval("feature_selection." + options["params"]["score_func"])(Xframe.values, Yframe.values)
     args = {}
     for p in options["params"]:
         if "score_func" in p:
             scorefunc = eval("feature_selection." + options["params"][p])
             args[p] = scorefunc
+            continue
             
         args[p] = options["params"][p]
-    print(args)
-    module = eval("feature_selection." + method)(args)
+
+    module = eval("feature_selection." + method)(**args)
     fit = getattr(module, "fit")
-    transform = getattr(module, "transform")
+    mtransform = getattr(module, "fit_transform")
     f = fit(Xframe, Yframe)
-    print(f.pvalues_)
+    names = Xframe.columns
     if transform is True:
-        data = transform(Xframe.values)
-    
-    #Xframe = pandas.DataFrame(data, columns = Xframe.columns)
-    return (f, Xframe)
+        data = mtransform(Xframe, Yframe)
+        Xframe = data
+
+    result = {}
+
+    if method == "VarianceThreshold":
+        result['variances'] = sorted(zip(map(lambda x: round(x, 4), f.variances_), names), reverse=True)
+    else:
+        result['scores'] = sorted(zip(map(lambda x: round(x, 4), f.scores_), names), reverse=True)
+        result['pvalues'] = sorted(zip(map(lambda x: round(x, 4), f.pvalues_), names), reverse=True)
+    return (result, Xframe)
+
+
+def data_featureselection_withestimator(estimator, Xframe, Yframe, options):
+    method = options['method']
+    transform = options['transform']
+    args = {}
+    for p in options["params"]:
+        if "score_func" in p:
+            scorefunc = eval("feature_selection." + options["params"][p])
+            args[p] = scorefunc
+            continue
+
+        args[p] = options["params"][p]
+
+    module = eval("feature_selection." + method)(estimator = estimator , **args)
+    fit = getattr(module, "fit")
+    mtransform = getattr(module, "fit_transform")
+    f = fit(Xframe, Yframe)
+    names = Xframe.columns
+    if transform is True:
+        data = mtransform(Xframe, Yframe)
+        Xframe = data
+
+    result = {}
+    result['scores'] = sorted(zip(map(lambda x: round(x, 4), f.scores_), names), reverse=True)
+    result['pvalues'] = sorted(zip(map(lambda x: round(x, 4), f.pvalues_), names), reverse=True)
+    return (result, Xframe)
     

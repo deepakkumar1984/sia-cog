@@ -12,7 +12,7 @@ if __name__ == '__main__':
     data = PipelineComponents.data_filtercolumns(data, options)
     options = {"params": {"xcols": ["crim", "zn", "indus", "chas", "nox", "rm", "age", "dis"], "ycols": ["medv"]}}
     (X,Y) = PipelineComponents.data_getxy(data, options)
-    options = {"method": "SelectKBest", "transform": False, "params": {"k": 4, "score_func": "f_classif"}}
+    options = {"method": "VarianceThreshold", "transform": True, "params": {"threshold": 0.0}}
     (f, Xframe) = PipelineComponents.data_featureselection(X, Y, options)
     print(f)
     
