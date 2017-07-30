@@ -1,13 +1,15 @@
 import pandas
 from pandas import read_csv
+import numpy
 import json
 from sklearn import preprocessing, feature_selection, feature_extraction, decomposition
 from sklearn.preprocessing import Imputer
 from sklearn.model_selection import cross_val_score
+from keras.models import model_from_json
 import pickle
 import os
 from sklearn.model_selection import KFold
-from Interface import SkLearnTask
+from Interface import SkLearnTask, DLTask
 
 projectfolder = ""
 
@@ -17,11 +19,11 @@ def init(self, name):
 def data_loadcsv(filename, pipeline):
     filename = projectfolder + "/dataset/" + filename
     if pipeline['options']['column_header'] == True:
-        dataframe = read_csv(filename, delim_whitespace=pipeline['options']['delim_whitespace'])
+        dataframe = read_csv(filename, delim_whitespace=pipeline['options']['delim_whitespace'], dtype={'a': numpy.float32})
     else:
-        dataframe = read_csv(filename, delim_whitespace=pipeline['options']['delim_whitespace'], header=None)
+        dataframe = read_csv(filename, delim_whitespace=pipeline['options']['delim_whitespace'], header=None, dtype={'a': numpy.float32})
 
-    return dataframe
+    return dataframe.astype('float32')
 
 def data_filtercolumns(dataframe, pipeline):
     cols = pipeline["options"]["columns"]
@@ -124,7 +126,7 @@ def data_getfeatures(X, Y, result, pipeline):
     if transform is True:
         X = X[names]
 
-    return X
+    return X, Y, result
 
 def data_featureselection_withestimator(estimator, X, Y, pipeline):
     method = pipeline['method']
@@ -162,7 +164,11 @@ def data_featureselection_withestimator(estimator, X, Y, pipeline):
     return (X, Y, result)
 
 def model_build(pipeline):
-    model = SkLearnTask.getSKLearnModel(pipeline['method'])
+    method = pipeline['method']
+    if method == "mlp":
+        model = DLTask.buildModel(pipeline)
+    else:
+        model = SkLearnTask.getSKLearnModel(pipeline['method'])
     return model
 
 def model_crossvalidate(model, X, Y, pipeline):
@@ -189,10 +195,39 @@ def model_fit(model, X, Y, pipeline):
         pickle.dump(model, f)
     return model
 
-def model_predict(X, pipeline):
-    picklefile = projectfolder + "/model.out"
-    with open(picklefile, "rb") as f:
-        model = pickle.load(f)
+def model_train(model, X, Y, pipeline, more = False):
+    modelObj = model_from_json(model)
+    modelObj.compile(loss=pipeline['options']['loss'], optimizer=pipeline['options']['optimizer'],
+                  metrics=pipeline['options']['scoring'])
+    epoches = pipeline["options"]["epoches"]
+    batch_size = pipeline["options"]["batch_size"]
+    weightpath = projectfolder + "/weights.hdf5"
+    if more == "true":
+        modelObj.load_weights(weightpath)
+
+    result = DLTask.Train(modelObj, X, Y, weightpath, epoches, batch_size)
+    picklefile = projectfolder + "/model.json"
+    model_json = modelObj.to_json()
+    with open(picklefile, "w") as json_file:
+        json_file.write(model_json)
+
+    return result
+
+def model_predict(X, pipeline, mlp=""):
+    if mlp == "true":
+        json_file = open(projectfolder + '/model.json', 'r')
+        loaded_model_json = json_file.read()
+        json_file.close()
+        model = model_from_json(loaded_model_json)
+        model.load_weights(projectfolder + "/weights.hdf5")
+        model.compile(loss=pipeline['options']['loss'], optimizer=pipeline['options']['optimizer'],
+                         metrics=pipeline['options']['scoring'])
+        if type(X) is pandas.DataFrame:
+            X = X.values
+    else:
+        picklefile = projectfolder + "/model.out"
+        with open(picklefile, "rb") as f:
+            model = pickle.load(f)
 
     Y = model.predict(X)
     return Y

@@ -42,14 +42,14 @@ class LossHistory(keras.callbacks.Callback):
 
 def buildModel(modelDef, fromFile = False, modelFolder=""):
     if fromFile:
-        json_file = open(modelFolder + '/model.json', 'r')
+        json_file = open(modelFolder + '/model.out', 'r')
         loaded_model_json = json_file.read()
         json_file.close()
         model = model_from_json(loaded_model_json)
         model.load_weights(modelFolder + "/model.hdf5")
     else:
         model = Sequential()
-        for m in modelDef['model']:
+        for m in modelDef['layers']:
             if m['type'] == 'input':
                 model.add(Dense(m['val'], input_dim=m['dim'], kernel_initializer=m['init'], activation=m['activation']))   
             elif m['type'] == 'dense':
@@ -57,100 +57,26 @@ def buildModel(modelDef, fromFile = False, modelFolder=""):
             elif m['type'] == 'output':
                 model.add(Dense(m['val'], kernel_initializer=m['init']))
     
-    model.compile(loss=modelDef['trainingparam']['loss'], optimizer=modelDef['trainingparam']['optimizer'], metrics=modelDef['scoring'])
-    return model
 
-def Evalute(id, modelDef, filename, modelFolder):
-    if modelDef['csv']['column_header'] == True:
-        dataframe = read_csv(filename, delim_whitespace=modelDef['csv']['delim_whitespace'])
-    else:
-        dataframe = read_csv(filename, delim_whitespace=modelDef['csv']['delim_whitespace'], header=None)
-    
-    if modelDef['csv']['colsdefined'] == True:
-        X_frame = dataframe[modelDef['xcols']]
-        Y_frame = dataframe[modelDef['ycols']]
-        X = X_frame.values
-        Y = Y_frame.values
-    else:
-        array = dataframe.values
-        rsplit = modelDef['csv']['xrange'].split(":")
-        X = array[:, int(rsplit[0]):int(rsplit[1])]
-        Y = array[:, modelDef['csv']['yrange']]
-    
-    X = X.astype(numpy.float32)
-    Y = Y.astype(numpy.float32)
-    X = utility.scaleData(modelDef['preprocessdata'], X)
+    model_json = model.to_json()
+    return model_json
+
+def Train(model, X, Y, weightpath, epoch=32, batch_size=32, validation_split = None):
+    if type(X) is pandas.DataFrame:
+        X = X.values
+
+    if type(Y) is pandas.DataFrame:
+        Y = Y.values
+
     seed = 7
     numpy.random.RandomState(seed)
-    #numpy.random.seed(seed)
-    kfold = KFold(n_splits=10, random_state=seed)
-    model = buildModel(modelDef)
-    history = LossHistory()
-    history.init(id, modelFolder)
-    model.fit(X, Y, epochs=modelDef['trainingparam']['epoches'], batch_size=modelDef['trainingparam']['batch_size'], verbose=1, callbacks=[history])
-    scores = model.evaluate(X, Y, verbose=0)
-    result = []
-    count = 0
-    for m in model.metrics_names:
-        if count > 0:
-            result.append({"metric": m, "score": scores[count]})
-        count = count + 1;
-    
-    # serialize model to JSON
-    model_json = model.to_json()
-    with open(modelFolder + "/model.json", "w") as json_file:
-        json_file.write(model_json)
-    # serialize weights to HDF5
-    model.save_weights(modelFolder + "/model.hdf5")
-    utility.updateModelResetCache(name, True)
-    keras.utils.plot_model(model, to_file=modelFolder + '/model.png', show_layer_names=True, show_shapes=True)
-    return result
+    if validation_split is None:
+        hist = model.fit(X, Y, epochs=epoch, batch_size=batch_size, verbose=1)
+    else:
+        hist = model.fit(X, Y, validation_split=validation_split, epochs=epoch, batch_size=batch_size, verbose=1)
 
-def ContinueTraining(modelDef, trainFile, modelFolder, epoch=0, batch_size=0):
-    model = buildModel(modelDef, fromFile=True, modelFolder=modelFolder)
-    if modelDef['csv']['column_header'] == True:
-        dataframe = read_csv(trainFile, delim_whitespace=modelDef['csv']['delim_whitespace'])
-    else:
-        dataframe = read_csv(trainFile, delim_whitespace=modelDef['csv']['delim_whitespace'], header=None)
-    
-    if modelDef['csv']['colsdefined'] == True:
-        X_frame = dataframe[modelDef['xcols']]
-        Y_frame = dataframe[modelDef['ycols']]
-        X = X_frame.values
-        Y = Y_frame.values
-    else:
-        array = dataframe.values
-        rsplit = modelDef['csv']['xrange'].split(":")
-        X = array[:, int(rsplit[0]):int(rsplit[1])]
-        Y = array[:, modelDef['csv']['yrange']]
-    
-    X = utility.scaleData(modelDef['preprocessdata'], X)
-    seed = 7
-    numpy.random.RandomState(seed)
-    #numpy.random.seed(seed)
-    kfold = KFold(n_splits=10, random_state=seed)
-    if epoch == 0:
-        epoch = modelDef['trainingparam']['epoches']
-    
-    if batch_size == 0:
-        batch_size = modelDef['trainingparam']['batch_size']
-    model.fit(X, Y, epochs=epoch, batch_size=batch_size, verbose=1)
-    scores = model.evaluate(X, Y, verbose=0)
-    result = []
-    count = 0
-    for m in model.metrics_names:
-        if count > 0:
-            result.append({"metric": m, "score": scores[count]})
-        count = count + 1;
-    
-    # serialize model to JSON
-    model_json = model.to_json()
-    with open(modelFolder + "/model.json", "w") as json_file:
-        json_file.write(model_json)
-    # serialize weights to HDF5
-    model.save_weights(modelFolder + "/model.hdf5")
-    utility.updateModelResetCache(name, True)
-    return result
+    model.save_weights(weightpath)
+    return hist.history
 
 def Predict(modelDef, modelFolder, testFile):
     foundModel = False
@@ -189,7 +115,7 @@ def Predict(modelDef, modelFolder, testFile):
         Y = array[:, modelDef['csv']['yrange']]
     
     X = utility.scaleData(modelDef['preprocessdata'], X)
-    Y = model.Predict(X)
+    Y = model.Predict(X.astype('float32'))
     dataframe['Result'] = Y
     dataframe.to_csv(modelFolder + '/dataset/prediction.csv')
     return Y

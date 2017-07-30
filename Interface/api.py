@@ -9,7 +9,7 @@ from flask import Flask, jsonify,url_for
 import matplotlib.pyplot as plt
 import os
 import json
-from Interface import app, SkLearnTask, ParallelTask,utility, DLTask, DataAnalyzer, DataManager, KApplications, DatasetTask
+from Interface import app, SkLearnTask, ParallelTask,utility, DLTask, DataAnalyzer, DataManager, KApplications, DatasetTask, Pipeline
 import shutil
 import werkzeug
 
@@ -112,13 +112,13 @@ def datamgr(name):
 
     return result
 
-@app.route('/api/srv/define/<name>', methods=['POST'])
-def define(name):
+@app.route('/api/srv/pipeline/<name>', methods=['POST'])
+def pipeline(name):
     message = "Success"
     code = 200
     try:
         directory = "./data/" + name
-        file = directory + "/define.json"
+        file = directory + "/pipeline.json"
 
         json_string = json.dumps(request.json)
         file = open(file, "w")
@@ -131,7 +131,7 @@ def define(name):
     return jsonify({"statuscode": code, "message": message})
 
 @app.route('/api/srv/evalute/<name>', methods=['POST'])
-def evalute(name):
+def validate(name):
     message = "Success"
     code = 200
     id = ""

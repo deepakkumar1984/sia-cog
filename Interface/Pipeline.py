@@ -31,6 +31,7 @@ def Run():
 
         args['pipeline'] = p
         output = func(**args)
+
         if type(output) is tuple:
             count = 0
             for t in output:
@@ -67,9 +68,11 @@ def Predict(filename, savePrediction = False):
             module = "data_getx"
 
         if "model_" in module:
-            if module != "model_fit":
+            if module != "model_fit" and module != "model_train":
                 continue
             else:
+                if module == "model_train":
+                    input['mlp'] = "true"
                 module = "model_predict"
                 name = "model_predict"
                 del input["model"]
@@ -109,6 +112,49 @@ def Predict(filename, savePrediction = False):
         initialX['result'] = predictions
         initialX.to_csv(PipelineComponents.projectfolder + "/dataset/predictions.csv")
     return predictions
+
+def ContinueTraining(epoches=25, batch_size=32):
+    PipelineComponents.init(PipelineComponents, srvname)
+    pipelineFile = PipelineComponents.projectfolder + '/pipeline.json'
+    pickleFile = PipelineComponents.projectfolder + '/pipeline.out'
+    pipelinedata = utility.getFileData(pipelineFile)
+    pipelinejson = json.loads(pipelinedata)
+    resultset = {}
+    for p in pipelinejson:
+        name = p['name']
+        module = p['module']
+        input = {}
+
+        if "input" in p:
+            input = p['input']
+
+        if module == "model_train":
+            p['options']['epoches'] = epoches
+            p['options']['batch_size'] = batch_size
+            input['more'] = "true"
+        func = getattr(PipelineComponents, module)
+        args = {}
+        for i in input:
+            inputValue = input[i]
+            if "output->" in inputValue:
+                args[i] = resultset[inputValue]
+                continue
+
+            args[i] = inputValue
+
+        args['pipeline'] = p
+        output = func(**args)
+
+        if type(output) is tuple:
+            count = 0
+            for t in output:
+                resultset["output->" + name + "->" + str(count)] = t
+                count = count + 1
+        else:
+            resultset["output->" + name] = output
+
+    with open(pickleFile, "wb") as f:
+        pickle.dump(resultset, f)
 
 def Output(name, num = None):
     PipelineComponents.init(PipelineComponents, srvname)
