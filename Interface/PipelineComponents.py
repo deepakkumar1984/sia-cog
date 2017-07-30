@@ -10,6 +10,7 @@ import pickle
 import os
 from sklearn.model_selection import KFold
 from Interface import SkLearnTask, DLTask
+from keras import datasets
 
 projectfolder = ""
 
@@ -24,6 +25,37 @@ def data_loadcsv(filename, pipeline):
         dataframe = read_csv(filename, delim_whitespace=pipeline['options']['delim_whitespace'], header=None, dtype={'a': numpy.float32})
 
     return dataframe.astype('float32')
+
+def data_loadsample(name, pipeline):
+    if name == "cifar10":
+        (X_train, Y_train), (X_test, Y_test) = datasets.cifar10.load_data()
+    elif name == "cifar100":
+        (X_train, Y_train), (X_test, Y_test) = datasets.cifar100.load_data()
+    elif name == "imdb":
+        (X_train, Y_train), (X_test, Y_test) = datasets.imdb.load_data(path="imdb.npz",
+                                                      num_words=None,
+                                                      skip_top=0,
+                                                      maxlen=None,
+                                                      seed=113,
+                                                      start_char=1,
+                                                      oov_char=2,
+                                                      index_from=3)
+    elif name == "reuters":
+        (X_train, Y_train), (X_test, Y_test) = datasets.reuters.load_data(path="reuters.npz",
+                                                         num_words=None,
+                                                         skip_top=0,
+                                                         maxlen=None,
+                                                         test_split=0.2,
+                                                         seed=113,
+                                                         start_char=1,
+                                                         oov_char=2,
+                                                         index_from=3)
+    elif name == "mnist":
+        (X_train, Y_train), (X_test, Y_test) = datasets.mnist.load_data()
+    elif name == "boston_housing":
+        (X_train, Y_train), (X_test, Y_test) = datasets.boston_housing.load_data()
+
+    return (X_train, Y_train), (X_test, Y_test)
 
 def data_filtercolumns(dataframe, pipeline):
     cols = pipeline["options"]["columns"]

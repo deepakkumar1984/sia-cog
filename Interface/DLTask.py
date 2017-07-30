@@ -8,7 +8,7 @@ import pandas
 from pandas import read_csv
 from Interface import utility
 from keras.models import Sequential, model_from_json
-from keras.layers import Dense
+from keras import layers
 from keras.wrappers.scikit_learn import KerasRegressor, KerasClassifier
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import KFold
@@ -51,11 +51,11 @@ def buildModel(modelDef, fromFile = False, modelFolder=""):
         model = Sequential()
         for m in modelDef['layers']:
             if m['type'] == 'input':
-                model.add(Dense(m['val'], input_dim=m['dim'], kernel_initializer=m['init'], activation=m['activation']))   
+                model.add(layers.Dense(m['val'], input_dim=m['dim'], kernel_initializer=m['init'], activation=m['activation']))
             elif m['type'] == 'dense':
-                model.add(Dense(m['val'], kernel_initializer=m['init'], activation=m['activation']))
+                model.add(layers.Dense(m['val'], kernel_initializer=m['init'], activation=m['activation']))
             elif m['type'] == 'output':
-                model.add(Dense(m['val'], kernel_initializer=m['init']))
+                model.add(layers.Dense(m['val'], kernel_initializer=m['init']))
     
 
     model_json = model.to_json()
