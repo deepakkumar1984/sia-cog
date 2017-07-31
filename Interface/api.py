@@ -8,10 +8,13 @@ from flask import request
 from flask import Flask, jsonify,url_for
 import matplotlib.pyplot as plt
 import os
-import json
+import simplejson as json
+from decimal import Decimal
 from Interface import app, SkLearnTask, ParallelTask,utility, DLTask, DataAnalyzer, DataManager, KApplications, DatasetTask, Pipeline
 import shutil
 import werkzeug
+import numpy
+import pandas
 
 @app.route('/api/srv/create', methods=['POST'])
 def create():
@@ -130,20 +133,28 @@ def pipeline(name):
 
     return jsonify({"statuscode": code, "message": message})
 
-@app.route('/api/srv/evalute/<name>', methods=['POST'])
+@app.route('/api/srv/validate/<name>', methods=['POST'])
 def validate(name):
     message = "Success"
     code = 200
-    id = ""
+    results = {}
     try:
-        data = json.loads(request.data)
-        id = ParallelTask.StartEvaluteThread(name, data)
-        message = "Evalute job started! Please check status."
+        Pipeline.init(Pipeline, name)
+        pipelinejson = Pipeline.getPipelineData()
+        Pipeline.Run()
+
+        for p in pipelinejson:
+            if p["module"] == "return_result":
+                mlist = p["input"]["module_output"]
+                for m in mlist:
+                    r = Pipeline.Output(m, to_json=True)
+                    results[m] = json.dumps(r)
+
     except Exception as e:
         code = 500
         message = str(e)
 
-    return jsonify({"statuscode": code, "message": message, "taskid": id})
+    return jsonify({"statuscode": code, "message": message, "results": results})
 
 @app.route('/api/srv/train/<name>', methods=['POST'])
 def train(name):

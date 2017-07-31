@@ -1,21 +1,33 @@
 from Interface import PipelineComponents, utility
 import pickle
-import json
+import simplejson as json
+import jsonpickle
+from decimal import Decimal
+import numpy
+import pandas
 
 srvname = ""
 def init(self, srvname):
     self.srvname = srvname
-
-def Run():
     PipelineComponents.init(PipelineComponents, srvname)
+
+def getPipelineData():
     pipelineFile = PipelineComponents.projectfolder + '/pipeline.json'
-    pickleFile = PipelineComponents.projectfolder + '/pipeline.out'
     pipelinedata = utility.getFileData(pipelineFile)
     pipelinejson = json.loads(pipelinedata)
+    return pipelinejson
+
+def Run():
+    pickleFile = PipelineComponents.projectfolder + '/pipeline.out'
+    pipelinejson = getPipelineData()
     resultset = {}
+
     for p in pipelinejson:
         name = p['name']
         module = p['module']
+        if module == "return_result":
+            continue
+
         input = {}
         if "input" in p:
             input = p['input']
@@ -156,7 +168,22 @@ def ContinueTraining(epoches=25, batch_size=32):
     with open(pickleFile, "wb") as f:
         pickle.dump(resultset, f)
 
-def Output(name, num = None):
+def Output(name, num = None, to_json=False):
     PipelineComponents.init(PipelineComponents, srvname)
-    result = PipelineComponents.readOutput(srvname, name, num)
-    return result
+    result = PipelineComponents.return_result(name, num)
+    #if to_json is True:
+    #    if type(result) is numpy.ndarray:
+    #        result = pandas.DataFrame(result).to_json()
+    #    elif type(result) is dict:
+    #        formatted_result = {}
+    #        for r in result:
+    #            t = type(result[r])
+    #            if t is numpy.ndarray:
+    #                formatted_result[r] = pandas.DataFrame(result[r]).to_json()
+    #            if t is list:
+    #                formatted_result[r] = jsonpickle.encode(result[r], unpicklable=False)
+    #            else:
+    #                formatted_result[r] = result[r]
+
+    #        result = formatted_result
+    return jsonpickle.encode(result, unpicklable=False)

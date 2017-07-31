@@ -24,7 +24,7 @@ def data_loadcsv(filename, pipeline):
     else:
         dataframe = read_csv(filename, delim_whitespace=pipeline['options']['delim_whitespace'], header=None, dtype={'a': numpy.float32})
 
-    return dataframe.astype('float32')
+    return dataframe
 
 def data_loadsample(name, pipeline):
     if name == "cifar10":
@@ -68,7 +68,6 @@ def data_getxy(dataframe, pipeline):
     Y_frame = dataframe[pipeline['options']['ycols']]
     
     return (X_frame,Y_frame)
-
 
 def data_getx(dataframe, pipeline):
     X_frame = dataframe[pipeline['options']['xcols']]
@@ -264,8 +263,8 @@ def model_predict(X, pipeline, mlp=""):
     Y = model.predict(X)
     return Y
 
-def readOutput(srvname, outputname, num = None):
-    pickleFile = './data/' + srvname + '/pipeline.out'
+def return_result(outputname, num = None):
+    pickleFile = projectfolder + '/pipeline.out'
     with open(pickleFile, 'rb') as f:
         resultset = pickle.load(f)
 

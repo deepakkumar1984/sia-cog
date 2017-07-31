@@ -83,5 +83,12 @@
       "X": "output->data_getxy->0",
       "Y": "output->data_getxy->1"
     }
+  },
+  {
+    "name": "return_result",
+    "module": "return_result",
+    "input":{
+      "module_output": ["model_crossvalidate", "data_featureselection->2"]
+    }
   }
 ]
