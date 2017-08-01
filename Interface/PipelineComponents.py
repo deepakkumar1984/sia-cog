@@ -4,18 +4,24 @@ import numpy
 import json
 from sklearn import preprocessing, feature_selection, feature_extraction, decomposition
 from sklearn.preprocessing import Imputer
+from keras.preprocessing import image
 from sklearn.model_selection import cross_val_score
 from keras.models import model_from_json
 import pickle
 import os
 from sklearn.model_selection import KFold
-from Interface import SkLearnTask, DLTask
+from Interface import SkLearnTask, DLTask, KApplications
 from keras import datasets
+import requests
+from io import BytesIO
+from PIL import Image
 
 projectfolder = ""
+model_type = ""
 
-def init(self, name):
+def init(self, name, modeltype):
     self.projectfolder = "./data/" + name
+    self.model_type = modeltype
 
 def data_loadcsv(filename, pipeline):
     filename = projectfolder + "/dataset/" + filename
@@ -57,6 +63,25 @@ def data_loadsample(name, pipeline):
 
     return (X_train, Y_train), (X_test, Y_test)
 
+def data_loadimg(filepath, pipeline):
+    target_x = pipeline['options']['target_size_x']
+    target_y = pipeline['options']['target_size_y']
+
+    if filepath.startswith('http://') or filepath.startswith('https://') or filepath.startswith('ftp://'):
+        response = requests.get(filepath)
+        img = Image.open(BytesIO(response.content))
+        img = img.resize((target_x, target_y))
+    else:
+        if not os.path.exists(filepath):
+            filepath = projectfolder + "/dataset" + filepath
+
+        if not os.path.exists(filepath):
+            raise Exception('Input image file does not exist')
+
+        img = image.load_img(filepath, target_size=(target_x, target_y))
+
+    return img
+
 def data_filtercolumns(dataframe, pipeline):
     cols = pipeline["options"]["columns"]
     dataframe = dataframe[cols]
@@ -71,7 +96,6 @@ def data_getxy(dataframe, pipeline):
 
 def data_getx(dataframe, pipeline):
     X_frame = dataframe[pipeline['options']['xcols']]
-
     return (X_frame, 0)
 
 def data_handlemissing(dataframe, pipeline):
@@ -243,8 +267,8 @@ def model_train(model, X, Y, pipeline, more = False):
 
     return result
 
-def model_predict(X, pipeline, mlp=""):
-    if mlp == "true":
+def model_predict(X, pipeline, model_type=""):
+    if model_type == "mlp":
         json_file = open(projectfolder + '/model.json', 'r')
         loaded_model_json = json_file.read()
         json_file.close()
@@ -254,6 +278,8 @@ def model_predict(X, pipeline, mlp=""):
                          metrics=pipeline['options']['scoring'])
         if type(X) is pandas.DataFrame:
             X = X.values
+    elif model_type == "imagenet":
+        KApplications.predict("")
     else:
         picklefile = projectfolder + "/model.out"
         with open(picklefile, "rb") as f:

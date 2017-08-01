@@ -18,9 +18,11 @@ class NumpyFloatHandler(jsonpickle.handlers.BaseHandler):
         return round(obj,6)
 
 srvname = ""
-def init(self, srvname):
+model_type = ""
+def init(self, srvname, model_type):
     self.srvname = srvname
-    PipelineComponents.init(PipelineComponents, srvname)
+    self.model_type = srvname
+    PipelineComponents.init(PipelineComponents, srvname, model_type)
 
 def getPipelineData():
     pipelineFile = PipelineComponents.projectfolder + '/pipeline.json'
@@ -29,6 +31,9 @@ def getPipelineData():
     return pipelinejson
 
 def Run():
+    if model_type == "imagenet":
+        raise Exception("Pretrained imagenet model not implemented for training or validation. Please invoke predict directly.")
+
     pickleFile = PipelineComponents.projectfolder + '/pipeline.out'
     pipelinejson = getPipelineData()
     resultset = {}
@@ -67,7 +72,7 @@ def Run():
         pickle.dump(resultset, f)
 
 def Predict(filename, savePrediction = False):
-    PipelineComponents.init(PipelineComponents, srvname)
+    PipelineComponents.init(PipelineComponents, srvname, model_type)
     pipelinefile = PipelineComponents.projectfolder + '/pipeline.json'
     pipelinedata = utility.getFileData(pipelinefile)
     pipelinejson = json.loads(pipelinedata)
@@ -97,8 +102,6 @@ def Predict(filename, savePrediction = False):
             if module != "model_fit" and module != "model_train":
                 continue
             else:
-                if module == "model_train":
-                    input['mlp'] = "true"
                 module = "model_predict"
                 name = "model_predict"
                 del input["model"]

@@ -26,7 +26,7 @@ def buildModel(modelDef, fromFile = False, modelFolder=""):
         model.load_weights(modelFolder + "/model.hdf5")
     else:
         model = Sequential()
-        for m in modelDef['layers']:
+        for m in modelDef['options']['layers']:
             if m['type'] == 'input':
                 model.add(layers.Dense(m['val'], input_dim=m['dim'], kernel_initializer=m['init'], activation=m['activation']))
             elif m['type'] == 'dense':

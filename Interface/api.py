@@ -187,12 +187,15 @@ def predict(name):
     code = 200
     try:
         data = json.loads(request.data)
+        servicedata = utility.getFileData("./data/" + name + "/service.json")
+        servicejson = json.loads(servicedata)
+
         savePrediction = False
         if "save_prediction" in data:
             savePrediction = data['save_prediction']
         result = {}
         testfile = data['testfile']
-        Pipeline.init(Pipeline, name)
+        Pipeline.init(Pipeline, name, servicejson["model_type"])
         predictions = Pipeline.Predict(testfile, savePrediction)
         result = json.loads(predictions)["0"]
     except Exception as e:

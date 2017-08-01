@@ -60,25 +60,44 @@
   {
     "name": "model_build",
     "module": "model_build",
-    "method": "mlp",
-    "layers": [
-        {"type": "input", "val": 20, "dim": 11, "init": "normal", "activation": "relu"},
-        {"type": "dense", "val": 11, "init": "normal", "activation": "relu"},
-        {"type": "output", "val": 1, "init": "normal"}
-    ]
+    "option": {
+      "layers": [
+        {
+          "type": "input",
+          "val": 20,
+          "dim": 11,
+          "init": "normal",
+          "activation": "relu"
+        },
+        {
+          "type": "dense",
+          "val": 11,
+          "init": "normal",
+          "activation": "relu"
+        },
+        {
+          "type": "output",
+          "val": 1,
+          "init": "normal"
+        }
+      ]
+    }
   },
   {
     "name": "model_train",
     "module": "model_train",
-    "input":{
+    "input": {
       "model": "output->model_build",
       "X": "output->data_featureselection->0",
       "Y": "output->data_featureselection->1"
     },
-    "options":{
+    "options": {
       "loss": "mse",
       "optimizer": "rmsprop",
-      "scoring": ["mae", "accuracy"],
+      "scoring": [
+        "mae",
+        "accuracy"
+      ],
       "epoches": 200,
       "batch_size": 32,
       "validation_split": 0.33
@@ -87,8 +106,11 @@
   {
     "name": "return_result",
     "module": "return_result",
-    "input":{
-      "module_output": ["model_build", "model_train"]
+    "input": {
+      "module_output": [
+        "model_build",
+        "model_train"
+      ]
     }
   }
 ]

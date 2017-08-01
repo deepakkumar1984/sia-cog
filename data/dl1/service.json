@@ -1,1 +1,1 @@
-{"name": "housing", "servicename": "housing", "regression": true}
+{"name": "housing", "servicename": "housing", "data_format": "csv", "model_type": "mlp"}

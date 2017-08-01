@@ -1,1 +1,30 @@
-{"isneuralnetwork": true, "modeltype": "imagenet", "inputtype": "image", "model": "VGG19", "image": {"target_size_x": 224, "target_size_y": 224}, "reset_cache": false}
+[
+  {
+    "name": "data_loadimg",
+    "module": "data_loadimg",
+    "input": {
+      "filepath": ""
+    },
+    "options": {
+      "target_size_x": 224,
+      "target_size_y": 224
+    }
+  },
+  {
+    "name": "model_build",
+    "module": "model_build",
+    "options":{
+      "model_name": "VGG16",
+      "target_size_x": 224,
+      "target_size_y": 224
+    }
+  },
+  {
+    "name": "model_train",
+    "module": "model_train",
+    "input": {
+      "model": "output->model_build",
+      "X": "output->data_loadimg"
+    }
+  }
+]

@@ -12,7 +12,7 @@ from PIL import Image
 modellist = []
 
 def buildModel(name, target_x, target_y):
-    input_tensor = Input(shape=(target_x, target_x, 3))
+    input_tensor = Input(shape=(target_x, target_y, 3))
     if name == "ResNet50":
         model = applications.resnet50.ResNet50(input_tensor=input_tensor)
     elif name == "VGG16":
@@ -53,6 +53,17 @@ def decodePred(name, preds):
         x = applications.xception.decode_predictions(preds)
     
     return x
+
+def predict(X, model):
+    x = image.img_to_array(X)
+    x = np.expand_dims(x, axis=0)
+    x = processInput(name, x)
+    preds = decodePred(name, model.predict(x))
+    result = []
+    for p in preds[0]:
+        result.append({"synset": p[0], "text": p[1], "prediction": float("{0:.2f}".format((p[2] * 100)))})
+
+    return result
 
 def predict(modelDef, img_path):
     target_x = modelDef['image']['target_size_x']
