@@ -3,7 +3,7 @@
     "name": "data_loadimg",
     "module": "data_loadimg",
     "input": {
-      "filepath": ""
+      "imagepath": ""
     },
     "options": {
       "target_size_x": 224,
@@ -24,7 +24,8 @@
     "module": "model_train",
     "input": {
       "model": "output->model_build",
-      "X": "output->data_loadimg"
+      "X": "output->data_loadimg",
+      "Y": []
     }
   }
 ]

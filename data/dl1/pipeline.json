@@ -60,7 +60,7 @@
   {
     "name": "model_build",
     "module": "model_build",
-    "option": {
+    "options": {
       "layers": [
         {
           "type": "input",

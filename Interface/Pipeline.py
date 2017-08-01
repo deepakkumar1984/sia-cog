@@ -21,7 +21,7 @@ srvname = ""
 model_type = ""
 def init(self, srvname, model_type):
     self.srvname = srvname
-    self.model_type = srvname
+    self.model_type = model_type
     PipelineComponents.init(PipelineComponents, srvname, model_type)
 
 def getPipelineData():
@@ -31,9 +31,6 @@ def getPipelineData():
     return pipelinejson
 
 def Run():
-    if model_type == "imagenet":
-        raise Exception("Pretrained imagenet model not implemented for training or validation. Please invoke predict directly.")
-
     pickleFile = PipelineComponents.projectfolder + '/pipeline.out'
     pipelinejson = getPipelineData()
     resultset = {}
@@ -83,11 +80,16 @@ def Predict(filename, savePrediction = False):
         name = p['name']
         module = p['module']
         input = {}
+        predType = "csv"
         if module == "return_result":
             continue
 
         if module == "data_loadcsv":
             p["input"]["filename"] = filename
+
+        if module == "data_loadimg":
+            p["input"]["imagepath"] = filename
+            predType = "img"
 
         if module == "data_handlemissing" or module == "data_filtercolumns":
             continue
@@ -138,12 +140,16 @@ def Predict(filename, savePrediction = False):
     predictions = resultset["output->model_predict"]
 
     if savePrediction is True:
-        initialX['pred_result'] = predictions
-        initialX.to_csv(PipelineComponents.projectfolder + "/dataset/predictions.csv")
+        if predType == "csv":
+            initialX['pred_result'] = predictions
+            initialX.to_csv(PipelineComponents.projectfolder + "/dataset/predictions.csv")
+        elif predType == "img":
+            with file.open(PipelineComponents.projectfolder + "/dataset/predictions.json", "w") as f:
+                json.dump(predictions, f)
 
     return pandas.DataFrame(predictions).to_json()
 
-def ContinueTraining(epoches=25, batch_size=32):
+def ContinueTraining(epoches=32, batch_size=32):
     PipelineComponents.init(PipelineComponents, srvname)
     pipelineFile = PipelineComponents.projectfolder + '/pipeline.json'
     pickleFile = PipelineComponents.projectfolder + '/pipeline.out'
@@ -189,7 +195,7 @@ def ContinueTraining(epoches=25, batch_size=32):
         pickle.dump(resultset, f)
 
 def Output(name, num = None, to_json=False):
-    PipelineComponents.init(PipelineComponents, srvname)
+    PipelineComponents.init(PipelineComponents, srvname, model_type)
     result = PipelineComponents.return_result(name, num)
     jsonpickle.handlers.registry.register(numpy.float, NumpyFloatHandler)
     jsonpickle.handlers.registry.register(numpy.float32, NumpyFloatHandler)

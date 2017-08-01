@@ -63,17 +63,17 @@ def data_loadsample(name, pipeline):
 
     return (X_train, Y_train), (X_test, Y_test)
 
-def data_loadimg(filepath, pipeline):
+def data_loadimg(imagepath, pipeline):
     target_x = pipeline['options']['target_size_x']
     target_y = pipeline['options']['target_size_y']
 
-    if filepath.startswith('http://') or filepath.startswith('https://') or filepath.startswith('ftp://'):
-        response = requests.get(filepath)
+    if imagepath.startswith('http://') or imagepath.startswith('https://') or imagepath.startswith('ftp://'):
+        response = requests.get(imagepath)
         img = Image.open(BytesIO(response.content))
         img = img.resize((target_x, target_y))
     else:
-        if not os.path.exists(filepath):
-            filepath = projectfolder + "/dataset" + filepath
+        if not os.path.exists(imagepath):
+            filepath = projectfolder + "/dataset/" + imagepath
 
         if not os.path.exists(filepath):
             raise Exception('Input image file does not exist')
@@ -218,9 +218,13 @@ def data_featureselection_withestimator(estimator, X, Y, pipeline):
     return (X, Y, result)
 
 def model_build(pipeline):
-    method = pipeline['method']
-    if method == "mlp":
+    if model_type == "mlp":
         model = DLTask.buildModel(pipeline)
+    elif model_type == "imagenet":
+        target_x = pipeline['options']['target_size_x']
+        target_y = pipeline['options']['target_size_y']
+        model_name = pipeline['options']['model_name']
+        model = KApplications.buildModel(model_name, target_x, target_y)
     else:
         model = SkLearnTask.getSKLearnModel(pipeline['method'])
     return model
@@ -250,24 +254,30 @@ def model_fit(model, X, Y, pipeline):
     return model
 
 def model_train(model, X, Y, pipeline, more = False):
-    modelObj = model_from_json(model)
-    modelObj.compile(loss=pipeline['options']['loss'], optimizer=pipeline['options']['optimizer'],
-                  metrics=pipeline['options']['scoring'])
-    epoches = pipeline["options"]["epoches"]
-    batch_size = pipeline["options"]["batch_size"]
-    weightpath = projectfolder + "/weights.hdf5"
-    if more == "true":
-        modelObj.load_weights(weightpath)
+    if model_type == "mlp":
+        modelObj = model_from_json(model)
+        modelObj.compile(loss=pipeline['options']['loss'], optimizer=pipeline['options']['optimizer'],
+                      metrics=pipeline['options']['scoring'])
+        epoches = pipeline["options"]["epoches"]
+        batch_size = pipeline["options"]["batch_size"]
+        weightpath = projectfolder + "/weights.hdf5"
+        if more == "true":
+            modelObj.load_weights(weightpath)
 
-    result = DLTask.Train(modelObj, X, Y, weightpath, epoches, batch_size)
-    picklefile = projectfolder + "/model.json"
-    model_json = modelObj.to_json()
-    with open(picklefile, "w") as json_file:
-        json_file.write(model_json)
+        result = DLTask.Train(modelObj, X, Y, weightpath, epoches, batch_size)
+        picklefile = projectfolder + "/model.json"
+        model_json = modelObj.to_json()
+        with open(picklefile, "w") as json_file:
+            json_file.write(model_json)
+    elif model_type == "imagenet":
+        picklefile = projectfolder + "/model.out"
+        with open(picklefile, "wb") as f:
+            pickle.dump(model, f)
+        result = model.summary()
 
     return result
 
-def model_predict(X, pipeline, model_type=""):
+def model_predict(X, pipeline):
     if model_type == "mlp":
         json_file = open(projectfolder + '/model.json', 'r')
         loaded_model_json = json_file.read()
@@ -279,7 +289,10 @@ def model_predict(X, pipeline, model_type=""):
         if type(X) is pandas.DataFrame:
             X = X.values
     elif model_type == "imagenet":
-        KApplications.predict("")
+        picklefile = projectfolder + "/model.out"
+        with open(picklefile, "rb") as f:
+            model = pickle.load(f)
+        KApplications.predict(model, X)
     else:
         picklefile = projectfolder + "/model.out"
         with open(picklefile, "rb") as f:

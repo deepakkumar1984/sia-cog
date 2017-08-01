@@ -54,7 +54,7 @@ def decodePred(name, preds):
     
     return x
 
-def predict(X, model):
+def predict(X, name, model):
     x = image.img_to_array(X)
     x = np.expand_dims(x, axis=0)
     x = processInput(name, x)
