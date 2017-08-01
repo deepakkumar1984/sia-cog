@@ -83,5 +83,12 @@
       "batch_size": 32,
       "validation_split": 0.33
     }
+  },
+  {
+    "name": "return_result",
+    "module": "return_result",
+    "input":{
+      "module_output": ["model_build", "model_train"]
+    }
   }
 ]

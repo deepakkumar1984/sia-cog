@@ -135,26 +135,16 @@ def pipeline(name):
 
 @app.route('/api/srv/validate/<name>', methods=['POST'])
 def validate(name):
-    message = "Success"
+    message = ""
     code = 200
-    results = {}
     try:
-        Pipeline.init(Pipeline, name)
-        pipelinejson = Pipeline.getPipelineData()
-        Pipeline.Run()
-
-        for p in pipelinejson:
-            if p["module"] == "return_result":
-                mlist = p["input"]["module_output"]
-                for m in mlist:
-                    r = Pipeline.Output(m, to_json=True)
-                    results[m] = json.dumps(r)
-
+        taskid = ParallelTask.StartValidateThread(name)
+        message = "Job started! Please check status for id: " + taskid
     except Exception as e:
         code = 500
         message = str(e)
 
-    return jsonify({"statuscode": code, "message": message, "results": results})
+    return jsonify({"statuscode": code, "message": message, "jobid": taskid})
 
 @app.route('/api/srv/train/<name>', methods=['POST'])
 def train(name):
@@ -163,30 +153,33 @@ def train(name):
     try:
         data = json.loads(request.data)
         directory = "./data/" + name
-        modelfile = directory + "/define.json"
-        trainfile = directory + "/dataset/" + data['trainfile']
-        modeldata = utility.getFileData(modelfile)
-        modeljson = json.loads(modeldata)
-        modeljson['name'] = name
-        epoches = 0
-        batch_size = 0
-        if data['epoches'] != '':
-            epoches = data['epoepochesch']
-        if data['batch_size'] != '':
+        epoches = 32
+        batch_size = 32
+        if "epoches" in data:
+            epoches = data['epoches']
+        if "batch_size" in data:
             batch_size = data['batch_size']
 
-        if modeljson['isneuralnetwork']:
-            result = DLTask.ContinueTraining(modeljson, trainfile, directory, epoches, batch_size)
-        else:
-            code = 500
-            message = "Training method is only for deep learning models"
-        
-        print(result)
+        taskid = ParallelTask.StartTrainThread(name, epoches, batch_size)
+        message = "Job started! Please check status for id: " + taskid
     except Exception as e:
         code = 500
         message = str(e)
 
-    return jsonify({"statuscode": code, "message": message})
+    return jsonify({"statuscode": code, "message": message, "jobid": taskid})
+
+@app.route('/api/srv/jobs/<name>', methods=['GET'])
+def jobs(name):
+    message = "Started!"
+    code = 200
+    try:
+        id = request.args.get("id")
+        result = ParallelTask.GetStatus(name, id)
+    except Exception as e:
+        code = 500
+        message = str(e)
+
+    return jsonify(result)
 
 @app.route('/api/srv/predict/<name>', methods=['POST'])
 def predict(name):
@@ -194,32 +187,14 @@ def predict(name):
     code = 200
     try:
         data = json.loads(request.data)
-        directory = "./data/" + name
-        modelfile = directory + "/define.json"
-        servicefile = directory + "/service.json"
+        savePrediction = False
+        if "save_prediction" in data:
+            savePrediction = data['save_prediction']
         result = {}
         testfile = data['testfile']
-        if testfile.startswith('http://') or testfile.startswith('https://') or testfile.startswith('ftp://'):
-            testfile = testfile
-        else:
-            testfile = directory + "/dataset/" + testfile
-
-        predictionFile = directory + "/dataset/prediction.csv"
-        modeldata = utility.getFileData(modelfile)
-        modeljson = json.loads(modeldata)
-        servicejson = json.loads(utility.getFileData(servicefile))
-        modeljson['name'] = name
-
-        if modeljson['isneuralnetwork']:
-            if modeljson['modeltype'] == "normal":
-                result = DLTask.Predict(modeljson, directory, testfile)
-            elif modeljson['modeltype'] == "imagenet":
-                result = KApplications.predict(modeljson, testfile)
-        else:
-            trainfile = directory + "/dataset/" + data['trainfile']
-            result = SkLearnTask.Predict(modeljson, servicejson['regression'], trainfile, testfile, predictionFile)
-        
-        print(result)
+        Pipeline.init(Pipeline, name)
+        predictions = Pipeline.Predict(testfile, savePrediction)
+        result = json.loads(predictions)["0"]
     except Exception as e:
         code = 500
         message = str(e)

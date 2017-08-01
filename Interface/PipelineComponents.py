@@ -24,7 +24,7 @@ def data_loadcsv(filename, pipeline):
     else:
         dataframe = read_csv(filename, delim_whitespace=pipeline['options']['delim_whitespace'], header=None, dtype={'a': numpy.float32})
 
-    return dataframe
+    return dataframe.astype("float64")
 
 def data_loadsample(name, pipeline):
     if name == "cifar10":
@@ -128,13 +128,13 @@ def data_featureselection(X, Y, pipeline):
 
     if transform is True:
         data = mtransform(X.values, Y.values)
-        X = data
         selected_columns = []
         fcount = 0
         for fs in f.get_support():
             if fs == True:
                 selected_columns.append(names[fcount])
                 fcount = fcount + 1
+        X = pandas.DataFrame(data, columns=selected_columns)
     else:
         selected_columns = names
 
@@ -151,9 +151,8 @@ def data_featureselection(X, Y, pipeline):
 def data_getfeatures(X, Y, result, pipeline):
     method = pipeline['method']
     transform = pipeline['transform']
+    result = json.loads(result)
     names = result["features"]
-    result = {}
-
     if transform is True:
         X = X[names]
 

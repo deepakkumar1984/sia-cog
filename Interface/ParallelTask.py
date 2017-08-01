@@ -1,44 +1,79 @@
 import threading
 import json
-from Interface import utility, DLTask, SkLearnTask
+from Interface import utility, Pipeline
 import uuid
 import os
+from tinydb import TinyDB, Query
+import datetime
 
-def saveResult(directory, result):
-    resultFile = directory + "/results.json"
-    resultData = utility.getFileData(resultFile)
-    if resultData == "":
-        resultjson = []
-    else:
-        resultjson = json.load(resultData)
-        
-    resultjson.append(result)
-    with open(resultFile, 'w') as outfile:
-        outfile.write(resultjson)
+def Validate(id, name):
+    results = {}
+    status = "Completed"
+    try:
+        Pipeline.init(Pipeline, name)
+        pipelinejson = Pipeline.getPipelineData()
+        Pipeline.Run()
 
-def Evalute(id, name, data):
-    directory = "./data/" + name
-    resultList = []
-    taskFolder = directory + "/task"
-    if not os.path.exists(taskFolder):
-        os.makedirs(taskFolder)
-    
-    modelfile = directory + "/define.json"
-    srvfile = directory + "/service.json"
-    trainfile = directory + "/dataset/" + data['trainfile']
-    srvdata = utility.getFileData(srvfile)
-    modeldata = utility.getFileData(modelfile)
-    srvjson = json.loads(srvdata)
-    modeljson = json.loads(modeldata)
-    if modeljson['isneuralnetwork']:
-        result = DLTask.Evalute(id, modeljson, trainfile, directory)
-    else:
-        result = SkLearnTask.Evalute(modeljson, srvjson['regression'], trainfile)
-    
-    saveResult(directory, result)
+        for p in pipelinejson:
+            if p["module"] == "return_result":
+                mlist = p["input"]["module_output"]
+                for m in mlist:
+                    r = Pipeline.Output(m, to_json=True)
+                    results[m] = json.loads(r)
+    except Exception as e:
+        results["message"] = str(e)
+        status = "Error"
 
-def StartEvaluteThread(name, data):
-    id = uuid.uuid4()
-    t = threading.Thread(Evalute, args=(id, name, data))
+    taskdb = TinyDB('./data/' + name + '/jobs_db.json')
+    Task = Query()
+    taskdb.update({"end": str(datetime.datetime.now()), "status": "Completed", "results": results}, Task.id == id)
+
+def Train(id, name, epoches, batch_size):
+    results = {}
+    status = "Completed"
+    try:
+        Pipeline.init(Pipeline, name)
+        pipelinejson = Pipeline.getPipelineData()
+        Pipeline.ContinueTraining(epoches=epoches, batch_size=batch_size)
+
+        for p in pipelinejson:
+            if p["module"] == "return_result":
+                mlist = p["input"]["module_output"]
+                for m in mlist:
+                    r = Pipeline.Output(m, to_json=True)
+                    results[m] = json.loads(r)
+    except Exception as e:
+        results["message"] = str(e)
+        status = "Error"
+
+    taskdb = TinyDB('./data/' + name + '/jobs_db.json')
+    Task = Query()
+    taskdb.update({"end": str(datetime.datetime.now()), "status": status, "results": results}, Task.id == id)
+
+def StartValidateThread(name):
+    id = str(uuid.uuid4())
+    taskdb = TinyDB('./data/' + name + '/jobs_db.json')
+    taskdb.insert({"id": id, "start": str(datetime.datetime.now()), "end": "", "status": "Started", "results": []})
+    t = threading.Thread(target=Validate, args=(id, name))
     t.start()
     return id
+
+def StartTrainThread(name, epoches, batch_size):
+    id = str(uuid.uuid4())
+    taskdb = TinyDB('./data/' + name + '/jobs_db.json')
+    taskdb.insert({"id": id, "start": str(datetime.datetime.now()), "end": "", "status": "Started", "results": []})
+    t = threading.Thread(target=Train, args=(id, name, epoches, batch_size))
+    t.start()
+    return id
+
+def GetStatus(name, id):
+    taskdb = TinyDB('./data/' + name + '/jobs_db.json')
+    Task = Query()
+    return taskdb.search(Task.id == id)
+
+def UpdateTaskError(name, id, message):
+    taskdb = TinyDB('./data/' + name + '/jobs_db.json')
+    Task = Query()
+    results = {"message": message}
+
+    taskdb.update({"end": str(datetime.datetime.now()), "status": "Error", "results": results}, Task.id == id)

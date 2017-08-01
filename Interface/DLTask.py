@@ -16,29 +16,6 @@ from sklearn import preprocessing
 from tinydb import TinyDB, Query
 
 modellist = []
-class LossHistory(keras.callbacks.Callback):
-    modelFolder = ""
-    id = ""
-
-    def init(self, jobid, path):
-        self.modelFolder = path
-        self.id = jobid
-        self.historydb = TinyDB(self.modelFolder + "/history_db.json")
-        self.taskdb = TinyDB(self.modelFolder + "/task_db.json")
-    
-    def saveLogs(self, epoch, log):
-        log['taskid'] = self.id
-        self.historydb.insert(log)
-
-    def on_epoch_end(self, epoch, logs={}):
-        self.saveLogs(epoch, logs)
-
-    def on_train_begin(self, logs=None):
-        self.taskdb.insert({"id": self.id, "start": str(datetime.datetime.now()), "end": "", "status": "Started"})
-
-    def on_train_end(self, logs=None):
-        Task = Query()
-        self.taskdb.update({"end": str(datetime.datetime.now()), "status": "Completed"}, Task.id == self.id)
 
 def buildModel(modelDef, fromFile = False, modelFolder=""):
     if fromFile:

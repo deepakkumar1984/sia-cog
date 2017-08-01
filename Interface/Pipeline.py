@@ -6,6 +6,17 @@ from decimal import Decimal
 import numpy
 import pandas
 
+class NumpyFloatHandler(jsonpickle.handlers.BaseHandler):
+    """
+    Automatic conversion of numpy float  to python floats
+    Required for jsonpickle to work correctly
+    """
+    def flatten(self, obj, data):
+        """
+        Converts and rounds a Numpy.float* to Python float
+        """
+        return round(obj,6)
+
 srvname = ""
 def init(self, srvname):
     self.srvname = srvname
@@ -67,6 +78,9 @@ def Predict(filename, savePrediction = False):
         name = p['name']
         module = p['module']
         input = {}
+        if module == "return_result":
+            continue
+
         if module == "data_loadcsv":
             p["input"]["filename"] = filename
 
@@ -121,9 +135,10 @@ def Predict(filename, savePrediction = False):
     predictions = resultset["output->model_predict"]
 
     if savePrediction is True:
-        initialX['result'] = predictions
+        initialX['pred_result'] = predictions
         initialX.to_csv(PipelineComponents.projectfolder + "/dataset/predictions.csv")
-    return predictions
+
+    return pandas.DataFrame(predictions).to_json()
 
 def ContinueTraining(epoches=25, batch_size=32):
     PipelineComponents.init(PipelineComponents, srvname)
@@ -136,6 +151,8 @@ def ContinueTraining(epoches=25, batch_size=32):
         name = p['name']
         module = p['module']
         input = {}
+        if module == "return_result":
+            continue
 
         if "input" in p:
             input = p['input']
@@ -171,19 +188,8 @@ def ContinueTraining(epoches=25, batch_size=32):
 def Output(name, num = None, to_json=False):
     PipelineComponents.init(PipelineComponents, srvname)
     result = PipelineComponents.return_result(name, num)
-    #if to_json is True:
-    #    if type(result) is numpy.ndarray:
-    #        result = pandas.DataFrame(result).to_json()
-    #    elif type(result) is dict:
-    #        formatted_result = {}
-    #        for r in result:
-    #            t = type(result[r])
-    #            if t is numpy.ndarray:
-    #                formatted_result[r] = pandas.DataFrame(result[r]).to_json()
-    #            if t is list:
-    #                formatted_result[r] = jsonpickle.encode(result[r], unpicklable=False)
-    #            else:
-    #                formatted_result[r] = result[r]
+    jsonpickle.handlers.registry.register(numpy.float, NumpyFloatHandler)
+    jsonpickle.handlers.registry.register(numpy.float32, NumpyFloatHandler)
+    jsonpickle.handlers.registry.register(numpy.float64, NumpyFloatHandler)
 
-    #        result = formatted_result
     return jsonpickle.encode(result, unpicklable=False)
