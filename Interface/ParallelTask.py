@@ -10,7 +10,11 @@ def Validate(id, name):
     results = {}
     status = "Completed"
     try:
-        Pipeline.init(Pipeline, name)
+        with open("./data/" + name + "/service.json") as f:
+            srvjson = json.load(f)
+
+        model_type = srvjson["model_type"]
+        Pipeline.init(Pipeline, name, model_type)
         pipelinejson = Pipeline.getPipelineData()
         Pipeline.Run()
 
@@ -32,7 +36,12 @@ def Train(id, name, epoches, batch_size):
     results = {}
     status = "Completed"
     try:
-        Pipeline.init(Pipeline, name)
+        with open("./data/" + name + "/service.json") as f:
+            srvjson = json.load(f)
+
+        model_type = srvjson["model_type"]
+
+        Pipeline.init(Pipeline, name, model_type)
         pipelinejson = Pipeline.getPipelineData()
         Pipeline.ContinueTraining(epoches=epoches, batch_size=batch_size)
 

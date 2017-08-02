@@ -47,7 +47,7 @@
     "name": "data_featureselection",
     "module": "data_featureselection",
     "method": "SelectKBest",
-    "transform": true,
+    "transform": false,
     "input": {
       "X": "output->data_getxy->0",
       "Y": "output->data_getxy->1"
@@ -63,32 +63,23 @@
     "method": "BayesianRidge"
   },
   {
-    "name": "model_crossvalidate",
-    "module": "model_crossvalidate",
+    "name": "model_evalute",
+    "module": "model_evalute",
     "input":{
       "model": "output->model_build",
       "X": "output->data_featureselection->0",
       "Y": "output->data_featureselection->1"
     },
     "options":{
-      "kfold": 10,
+      "kfold": 25,
       "scoring": ["neg_mean_squared_error"]
-    }
-  },
-  {
-    "name": "model_fit",
-    "module": "model_fit",
-    "input":{
-      "model": "output->model_build",
-      "X": "output->data_getxy->0",
-      "Y": "output->data_getxy->1"
     }
   },
   {
     "name": "return_result",
     "module": "return_result",
     "input":{
-      "module_output": ["model_build", "model_fit"]
+      "module_output": ["model_build", "model_evalute"]
     }
   }
 ]

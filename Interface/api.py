@@ -133,8 +133,8 @@ def pipeline(name):
 
     return jsonify({"statuscode": code, "message": message})
 
-@app.route('/api/srv/validate/<name>', methods=['POST'])
-def validate(name):
+@app.route('/api/srv/evalute/<name>', methods=['POST'])
+def evalute(name):
     message = ""
     code = 200
     try:
@@ -194,10 +194,18 @@ def predict(name):
         if "save_prediction" in data:
             savePrediction = data['save_prediction']
         result = {}
-        testfile = data['testfile']
+        if servicejson["data_format"] == "image":
+            testfile = data['imagepath']
+        elif servicejson["data_format"] == "csv":
+            testfile = data['testfile']
+
         Pipeline.init(Pipeline, name, servicejson["model_type"])
         predictions = Pipeline.Predict(testfile, savePrediction)
-        result = json.loads(predictions)["0"]
+        predictions = json.loads(predictions)
+        if servicejson["data_format"] == "csv":
+            result = predictions["0"]
+        else:
+            result = predictions
     except Exception as e:
         code = 500
         message = str(e)

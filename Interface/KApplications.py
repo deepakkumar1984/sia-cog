@@ -8,6 +8,7 @@ from Interface import utility
 import requests
 from io import BytesIO
 from PIL import Image
+import jsonpickle
 
 modellist = []
 
@@ -63,42 +64,5 @@ def predict(X, name, model):
     for p in preds[0]:
         result.append({"synset": p[0], "text": p[1], "prediction": float("{0:.2f}".format((p[2] * 100)))})
 
-    return result
+    return jsonpickle.encode(result, unpicklable=False)
 
-def predict(modelDef, img_path):
-    target_x = modelDef['image']['target_size_x']
-    target_y = modelDef['image']['target_size_y']
-    name = modelDef['model']
-    modelname = modelDef['name']
-    foundModel = False
-    for m in modellist:
-        if m['name'] == name:
-            model = m['model']
-            foundModel = True
-    
-    if not foundModel:
-        model = buildModel(name, target_x, target_y)
-        modellist.append({"name": name, "model": model})
-        utility.updateModelResetCache(modelname, False)
-    else:
-        if modelDef['reset_cache']:
-            model = buildModel(name, target_x, target_y)
-            for m in modellist:
-                if m['name'] == name:
-                    m['model'] = model
-                    utility.updateModelResetCache(modelname, False)
-    if img_path.startswith('http://') or img_path.startswith('https://') or img_path.startswith('ftp://'):
-        response = requests.get(img_path)
-        img = Image.open(BytesIO(response.content))
-        img = img.resize((target_x, target_y))
-    else:
-        img = image.load_img(img_path, target_size=(target_x, target_y))
-    x = image.img_to_array(img)
-    x = np.expand_dims(x, axis=0)
-    x = processInput(name, x)
-    preds = decodePred(name, model.predict(x))
-    result = []
-    for p in preds[0]:
-        result.append({"synset": p[0], "text": p[1], "prediction": float("{0:.2f}".format((p[2] * 100)))})
-
-    return result

@@ -15,13 +15,20 @@ from keras import datasets
 import requests
 from io import BytesIO
 from PIL import Image
+import jsonpickle
 
 projectfolder = ""
 model_type = ""
 
+optionslist = {}
+
 def init(self, name, modeltype):
     self.projectfolder = "./data/" + name
     self.model_type = modeltype
+
+def addOption(options):
+    for op in options:
+        optionslist[op] = options[op]
 
 def data_loadcsv(filename, pipeline):
     filename = projectfolder + "/dataset/" + filename
@@ -73,12 +80,12 @@ def data_loadimg(imagepath, pipeline):
         img = img.resize((target_x, target_y))
     else:
         if not os.path.exists(imagepath):
-            filepath = projectfolder + "/dataset/" + imagepath
+            imagepath = projectfolder + "/dataset/" + imagepath
 
-        if not os.path.exists(filepath):
+        if not os.path.exists(imagepath):
             raise Exception('Input image file does not exist')
 
-        img = image.load_img(filepath, target_size=(target_x, target_y))
+        img = image.load_img(imagepath, target_size=(target_x, target_y))
 
     return img
 
@@ -171,7 +178,6 @@ def data_featureselection(X, Y, pipeline):
     result["features"] = selected_columns
     return X, Y, result
 
-
 def data_getfeatures(X, Y, result, pipeline):
     method = pipeline['method']
     transform = pipeline['transform']
@@ -225,11 +231,15 @@ def model_build(pipeline):
         target_y = pipeline['options']['target_size_y']
         model_name = pipeline['options']['model_name']
         model = KApplications.buildModel(model_name, target_x, target_y)
+        saveModel = {"model_type": "imagenet", "model_name": model_name, "target_size_x": target_x, "target_size_y": target_y}
+        picklefile = projectfolder + "/model.json"
+        with open(picklefile, "wb") as f:
+            json.dump(saveModel, f)
     else:
         model = SkLearnTask.getSKLearnModel(pipeline['method'])
     return model
 
-def model_crossvalidate(model, X, Y, pipeline):
+def model_evalute(model, X, Y, pipeline):
     if "scoring" in pipeline["options"]:
         if len(pipeline['options']['scoring']) > 0:
             scoring = pipeline['options']['scoring'][0]
@@ -244,14 +254,12 @@ def model_crossvalidate(model, X, Y, pipeline):
 
     results = cross_val_score(model, X, Y, cv=kfold, scoring=scoring)
     output = {"mean": results.mean(), "std": results.std(), "results": results}
-    return output
-
-def model_fit(model, X, Y, pipeline):
     model.fit(X, Y)
     picklefile = projectfolder + "/model.out"
     with open(picklefile, "wb") as f:
         pickle.dump(model, f)
-    return model
+
+    return output
 
 def model_train(model, X, Y, pipeline, more = False):
     if model_type == "mlp":
@@ -270,10 +278,9 @@ def model_train(model, X, Y, pipeline, more = False):
         with open(picklefile, "w") as json_file:
             json_file.write(model_json)
     elif model_type == "imagenet":
-        picklefile = projectfolder + "/model.out"
-        with open(picklefile, "wb") as f:
-            pickle.dump(model, f)
-        result = model.summary()
+        result = {}
+        result["sample_prediction"] = KApplications.predict(X, optionslist["model_name"], model)
+        result["model_summary"] = model.summary()
 
     return result
 
@@ -288,17 +295,22 @@ def model_predict(X, pipeline):
                          metrics=pipeline['options']['scoring'])
         if type(X) is pandas.DataFrame:
             X = X.values
+        Y = model.predict(X)
     elif model_type == "imagenet":
-        picklefile = projectfolder + "/model.out"
-        with open(picklefile, "rb") as f:
-            model = pickle.load(f)
-        KApplications.predict(model, X)
+        with open(projectfolder + '/model.json', 'r') as f:
+            loaded_model_json = json.load(f)
+
+        model_name = loaded_model_json["model_name"]
+        target_x = loaded_model_json["target_size_x"]
+        target_y = loaded_model_json["target_size_y"]
+        model = KApplications.buildModel(model_name, target_x, target_y)
+        Y = KApplications.predict(X, optionslist["model_name"], model)
     else:
         picklefile = projectfolder + "/model.out"
         with open(picklefile, "rb") as f:
             model = pickle.load(f)
+        Y = model.predict(X)
 
-    Y = model.predict(X)
     return Y
 
 def return_result(outputname, num = None):

@@ -38,6 +38,11 @@ def Run():
     for p in pipelinejson:
         name = p['name']
         module = p['module']
+        options = {}
+        if "options" in p:
+            options = p["options"]
+            PipelineComponents.addOption(options)
+
         if module == "return_result":
             continue
 
@@ -65,8 +70,13 @@ def Run():
         else:
             resultset["output->" + name] = output
 
-    with open(pickleFile, "wb") as f:
-        pickle.dump(resultset, f)
+    savePipeline = True
+    if model_type == "imagenet":
+        savePipeline = False
+
+    if savePipeline is True:
+        with open(pickleFile, "wb") as f:
+            pickle.dump(resultset, f)
 
 def Predict(filename, savePrediction = False):
     PipelineComponents.init(PipelineComponents, srvname, model_type)
@@ -75,12 +85,17 @@ def Predict(filename, savePrediction = False):
     pipelinejson = json.loads(pipelinedata)
     resultset = {}
     initialX = []
-
+    predType = "csv"
     for p in pipelinejson:
         name = p['name']
         module = p['module']
         input = {}
-        predType = "csv"
+
+        options = {}
+        if "options" in p:
+            options = p["options"]
+            PipelineComponents.addOption(options)
+
         if module == "return_result":
             continue
 
@@ -101,7 +116,7 @@ def Predict(filename, savePrediction = False):
             module = "data_getx"
 
         if "model_" in module:
-            if module != "model_fit" and module != "model_train":
+            if module != "model_evalute" and module != "model_train":
                 continue
             else:
                 module = "model_predict"
@@ -138,19 +153,23 @@ def Predict(filename, savePrediction = False):
             initialX = output
 
     predictions = resultset["output->model_predict"]
-
+    if predType == "csv":
+        predictions = pandas.DataFrame(predictions).to_json()
     if savePrediction is True:
         if predType == "csv":
             initialX['pred_result'] = predictions
             initialX.to_csv(PipelineComponents.projectfolder + "/dataset/predictions.csv")
         elif predType == "img":
-            with file.open(PipelineComponents.projectfolder + "/dataset/predictions.json", "w") as f:
+            with open(PipelineComponents.projectfolder + "/dataset/predictions.json", "wb") as f:
                 json.dump(predictions, f)
 
-    return pandas.DataFrame(predictions).to_json()
+    return predictions
 
 def ContinueTraining(epoches=32, batch_size=32):
-    PipelineComponents.init(PipelineComponents, srvname)
+    if model_type == "imagenet":
+        raise Exception("Pre-trained imagenet model not implemented for more training")
+
+    PipelineComponents.init(PipelineComponents, srvname, model_type)
     pipelineFile = PipelineComponents.projectfolder + '/pipeline.json'
     pickleFile = PipelineComponents.projectfolder + '/pipeline.out'
     pipelinedata = utility.getFileData(pipelineFile)
@@ -160,6 +179,11 @@ def ContinueTraining(epoches=32, batch_size=32):
         name = p['name']
         module = p['module']
         input = {}
+        options = {}
+        if "options" in p:
+            options = p["options"]
+            PipelineComponents.addOption(options)
+
         if module == "return_result":
             continue
 
@@ -167,8 +191,8 @@ def ContinueTraining(epoches=32, batch_size=32):
             input = p['input']
 
         if module == "model_train":
-            p['options']['epoches'] = epoches
-            p['options']['batch_size'] = batch_size
+            options['epoches'] = epoches
+            options['batch_size'] = batch_size
             input['more'] = "true"
         func = getattr(PipelineComponents, module)
         args = {}
@@ -191,8 +215,13 @@ def ContinueTraining(epoches=32, batch_size=32):
         else:
             resultset["output->" + name] = output
 
-    with open(pickleFile, "wb") as f:
-        pickle.dump(resultset, f)
+    savePipeline = True
+    if model_type == "imagenet":
+        savePipeline = False
+
+    if savePipeline is True:
+        with open(pickleFile, "wb") as f:
+            pickle.dump(resultset, f)
 
 def Output(name, num = None, to_json=False):
     PipelineComponents.init(PipelineComponents, srvname, model_type)

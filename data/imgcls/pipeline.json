@@ -3,7 +3,7 @@
     "name": "data_loadimg",
     "module": "data_loadimg",
     "input": {
-      "imagepath": ""
+      "imagepath": "park.jpg"
     },
     "options": {
       "target_size_x": 224,
