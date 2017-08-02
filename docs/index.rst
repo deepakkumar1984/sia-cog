@@ -9,4 +9,4 @@ Components Involved
 4) `MxNet <http://mxnet.io>`_
 
 
-Please follow the `simple instruction <./install_configure.rst/>`_ on how to setup your own machine learning API to start creating and training models.
+Please follow the `simple instruction <./installconfigure.rst/>`_ on how to setup your own machine learning API to start creating and training models.
