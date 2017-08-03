@@ -16,9 +16,17 @@ parser = Parser(tokenizer, tagger)
 
 engine = IntentDeterminationEngine()
 
+def addIntent(intent):
+    for e in intent["entities"]:
+        
+
 def buildIntent(projName):
     intentdata = "./data/" + projName + "intentdata.json"
     with open(intentdata, "rb") as f:
         intentjson = json.load(f)
+
+    for i in intentjson:
+        addIntent(i)
+
 
 

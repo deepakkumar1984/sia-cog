@@ -1,6 +1,7 @@
 [
   {
     "intent": "service:create",
+    "build":["weather", "location"]
     
   }
 ]
