@@ -92,7 +92,7 @@ def predictint():
         data = request.args.get('data')
         print(data)
         result = LangIntentApplications.predict(data)
-        result = jsonpickle.encode(result, unpicklable=False)
+        result = json.loads(jsonpickle.encode(result, unpicklable=False))
     except Exception as e:
         code = 500
         message = str(e)
