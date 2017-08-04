@@ -1,8 +1,0 @@
-{
-  "name": "Image Classification",
-  "servicename": "imgcls",
-  "regression": false,
-  "use_deeplearning": true,
-  "data_format": "image",
-  "model_type": "imagenet"
-}

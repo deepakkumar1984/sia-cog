@@ -9,6 +9,8 @@ import requests
 from io import BytesIO
 from PIL import Image
 import jsonpickle
+import os
+import simplejson as json
 
 modellist = []
 
@@ -55,8 +57,17 @@ def decodePred(name, preds):
     
     return x
 
-def predict(X, name, model):
-    x = image.img_to_array(X)
+def predict(imagepath, target_x, target_y, name, model):
+    if imagepath.startswith('http://') or imagepath.startswith('https://') or imagepath.startswith('ftp://'):
+        response = requests.get(imagepath)
+        img = Image.open(BytesIO(response.content))
+        img = img.resize((target_x, target_y))
+    else:
+        if not os.path.exists(imagepath):
+            raise Exception('Input image file does not exist')
+        img = image.load_img(imagepath, target_size=(target_x, target_y))
+
+    x = image.img_to_array(img)
     x = np.expand_dims(x, axis=0)
     x = processInput(name, x)
     preds = decodePred(name, model.predict(x))
@@ -64,5 +75,5 @@ def predict(X, name, model):
     for p in preds[0]:
         result.append({"synset": p[0], "text": p[1], "prediction": float("{0:.2f}".format((p[2] * 100)))})
 
-    return jsonpickle.encode(result, unpicklable=False)
+    return json.loads(jsonpickle.encode(result, unpicklable=False))
 

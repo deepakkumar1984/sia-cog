@@ -9,6 +9,13 @@ def getFileData(filePath):
             data = text_file.read()
     return data
 
+def getJsonData(filePath):
+    data = {}
+    if os.path.exists(filePath):
+        with open(filePath, "r") as text_file:
+            data = text_file.read()
+    return json.loads(data)
+
 def saveFileData(filePath, content):
     with open(filePath, "w") as text_file:
         text_file.write(content)

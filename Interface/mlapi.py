@@ -10,13 +10,13 @@ import matplotlib.pyplot as plt
 import os
 import simplejson as json
 from decimal import Decimal
-from Interface import app, SkLearnTask, ParallelTask,utility, DLTask, DataAnalyzer, DataManager, KApplications, DatasetTask, Pipeline
+from Interface import app, SkLearnTask, ParallelTask,utility, DLTask, DataAnalyzer, DataManager, VisionApplications, DatasetTask, Pipeline
 import shutil
 import werkzeug
 import numpy
 import pandas
 
-@app.route('/api/srv/create', methods=['POST'])
+@app.route('/api/ml/create', methods=['POST'])
 def create():
     message = "Success"
     code = 200
@@ -40,7 +40,7 @@ def create():
 
     return jsonify({"statuscode": code, "message": message})
 
-@app.route('/api/srv/update/<name>', methods=['POST'])
+@app.route('/api/ml/update/<name>', methods=['POST'])
 def update(name):
     message = "Success"
     code = 200
@@ -62,7 +62,7 @@ def update(name):
 
     return jsonify({"statuscode": code, "message": message})
 
-@app.route('/api/srv/delete/<name>', methods=['POST'])
+@app.route('/api/ml/delete/<name>', methods=['POST'])
 def delete(name):
     message = "Success"
     code = 200
@@ -80,7 +80,7 @@ def delete(name):
 
     return jsonify({"statuscode": code, "message": message})
 
-@app.route('/api/srv/upload/<name>', methods=['GET','POST'])
+@app.route('/api/ml/upload/<name>', methods=['GET','POST'])
 def upload(name):
     message = "Success"
     code = 200
@@ -101,7 +101,7 @@ def upload(name):
 
     return jsonify({"statuscode": code, "message": message})
 
-@app.route('/api/srv/data/<name>', methods=['POST'])
+@app.route('/api/ml/data/<name>', methods=['POST'])
 def datamgr(name):
     message = "Success"
     code = 200
@@ -115,7 +115,7 @@ def datamgr(name):
 
     return result
 
-@app.route('/api/srv/pipeline/<name>', methods=['POST'])
+@app.route('/api/ml/pipeline/<name>', methods=['POST'])
 def pipeline(name):
     message = "Success"
     code = 200
@@ -133,7 +133,7 @@ def pipeline(name):
 
     return jsonify({"statuscode": code, "message": message})
 
-@app.route('/api/srv/evalute/<name>', methods=['POST'])
+@app.route('/api/ml/evalute/<name>', methods=['POST'])
 def evalute(name):
     message = ""
     code = 200
@@ -146,7 +146,7 @@ def evalute(name):
 
     return jsonify({"statuscode": code, "message": message, "jobid": taskid})
 
-@app.route('/api/srv/train/<name>', methods=['POST'])
+@app.route('/api/ml/train/<name>', methods=['POST'])
 def train(name):
     message = "Success"
     code = 200
@@ -168,7 +168,7 @@ def train(name):
 
     return jsonify({"statuscode": code, "message": message, "jobid": taskid})
 
-@app.route('/api/srv/jobs/<name>', methods=['GET'])
+@app.route('/api/ml/jobs/<name>', methods=['GET'])
 def jobs(name):
     message = "Started!"
     code = 200
@@ -181,7 +181,7 @@ def jobs(name):
 
     return jsonify(result)
 
-@app.route('/api/srv/predict/<name>', methods=['POST'])
+@app.route('/api/ml/predict/<name>', methods=['POST'])
 def predict(name):
     message = "Success"
     code = 200

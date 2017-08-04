@@ -6,4 +6,6 @@ from flask import Flask
 app = Flask(__name__)
 
 import Interface.views
-import Interface.api
+import Interface.mlapi
+import Interface.visionapi
+import Interface.intentapi

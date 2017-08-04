@@ -10,7 +10,7 @@ from keras.models import model_from_json
 import pickle
 import os
 from sklearn.model_selection import KFold
-from Interface import SkLearnTask, DLTask, KApplications
+from Interface import SkLearnTask, DLTask, VisionApplications
 from keras import datasets
 import requests
 from io import BytesIO
@@ -226,15 +226,6 @@ def data_featureselection_withestimator(estimator, X, Y, pipeline):
 def model_build(pipeline):
     if model_type == "mlp":
         model = DLTask.buildModel(pipeline)
-    elif model_type == "imagenet":
-        target_x = pipeline['options']['target_size_x']
-        target_y = pipeline['options']['target_size_y']
-        model_name = pipeline['options']['model_name']
-        model = KApplications.buildModel(model_name, target_x, target_y)
-        saveModel = {"model_type": "imagenet", "model_name": model_name, "target_size_x": target_x, "target_size_y": target_y}
-        picklefile = projectfolder + "/model.json"
-        with open(picklefile, "wb") as f:
-            json.dump(saveModel, f)
     else:
         model = SkLearnTask.getSKLearnModel(pipeline['method'])
     return model
@@ -277,10 +268,6 @@ def model_train(model, X, Y, pipeline, more = False):
         model_json = modelObj.to_json()
         with open(picklefile, "w") as json_file:
             json_file.write(model_json)
-    elif model_type == "imagenet":
-        result = {}
-        result["sample_prediction"] = KApplications.predict(X, optionslist["model_name"], model)
-        result["model_summary"] = model.summary()
 
     return result
 
@@ -296,15 +283,6 @@ def model_predict(X, pipeline):
         if type(X) is pandas.DataFrame:
             X = X.values
         Y = model.predict(X)
-    elif model_type == "imagenet":
-        with open(projectfolder + '/model.json', 'r') as f:
-            loaded_model_json = json.load(f)
-
-        model_name = loaded_model_json["model_name"]
-        target_x = loaded_model_json["target_size_x"]
-        target_y = loaded_model_json["target_size_y"]
-        model = KApplications.buildModel(model_name, target_x, target_y)
-        Y = KApplications.predict(X, optionslist["model_name"], model)
     else:
         picklefile = projectfolder + "/model.out"
         with open(picklefile, "rb") as f:

@@ -71,8 +71,6 @@ def Run():
             resultset["output->" + name] = output
 
     savePipeline = True
-    if model_type == "imagenet":
-        savePipeline = False
 
     if savePipeline is True:
         with open(pickleFile, "wb") as f:
@@ -166,9 +164,6 @@ def Predict(filename, savePrediction = False):
     return predictions
 
 def ContinueTraining(epoches=32, batch_size=32):
-    if model_type == "imagenet":
-        raise Exception("Pre-trained imagenet model not implemented for more training")
-
     PipelineComponents.init(PipelineComponents, srvname, model_type)
     pipelineFile = PipelineComponents.projectfolder + '/pipeline.json'
     pickleFile = PipelineComponents.projectfolder + '/pipeline.out'
@@ -216,9 +211,6 @@ def ContinueTraining(epoches=32, batch_size=32):
             resultset["output->" + name] = output
 
     savePipeline = True
-    if model_type == "imagenet":
-        savePipeline = False
-
     if savePipeline is True:
         with open(pickleFile, "wb") as f:
             pickle.dump(resultset, f)

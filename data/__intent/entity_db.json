@@ -1,0 +1,18 @@
+{
+  "_default": {
+    "4": {
+      "keywords": [
+        "weather",
+        "climate"
+      ],
+      "name": "WeatherKeyword"
+    },
+    "5": {
+      "keywords": [
+        "adelaide",
+        "london"
+      ],
+      "name": "Location"
+    }
+  }
+}

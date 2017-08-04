@@ -2,7 +2,7 @@ import os
 import json
 import uuid
 import keras
-from Interface import KApplications
+from Interface import VisionApplications
 from Interface import utility
 def predicttest(name, imgpath):
     directory = "./data/" + name
@@ -13,7 +13,7 @@ def predicttest(name, imgpath):
     modeljson = json.loads(modeldata)
     modeljson['name'] = name
     if modeljson['modeltype'] == 'imagenet':
-        result = KApplications.predict(modeljson, imgpath)
+        result = VisionApplications.predict(modeljson, imgpath)
     
     print(result)
 
