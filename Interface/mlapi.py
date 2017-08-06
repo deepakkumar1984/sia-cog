@@ -2,19 +2,17 @@
 Routes and views for the flask application.
 """
 
-from datetime import datetime
-from flask import render_template
-from flask import request
-from flask import Flask, jsonify,url_for
-import matplotlib.pyplot as plt
 import os
-import simplejson as json
-from decimal import Decimal
-from Interface import app, SkLearnTask, ParallelTask,utility, DLTask, DataAnalyzer, DataManager, VisionApplications, DatasetTask, Pipeline
 import shutil
+
+import simplejson as json
 import werkzeug
-import numpy
-import pandas
+from flask import jsonify
+from flask import request
+
+from Interface import app, ParallelTask, utility, DatasetTask
+from libml import pipeline
+
 
 @app.route('/api/ml/create', methods=['POST'])
 def create():
@@ -199,8 +197,8 @@ def predict(name):
         elif servicejson["data_format"] == "csv":
             testfile = data['testfile']
 
-        Pipeline.init(Pipeline, name, servicejson["model_type"])
-        predictions = Pipeline.Predict(testfile, savePrediction)
+        pipeline.init(pipeline, name, servicejson["model_type"])
+        predictions = pipeline.Predict(testfile, savePrediction)
         predictions = json.loads(predictions)
         if servicejson["data_format"] == "csv":
             result = predictions["0"]

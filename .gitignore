@@ -1,6 +1,7 @@
 /.vscode
 /obj
-*.pyc
-/Interface/*.pyc
 /.idea
+/data/__vision/weights
+*.so
+*.pyc
 

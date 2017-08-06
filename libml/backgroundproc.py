@@ -1,10 +1,12 @@
-import threading
-import json
-from Interface import utility, Pipeline
-import uuid
-import os
-from tinydb import TinyDB, Query
 import datetime
+import json
+import threading
+import uuid
+
+from tinydb import TinyDB, Query
+
+from libml import pipeline
+
 
 def Validate(id, name):
     results = {}
@@ -14,15 +16,15 @@ def Validate(id, name):
             srvjson = json.load(f)
 
         model_type = srvjson["model_type"]
-        Pipeline.init(Pipeline, name, model_type)
-        pipelinejson = Pipeline.getPipelineData()
-        Pipeline.Run()
+        pipeline.init(pipeline, name, model_type)
+        pipelinejson = pipeline.getPipelineData()
+        pipeline.Run()
 
         for p in pipelinejson:
             if p["module"] == "return_result":
                 mlist = p["input"]["module_output"]
                 for m in mlist:
-                    r = Pipeline.Output(m, to_json=True)
+                    r = pipeline.Output(m, to_json=True)
                     results[m] = json.loads(r)
     except Exception as e:
         results["message"] = str(e)
@@ -41,15 +43,15 @@ def Train(id, name, epoches, batch_size):
 
         model_type = srvjson["model_type"]
 
-        Pipeline.init(Pipeline, name, model_type)
-        pipelinejson = Pipeline.getPipelineData()
-        Pipeline.ContinueTraining(epoches=epoches, batch_size=batch_size)
+        pipeline.init(pipeline, name, model_type)
+        pipelinejson = pipeline.getPipelineData()
+        pipeline.ContinueTraining(epoches=epoches, batch_size=batch_size)
 
         for p in pipelinejson:
             if p["module"] == "return_result":
                 mlist = p["input"]["module_output"]
                 for m in mlist:
-                    r = Pipeline.Output(m, to_json=True)
+                    r = pipeline.Output(m, to_json=True)
                     results[m] = json.loads(r)
     except Exception as e:
         results["message"] = str(e)

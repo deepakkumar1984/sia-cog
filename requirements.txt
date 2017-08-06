@@ -11,5 +11,7 @@ tinydb
 requests
 simplejson
 jsonpickle
--e git+https://github.com/mycroftai/adapt#egg=adapt-parser
+pytesseract
 nltk
+dlib
+scikit-image

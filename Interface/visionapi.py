@@ -2,19 +2,16 @@
 Routes and views for the flask application.
 """
 
-from datetime import datetime
-from flask import render_template
-from flask import request
-from flask import Flask, jsonify,url_for
-import matplotlib.pyplot as plt
 import os
-import simplejson as json
-from decimal import Decimal
-from Interface import app, utility, VisionApplications, PipelineComponents
 import shutil
-import werkzeug
-import numpy
-import pandas
+
+import simplejson as json
+from flask import jsonify
+from flask import request
+
+from Interface import app, utility
+from libvis import objcls, objdet
+
 
 @app.route('/api/vis/create', methods=['POST'])
 def visioncreate():
@@ -93,11 +90,18 @@ def visionpredict(name):
         servicejson = utility.getJsonData(file)
         result = {}
         imagepath = data['imagepath']
-        target_x = servicejson['options']['target_size_x']
-        target_y = servicejson['options']['target_size_y']
-        model_name = servicejson['options']['model']
-        model = VisionApplications.buildModel(model_name, target_x, target_y)
-        result = VisionApplications.predict(imagepath, target_x, target_y, model_name, model)
+
+        if servicejson["type"] == "cls":
+            target_x = servicejson['options']['target_size_x']
+            target_y = servicejson['options']['target_size_y']
+            model_name = servicejson['options']['model']
+            model = objcls.loadModel(model_name, target_x, target_y)
+            result = objcls.predict(imagepath, target_x, target_y, model_name, model)
+        elif servicejson["type"] == "det":
+            model_name = servicejson['options']['model']
+            isgpu = servicejson['options']['gpu']
+            model = objdet.loadModel(model_name, 10, isgpu)
+            result = objdet.predict(imagepath, model)
     except Exception as e:
         code = 500
         message = str(e)

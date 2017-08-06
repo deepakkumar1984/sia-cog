@@ -1,9 +1,9 @@
-import os
 import json
-import uuid
-import keras
-from Interface import VisionApplications
+
 from Interface import utility
+from libvis import objcls
+
+
 def predicttest(name, imgpath):
     directory = "./data/" + name
     modelfile = directory + "/define.json"
@@ -13,7 +13,7 @@ def predicttest(name, imgpath):
     modeljson = json.loads(modeldata)
     modeljson['name'] = name
     if modeljson['modeltype'] == 'imagenet':
-        result = VisionApplications.predict(modeljson, imgpath)
+        result = objcls.predict(modeljson, imgpath)
     
     print(result)
 

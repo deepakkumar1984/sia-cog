@@ -1,3 +1,3 @@
-from Interface import LangIntentApplications as l
+from libintent import intentanalyzer as l
 
 l.saveEntity("")

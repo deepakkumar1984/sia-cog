@@ -1,21 +1,21 @@
-import pandas
-from pandas import read_csv
-import numpy
 import json
-from sklearn import preprocessing, feature_selection, feature_extraction, decomposition
-from sklearn.preprocessing import Imputer
-from keras.preprocessing import image
-from sklearn.model_selection import cross_val_score
-from keras.models import model_from_json
-import pickle
 import os
-from sklearn.model_selection import KFold
-from Interface import SkLearnTask, DLTask, VisionApplications
-from keras import datasets
-import requests
+import pickle
 from io import BytesIO
+
+import numpy
+import pandas
+import requests
 from PIL import Image
-import jsonpickle
+from keras import datasets
+from keras.models import model_from_json
+from keras.preprocessing import image
+from pandas import read_csv
+from sklearn.model_selection import cross_val_score
+from sklearn.preprocessing import Imputer
+
+from Interface import DLTask
+from libml import scikitlearn
 
 projectfolder = ""
 model_type = ""
@@ -227,7 +227,7 @@ def model_build(pipeline):
     if model_type == "mlp":
         model = DLTask.buildModel(pipeline)
     else:
-        model = SkLearnTask.getSKLearnModel(pipeline['method'])
+        model = scikitlearn.getSKLearnModel(pipeline['method'])
     return model
 
 def model_evalute(model, X, Y, pipeline):
