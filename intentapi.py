@@ -8,21 +8,20 @@ from flask import jsonify
 from flask import request
 
 from Interface import app
-from libintent import intentanalyzer
+from langintent import intentanalyzer
 
-
-@app.route('/api/int/define/<type>', methods=['POST'])
-def defineintobjects(type):
+@app.route('/api/int/define/<objtype>', methods=['POST'])
+def defineintobjects(objtype):
     message = "Success"
     code = 200
     try:
         rjson = request.json
         name = rjson["name"]
 
-        if type.lower() == "entity":
+        if objtype.lower() == "entity":
             keywords = rjson["keywords"]
             intentanalyzer.saveEntity(name, keywords)
-        elif type.lower() == "intent":
+        elif objtype.lower() == "intent":
             rentities = rjson["required_entities"]
             oentities = rjson["optional_entities"]
             intentanalyzer.saveIntent(name, rentities, oentities)
@@ -36,15 +35,15 @@ def defineintobjects(type):
     return jsonify({"statuscode": code, "message": message})
 
 @app.route('/api/int/delete/<type>', methods=['POST'])
-def deleteintobjects(type):
+def deleteintobjects(objtype):
     message = "Success"
     code = 200
     try:
         rjson = request.json
         name = rjson["name"]
-        if type.lower() == "entity":
+        if objtype.lower() == "entity":
             intentanalyzer.deleteEntity(name)
-        elif type.lower() == "intent":
+        elif objtype.lower() == "intent":
             intentanalyzer.deleteIntent(name)
         else:
             raise Exception("Invalid api call")

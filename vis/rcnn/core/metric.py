@@ -1,7 +1,7 @@
 import mxnet as mx
 import numpy as np
 
-from libvis.rcnn.config import config
+from vis.rcnn.config import config
 
 
 def get_rpn_names():

@@ -6,8 +6,10 @@ import pandas
 import simplejson as json
 
 from Interface import utility
-from libml import pipelinecomponents
+from ml import pipelinecomponents
 
+srvname = ""
+model_type = ""
 
 class NumpyFloatHandler(jsonpickle.handlers.BaseHandler):
     """
@@ -20,11 +22,10 @@ class NumpyFloatHandler(jsonpickle.handlers.BaseHandler):
         """
         return round(obj,6)
 
-srvname = ""
-model_type = ""
 def init(self, srvname, model_type):
     self.srvname = srvname
     self.model_type = model_type
+
     pipelinecomponents.init(pipelinecomponents, srvname, model_type)
 
 def getPipelineData():
@@ -104,16 +105,7 @@ def Predict(filename, savePrediction = False):
             p["input"]["filename"] = filename
 
         if module == "data_loadimg":
-            p["input"]["imagepatclass NumpyFloatHandler(jsonpickle.handlers.BaseHandler):
-    """
-    Automatic conversion of numpy float  to python floats
-    Required for jsonpickle to work correctly
-    """
-    def flatten(self, obj, data):
-        """
-        Converts and rounds a Numpy.float* to Python float
-        """
-        return round(obj,6)h"] = filename
+            p["input"]["imagepath"] = filename
             predType = "img"
 
         if module == "data_handlemissing" or module == "data_filtercolumns":

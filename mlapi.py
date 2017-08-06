@@ -10,9 +10,8 @@ import werkzeug
 from flask import jsonify
 from flask import request
 
-from Interface import app, ParallelTask, utility, DatasetTask
-from libml import pipeline
-
+from Interface import utility, DatasetTask, app
+import ml
 
 @app.route('/api/ml/create', methods=['POST'])
 def create():
@@ -38,7 +37,7 @@ def create():
 
     return jsonify({"statuscode": code, "message": message})
 
-@app.route('/api/ml/update/<name>', methods=['POST'])
+@flaskapp.route('/api/ml/update/<name>', methods=['POST'])
 def update(name):
     message = "Success"
     code = 200
@@ -60,7 +59,7 @@ def update(name):
 
     return jsonify({"statuscode": code, "message": message})
 
-@app.route('/api/ml/delete/<name>', methods=['POST'])
+@flaskapp.route('/api/ml/delete/<name>', methods=['POST'])
 def delete(name):
     message = "Success"
     code = 200
@@ -78,7 +77,7 @@ def delete(name):
 
     return jsonify({"statuscode": code, "message": message})
 
-@app.route('/api/ml/upload/<name>', methods=['GET','POST'])
+@flaskapp.route('/api/ml/upload/<name>', methods=['GET', 'POST'])
 def upload(name):
     message = "Success"
     code = 200
@@ -99,7 +98,7 @@ def upload(name):
 
     return jsonify({"statuscode": code, "message": message})
 
-@app.route('/api/ml/data/<name>', methods=['POST'])
+@flaskapp.route('/api/ml/data/<name>', methods=['POST'])
 def datamgr(name):
     message = "Success"
     code = 200
@@ -113,7 +112,7 @@ def datamgr(name):
 
     return result
 
-@app.route('/api/ml/pipeline/<name>', methods=['POST'])
+@flaskapp.route('/api/ml/pipeline/<name>', methods=['POST'])
 def pipeline(name):
     message = "Success"
     code = 200
@@ -131,7 +130,7 @@ def pipeline(name):
 
     return jsonify({"statuscode": code, "message": message})
 
-@app.route('/api/ml/evalute/<name>', methods=['POST'])
+@flaskapp.route('/api/ml/evalute/<name>', methods=['POST'])
 def evalute(name):
     message = ""
     code = 200
@@ -144,7 +143,7 @@ def evalute(name):
 
     return jsonify({"statuscode": code, "message": message, "jobid": taskid})
 
-@app.route('/api/ml/train/<name>', methods=['POST'])
+@flaskapp.route('/api/ml/train/<name>', methods=['POST'])
 def train(name):
     message = "Success"
     code = 200
@@ -166,7 +165,7 @@ def train(name):
 
     return jsonify({"statuscode": code, "message": message, "jobid": taskid})
 
-@app.route('/api/ml/jobs/<name>', methods=['GET'])
+@flaskapp.route('/api/ml/jobs/<name>', methods=['GET'])
 def jobs(name):
     message = "Started!"
     code = 200
@@ -179,7 +178,7 @@ def jobs(name):
 
     return jsonify(result)
 
-@app.route('/api/ml/predict/<name>', methods=['POST'])
+@flaskapp.route('/api/ml/predict/<name>', methods=['POST'])
 def predict(name):
     message = "Success"
     code = 200
@@ -197,8 +196,8 @@ def predict(name):
         elif servicejson["data_format"] == "csv":
             testfile = data['testfile']
 
-        pipeline.init(pipeline, name, servicejson["model_type"])
-        predictions = pipeline.Predict(testfile, savePrediction)
+        ml.pipeline.init(ml.pipeline, name, servicejson["model_type"])
+        predictions = ml.pipeline.Predict(testfile, savePrediction)
         predictions = json.loads(predictions)
         if servicejson["data_format"] == "csv":
             result = predictions["0"]

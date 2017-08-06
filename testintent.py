@@ -1,3 +1,3 @@
-from libintent import intentanalyzer as l
+import langintent.intentanalyzer as ia
 
-l.saveEntity("")
+print(ia.predict("how is the weather in adelaide"))

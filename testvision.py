@@ -1,4 +1,4 @@
-from libvis import cvmgr
+from vis import cvmgr
 import simplejson as json
 
 imgpath = "/home/deepak/work/ml-api/data/__vision/demo/people.jpg"

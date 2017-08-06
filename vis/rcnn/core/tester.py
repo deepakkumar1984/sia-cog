@@ -5,11 +5,11 @@ import mxnet as mx
 import numpy as np
 
 from module import MutableModule
-from libvis.rcnn.logger import logger
-from libvis.rcnn.config import config
-from libvis.rcnn.io import image
-from libvis.rcnn.processing.bbox_transform import bbox_pred, clip_boxes
-from libvis.rcnn.processing.nms import py_nms_wrapper, cpu_nms_wrapper, gpu_nms_wrapper
+from vis.rcnn.logger import logger
+from vis.rcnn.config import config
+from vis.rcnn.io import image
+from vis.rcnn.processing.bbox_transform import bbox_pred, clip_boxes
+from vis.rcnn.processing.nms import py_nms_wrapper, cpu_nms_wrapper, gpu_nms_wrapper
 
 
 class Predictor(object):

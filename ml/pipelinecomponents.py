@@ -13,9 +13,9 @@ from keras.preprocessing import image
 from pandas import read_csv
 from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import Imputer
+from sklearn import preprocessing, feature_selection, feature_extraction
 
-from Interface import DLTask
-from libml import scikitlearn
+from ml import scikitlearn, deeplearning
 
 projectfolder = ""
 model_type = ""

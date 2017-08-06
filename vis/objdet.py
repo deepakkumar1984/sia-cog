@@ -3,9 +3,9 @@ import os
 import cv2
 import mxnet as mx
 import numpy as np
-from libvis.rcnn.logger import logger
-from libvis.rcnn.config import config
-from libvis.rcnn.symbol import get_vgg_test, get_vgg_rpn_test, get_resnet_test
+from vis.rcnn.logger import logger
+from vis.rcnn.config import config
+from vis.rcnn.symbol import get_vgg_test, get_vgg_rpn_test, get_resnet_test
 from rcnn.io.image import resize, transform
 from rcnn.core.tester import Predictor, im_detect, im_proposal, vis_all_detection, draw_all_detection
 from rcnn.utils.load_model import load_param

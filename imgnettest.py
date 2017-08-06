@@ -1,7 +1,7 @@
 import json
 
 from Interface import utility
-from libvis import objcls
+from vis import objcls
 
 
 def predicttest(name, imgpath):

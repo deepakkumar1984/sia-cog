@@ -6,7 +6,7 @@ import numpy as np
 
 from ..logger import logger
 from bbox_transform import bbox_overlaps, bbox_transform
-from libvis.rcnn.config import config
+from vis.rcnn.config import config
 
 
 def compute_bbox_regression_targets(rois, overlaps, labels):

@@ -10,7 +10,7 @@ from flask import jsonify
 from flask import request
 
 from Interface import app, utility
-from libvis import objcls, objdet
+from vis import objcls, objdet
 
 
 @app.route('/api/vis/create', methods=['POST'])

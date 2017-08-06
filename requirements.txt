@@ -10,6 +10,7 @@ pillow
 tinydb
 requests
 simplejson
+opencv-python
 jsonpickle
 pytesseract
 nltk

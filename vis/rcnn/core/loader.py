@@ -2,10 +2,10 @@ import mxnet as mx
 import numpy as np
 from mxnet.executor_manager import _split_input_slice
 
-from libvis.rcnn.config import config
-from libvis.rcnn.io.image import tensor_vstack
-from libvis.rcnn.io.rpn import get_rpn_testbatch, get_rpn_batch, assign_anchor
-from libvis.rcnn.io.rcnn import get_rcnn_testbatch, get_rcnn_batch
+from vis.rcnn.config import config
+from vis.rcnn.io.image import tensor_vstack
+from vis.rcnn.io.rpn import get_rpn_testbatch, get_rpn_batch, assign_anchor
+from vis.rcnn.io.rcnn import get_rcnn_testbatch, get_rcnn_batch
 
 
 class TestLoader(mx.io.DataIter):

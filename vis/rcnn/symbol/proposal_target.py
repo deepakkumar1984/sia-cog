@@ -8,7 +8,7 @@ import numpy as np
 from distutils.util import strtobool
 
 from ..logger import logger
-from libvis.rcnn.io.rcnn import sample_rois
+from vis.rcnn.io.rcnn import sample_rois
 
 
 class ProposalTargetOperator(mx.operator.CustomOp):

@@ -8,10 +8,10 @@ import numpy as np
 import numpy.random as npr
 from distutils.util import strtobool
 
-from libvis.rcnn.logger import logger
-from libvis.rcnn.processing.bbox_transform import bbox_pred, clip_boxes
-from libvis.rcnn.processing.generate_anchor import generate_anchors
-from libvis.rcnn.processing.nms import py_nms_wrapper, cpu_nms_wrapper, gpu_nms_wrapper
+from vis.rcnn.logger import logger
+from vis.rcnn.processing.bbox_transform import bbox_pred, clip_boxes
+from vis.rcnn.processing.generate_anchor import generate_anchors
+from vis.rcnn.processing.nms import py_nms_wrapper, cpu_nms_wrapper, gpu_nms_wrapper
 
 
 class ProposalOperator(mx.operator.CustomOp):

@@ -1,5 +1,5 @@
 import numpy as np
-import libvis.rcnn.cython.cpu_nms as cpu_nms
+import vis.rcnn.cython.cpu_nms as cpu_nms
 try:
     from ..cython.gpu_nms import gpu_nms
 except ImportError:
