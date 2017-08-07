@@ -107,7 +107,7 @@ def data_handlemissing(dataframe, pipeline):
     return dataframe
 
 def data_preprocess(dataframe, pipeline):
-    method = pipeline['method']
+    method = pipeline['options']['method']
     data = dataframe.values
     module = eval("preprocessing." + method)()
     m = getattr(module, "fit_transform")
