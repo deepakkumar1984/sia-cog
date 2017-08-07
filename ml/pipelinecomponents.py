@@ -225,9 +225,9 @@ def data_featureselection_withestimator(estimator, X, Y, pipeline):
 
 def model_build(pipeline):
     if model_type == "mlp":
-        model = DLTask.buildModel(pipeline)
+        model = deeplearning.buildModel(pipeline)
     else:
-        model = scikitlearn.getSKLearnModel(pipeline['method'])
+        model = scikitlearn.getSKLearnModel(pipeline['options']['method'])
     return model
 
 def model_evalute(model, X, Y, pipeline):

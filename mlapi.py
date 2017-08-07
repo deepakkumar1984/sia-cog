@@ -48,6 +48,10 @@ def update(name):
             code = 1001
             message = "Service does not exists!"
         else:
+            if request.json["servicename"] != name:
+                code = 1001
+                message = "Service name is not matching with the api calls"
+
             json_string = json.dumps(request.json)
             file = open(file, "w")
             file.write(json_string)
@@ -130,8 +134,8 @@ def pipeline(name):
 
     return jsonify({"statuscode": code, "message": message})
 
-@app.route('/api/ml/evalute/<name>', methods=['POST'])
-def evalute(name):
+@app.route('/api/ml/evaluate/<name>', methods=['POST'])
+def evaluate(name):
     message = ""
     code = 200
     try:
@@ -171,7 +175,7 @@ def jobs(name):
     code = 200
     try:
         id = request.args.get("id")
-        result = ml.backgroundproc.GetStatus(name, id)
+        result = backgroundproc.GetStatus(name, id)
     except Exception as e:
         code = 500
         message = str(e)
@@ -196,7 +200,7 @@ def predict(name):
         elif servicejson["data_format"] == "csv":
             testfile = data['testfile']
 
-        ml.pipeline.init(pipeline, name, servicejson["model_type"])
+        pipeline.init(pipeline, name, servicejson["model_type"])
         predictions = pipeline.Predict(testfile, savePrediction)
         predictions = json.loads(predictions)
         if servicejson["data_format"] == "csv":

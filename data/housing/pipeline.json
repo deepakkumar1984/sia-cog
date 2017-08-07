@@ -46,7 +46,9 @@
   {
     "name": "model_build",
     "module": "model_build",
-    "method": "BayesianRidge"
+    "options":{
+      "method": "BayesianRidge"
+    }
   },
   {
     "input": {
