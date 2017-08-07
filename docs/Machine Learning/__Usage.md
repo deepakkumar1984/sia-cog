@@ -136,7 +136,7 @@ Example:
 http://localhost:5555/api/ml/train/housing
 ```
 
-###Input Parameters:
+**Input Parameters:**
 
 * **epochs**: The number of epochs needs to train more (default: 32)
 * **batch_size**: The current training batch size (default: 32)

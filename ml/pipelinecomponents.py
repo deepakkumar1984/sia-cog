@@ -37,14 +37,15 @@ def data_loadcsv(filename, pipeline):
     else:
         dataframe = read_csv(filename, delim_whitespace=pipeline['options']['delim_whitespace'], header=None, dtype={'a': numpy.float32})
 
-    return dataframe.astype("float64")
+    return dataframe
 
-def data_loadsample(name, pipeline):
-    if name == "cifar10":
+def data_loadsample(pipeline):
+    dataset_name = pipeline["options"]["dataset_name"]
+    if dataset_name == "cifar10":
         (X_train, Y_train), (X_test, Y_test) = datasets.cifar10.load_data()
-    elif name == "cifar100":
+    elif dataset_name == "cifar100":
         (X_train, Y_train), (X_test, Y_test) = datasets.cifar100.load_data()
-    elif name == "imdb":
+    elif dataset_name == "imdb":
         (X_train, Y_train), (X_test, Y_test) = datasets.imdb.load_data(path="imdb.npz",
                                                       num_words=None,
                                                       skip_top=0,
@@ -53,7 +54,7 @@ def data_loadsample(name, pipeline):
                                                       start_char=1,
                                                       oov_char=2,
                                                       index_from=3)
-    elif name == "reuters":
+    elif dataset_name == "reuters":
         (X_train, Y_train), (X_test, Y_test) = datasets.reuters.load_data(path="reuters.npz",
                                                          num_words=None,
                                                          skip_top=0,
@@ -63,37 +64,12 @@ def data_loadsample(name, pipeline):
                                                          start_char=1,
                                                          oov_char=2,
                                                          index_from=3)
-    elif name == "mnist":
+    elif dataset_name == "mnist":
         (X_train, Y_train), (X_test, Y_test) = datasets.mnist.load_data()
-    elif name == "boston_housing":
+    elif dataset_name == "boston_housing":
         (X_train, Y_train), (X_test, Y_test) = datasets.boston_housing.load_data()
 
     return (X_train, Y_train), (X_test, Y_test)
-
-def data_loadimg(imagepath, pipeline):
-    target_x = pipeline['options']['target_size_x']
-    target_y = pipeline['options']['target_size_y']
-
-    if imagepath.startswith('http://') or imagepath.startswith('https://') or imagepath.startswith('ftp://'):
-        response = requests.get(imagepath)
-        img = Image.open(BytesIO(response.content))
-        img = img.resize((target_x, target_y))
-    else:
-        if not os.path.exists(imagepath):
-            imagepath = projectfolder + "/dataset/" + imagepath
-
-        if not os.path.exists(imagepath):
-            raise Exception('Input image file does not exist')
-
-        img = image.load_img(imagepath, target_size=(target_x, target_y))
-
-    return img
-
-def data_filtercolumns(dataframe, pipeline):
-    cols = pipeline["options"]["columns"]
-    dataframe = dataframe[cols]
-
-    return dataframe
 
 def data_getxy(dataframe, pipeline):
     X_frame = dataframe[pipeline['options']['xcols']]
