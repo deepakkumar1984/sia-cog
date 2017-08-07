@@ -9,6 +9,8 @@ from flask import request
 
 from Interface import app
 from langintent import intentanalyzer
+import shutil
+import os
 
 @app.route('/api/int/define/<objtype>', methods=['POST'])
 def defineintobjects(objtype):
@@ -25,6 +27,10 @@ def defineintobjects(objtype):
             rentities = rjson["required_entities"]
             oentities = rjson["optional_entities"]
             intentanalyzer.saveIntent(name, rentities, oentities)
+            utter = rjson["utter"]
+            if not utter is None:
+                intentanalyzer.saveUtter(name, utter)
+
         else:
             raise Exception("Invalid api call")
 
@@ -45,6 +51,7 @@ def deleteintobjects(objtype):
             intentanalyzer.deleteEntity(name)
         elif objtype.lower() == "intent":
             intentanalyzer.deleteIntent(name)
+            shutil.rmtree("./data/__intent/utter/" + name + ".intent")
         else:
             raise Exception("Invalid api call")
 

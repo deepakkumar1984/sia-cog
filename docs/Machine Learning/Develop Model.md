@@ -1,3 +1,14 @@
+###Develop model using train data
+Developing a model requires knowledge about the various machine learning algorithm which will fit the need to solve a particular problem. I am covering only few algorithms here and will try to provide you a guide on how to use it for this housing problem. You can learn and free to try to other algorithm. 
+
+The API uses scikit tool for general machine learning model for regression and classification problems. I will cover deep learning model using later which uses keras as the backend tool to run the code.
+
+I would suggest to go through the tutorials here to learn more about general machine learning models: [http://scikit-learn.org/stable/tutorial/index.html](http://scikit-learn.org/stable/tutorial/index.html)
+
+We are using pipeline framework to develop the model. These API calls uses json as input data format.
+Sample pipeline json with the element from loading the data, pre-proceesing till model buidling.
+
+```
 [
   {
     "input": {
@@ -74,3 +85,8 @@
     "module": "return_result"
   }
 ]
+```
+
+
+To learn more about what pipeline element means, please go through the API documenation.
+

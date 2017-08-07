@@ -1,5 +1,5 @@
 setuptools
-Flask<1
+Flask
 Cython
 Keras
 sklearn
@@ -16,3 +16,4 @@ pytesseract
 nltk
 dlib
 scikit-image
+chatterbot

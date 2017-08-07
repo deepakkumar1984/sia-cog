@@ -11,7 +11,7 @@ from flask import jsonify
 from flask import request
 
 from Interface import utility, DatasetTask, app
-import ml
+from ml import backgroundproc, pipeline
 
 @app.route('/api/ml/create', methods=['POST'])
 def create():
@@ -37,7 +37,7 @@ def create():
 
     return jsonify({"statuscode": code, "message": message})
 
-@flaskapp.route('/api/ml/update/<name>', methods=['POST'])
+@app.route('/api/ml/update/<name>', methods=['POST'])
 def update(name):
     message = "Success"
     code = 200
@@ -59,7 +59,7 @@ def update(name):
 
     return jsonify({"statuscode": code, "message": message})
 
-@flaskapp.route('/api/ml/delete/<name>', methods=['POST'])
+@app.route('/api/ml/delete/<name>', methods=['POST'])
 def delete(name):
     message = "Success"
     code = 200
@@ -77,7 +77,7 @@ def delete(name):
 
     return jsonify({"statuscode": code, "message": message})
 
-@flaskapp.route('/api/ml/upload/<name>', methods=['GET', 'POST'])
+@app.route('/api/ml/upload/<name>', methods=['GET', 'POST'])
 def upload(name):
     message = "Success"
     code = 200
@@ -98,7 +98,7 @@ def upload(name):
 
     return jsonify({"statuscode": code, "message": message})
 
-@flaskapp.route('/api/ml/data/<name>', methods=['POST'])
+@app.route('/api/ml/data/<name>', methods=['POST'])
 def datamgr(name):
     message = "Success"
     code = 200
@@ -112,7 +112,7 @@ def datamgr(name):
 
     return result
 
-@flaskapp.route('/api/ml/pipeline/<name>', methods=['POST'])
+@app.route('/api/ml/pipeline/<name>', methods=['POST'])
 def pipeline(name):
     message = "Success"
     code = 200
@@ -130,12 +130,12 @@ def pipeline(name):
 
     return jsonify({"statuscode": code, "message": message})
 
-@flaskapp.route('/api/ml/evalute/<name>', methods=['POST'])
+@app.route('/api/ml/evalute/<name>', methods=['POST'])
 def evalute(name):
     message = ""
     code = 200
     try:
-        taskid = ParallelTask.StartValidateThread(name)
+        taskid = backgroundproc.StartValidateThread(name)
         message = "Job started! Please check status for id: " + taskid
     except Exception as e:
         code = 500
@@ -143,7 +143,7 @@ def evalute(name):
 
     return jsonify({"statuscode": code, "message": message, "jobid": taskid})
 
-@flaskapp.route('/api/ml/train/<name>', methods=['POST'])
+@app.route('/api/ml/train/<name>', methods=['POST'])
 def train(name):
     message = "Success"
     code = 200
@@ -157,7 +157,7 @@ def train(name):
         if "batch_size" in data:
             batch_size = data['batch_size']
 
-        taskid = ParallelTask.StartTrainThread(name, epoches, batch_size)
+        taskid = backgroundproc.StartTrainThread(name, epoches, batch_size)
         message = "Job started! Please check status for id: " + taskid
     except Exception as e:
         code = 500
@@ -165,20 +165,20 @@ def train(name):
 
     return jsonify({"statuscode": code, "message": message, "jobid": taskid})
 
-@flaskapp.route('/api/ml/jobs/<name>', methods=['GET'])
+@app.route('/api/ml/jobs/<name>', methods=['GET'])
 def jobs(name):
     message = "Started!"
     code = 200
     try:
         id = request.args.get("id")
-        result = ParallelTask.GetStatus(name, id)
+        result = ml.backgroundproc.GetStatus(name, id)
     except Exception as e:
         code = 500
         message = str(e)
 
     return jsonify(result)
 
-@flaskapp.route('/api/ml/predict/<name>', methods=['POST'])
+@app.route('/api/ml/predict/<name>', methods=['POST'])
 def predict(name):
     message = "Success"
     code = 200
@@ -196,8 +196,8 @@ def predict(name):
         elif servicejson["data_format"] == "csv":
             testfile = data['testfile']
 
-        ml.pipeline.init(ml.pipeline, name, servicejson["model_type"])
-        predictions = ml.pipeline.Predict(testfile, savePrediction)
+        ml.pipeline.init(pipeline, name, servicejson["model_type"])
+        predictions = pipeline.Predict(testfile, savePrediction)
         predictions = json.loads(predictions)
         if servicejson["data_format"] == "csv":
             result = predictions["0"]

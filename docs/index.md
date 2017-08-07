@@ -1,10 +1,11 @@
 
-Welcome to the ml-api wiki! 
+Welcome to the sia-cog wiki! 
 
-We are trying to provide an easy interface in form of web api to create machine learning without having knowledge of programmining language like python or R.
+We are trying to provide an easy interface in form of web API to build or host various machine learning algorithm or general visual/speech/language cognitive services without having knowledge of the programming language like Python or R.
 
 ####Major Components Involved
-1) Python language (>2.7)
-2) [Scikit-learn](http://scikit-learn.org/)
-3) [Keras](https://keras.io/)
-4) [MxNet](http://mxnet.io)
+* Python language (>2.7)
+* [Scikit-learn](http://scikit-learn.org/)
+* [Keras](https://keras.io/)
+* [MxNet](http://mxnet.io)
+* [MyCroft] (https://github.com/MycroftAI)
