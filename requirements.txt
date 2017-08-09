@@ -14,5 +14,4 @@ opencv-python
 jsonpickle
 pytesseract
 nltk
-scikit-image
 chatterbot

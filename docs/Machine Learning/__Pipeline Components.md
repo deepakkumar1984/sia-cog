@@ -66,6 +66,7 @@ Split the dataframe to X and Y required for training the model.
 dataframe: input dataframe which will be split to X and Y
 
 **options**
+
 * xcols: Colummns which will act as features, usually terms as X values
 * ycols: The actual predictions for the X values will be used for training the model.
 
@@ -158,15 +159,15 @@ dataframe
 
 method: Select a pro-processing method that will suit your requirement. Below are the available list of methods yoo can choose from:
 
-> StandardScaler
-> MinMaxScaler
-> MaxAbsScaler
-> RobustScaler
-> Normalizer
-> Binarizer  
-> OneHotEncoder
-> LabelBinarizer
-> LabelEncoder
+* StandardScaler
+* MinMaxScaler
+* MaxAbsScaler
+* RobustScaler
+* Normalizer
+* Binarizer  
+* OneHotEncoder
+* LabelBinarizer
+* LabelEncoder
 
 **output**
 
