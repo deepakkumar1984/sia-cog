@@ -10,18 +10,16 @@ RUN ln -sf /dev/stderr /var/log/siacog.log
 
 RUN useradd -ms /bin/bash sia
 
-RUN apt-get update && apt-get install -y git cmake build-essential libopencv-dev libcurl4-openssl-dev libhdf5-dev libprotobuf-dev wget unzip
-RUN apt-get install -y build-essential libssl-dev libffi-dev python-dev python-tk
-RUN apt-get install -y libfann-dev swig
-RUN apt-get install -y tesseract-ocr
+RUN apt-get update && apt-get install -y git cmake build-essential wget unzip
+RUN apt-get install -y libopencv-dev libssl-dev libffi-dev libfann-dev swig tesseract-ocr python-dev python-tk
 RUN pip install setuptools Flask Cython Keras sklearn pandas matplotlib h5py pillow tinydb requests simplejson opencv-python jsonpickle pytesseract nltk chatterbot
 
 WORKDIR /opt
 RUN git clone https://github.com/deepakkumar1984/sia-cog.git
 WORKDIR /opt/sia-cog/vis/rcnn
-make
+RUN make
 
-WORKON /opt/sia-cog
+WORKDIR /opt/sia-cog
 VOLUME ["/data"]
 
 WORKDIR /opt/sia-cog/data/__vision
