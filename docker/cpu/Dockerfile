@@ -16,7 +16,7 @@ RUN pip install setuptools Flask Cython Keras sklearn pandas matplotlib h5py pil
 
 WORKDIR /opt
 RUN git clone https://github.com/deepakkumar1984/sia-cog.git
-WORKDIR /opt/sia-cog/vis/rcnn
+WORKDIR /opt/sia-cog/vis
 RUN make
 
 WORKDIR /opt/sia-cog
