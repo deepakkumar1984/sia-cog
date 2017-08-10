@@ -1,4 +1,5 @@
-FROM nvidia/cuda
+
+ FROM nvidia/cuda
 
 RUN echo 'building GPU sia-cog image'
 
@@ -9,10 +10,13 @@ RUN ln -sf /dev/stdout /var/log/siacog.log
 RUN ln -sf /dev/stderr /var/log/siacog.log
 
 RUN useradd -ms /bin/bash sia
-
+SS                     FROM            FROMFROMFROM
 RUN apt-get update && apt-get install -y python-pip python-dev git cmake build-essential wget unzip
-RUN apt-get install -y libopencv-dev libssl-dev libffi-dev libfann-dev swig tesseract-ocr python-tk
-RUN pip install setuptools Flask Cython Keras sklearn pandas matplotlib h5py pillow tinydb requests simplejson opencv-python jsonpickle pytesseract nltk chatterbot
+RUN apt-get install -y libopencv-dev libssl-dev libffi-dev libfann-dev swig tesseract-ocr python-tk openmpi-bin
+RUN pip install setuptools Flask Cython Keras sklearn pandas matplotlib h5py pillow tinydb requests simplejson opencv-python jsonpickle pytesseract nltk chatterbot tensorflow-gpu
+RUN pip install https://cntk.ai/PythonWheel/GPU/cntk-2.1-cp27-cp27mu-linux_x86_64.whl
+
+ENV KERAS_BACKEND=cntk
 
 WORKDIR /opt
 RUN git clone https://github.com/deepakkumar1984/sia-cog.git
