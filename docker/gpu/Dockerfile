@@ -14,9 +14,9 @@ RUN useradd -ms /bin/bash sia
 RUN apt-get update && apt-get install -y python-pip python-dev git cmake build-essential wget unzip
 RUN apt-get install -y libopencv-dev libssl-dev libffi-dev libfann-dev swig tesseract-ocr python-tk openmpi-bin
 RUN pip install setuptools Flask Cython Keras sklearn pandas matplotlib h5py pillow tinydb requests simplejson opencv-python jsonpickle pytesseract nltk chatterbot tensorflow-gpu
-RUN pip install https://cntk.ai/PythonWheel/GPU/cntk-2.1-cp27-cp27mu-linux_x86_64.whl
 
-ENV KERAS_BACKEND=cntk
+
+ENV KERAS_BACKEND=tensorflow
 
 WORKDIR /opt
 RUN git clone https://github.com/deepakkumar1984/sia-cog.git
