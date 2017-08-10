@@ -1,9 +1,9 @@
-FROM ubuntu:16.04
+FROM nvidia/cuda
 
-RUN echo 'building CPU sia-cog image'
+RUN echo 'building GPU sia-cog image'
 
 MAINTAINER Deepak Battini "deepak.battini@siadroid.com"
-LABEL description="sia-cog cognitive and machine learning API / CPU version"
+LABEL description="sia-cog cognitive and machine learning API / GPU version"
 
 RUN ln -sf /dev/stdout /var/log/siacog.log
 RUN ln -sf /dev/stderr /var/log/siacog.log
