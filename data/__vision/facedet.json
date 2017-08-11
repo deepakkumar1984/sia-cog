@@ -1,0 +1,5 @@
+{
+  "name": "Face Detection",
+  "servicename": "facedet",
+  "type": "face"
+}

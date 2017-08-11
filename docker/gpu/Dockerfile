@@ -1,5 +1,4 @@
-
- FROM nvidia/cuda
+FROM nvidia/cuda
 
 RUN echo 'building GPU sia-cog image'
 
@@ -13,8 +12,7 @@ RUN useradd -ms /bin/bash sia
 
 RUN apt-get update && apt-get install -y python-pip python-dev git cmake build-essential wget unzip
 RUN apt-get install -y libopencv-dev libssl-dev libffi-dev libfann-dev swig tesseract-ocr python-tk openmpi-bin
-RUN pip install setuptools Flask Cython Keras sklearn pandas matplotlib h5py pillow tinydb requests simplejson opencv-python jsonpickle pytesseract nltk chatterbot tensorflow-gpu
-
+RUN pip install setuptools Flask Cython Keras mxnet-cu80 sklearn pandas matplotlib h5py pillow tinydb requests simplejson opencv-python jsonpickle pytesseract nltk chatterbot tensorflow-gpu urllib
 
 ENV KERAS_BACKEND=tensorflow
 
@@ -23,12 +21,11 @@ RUN git clone https://github.com/deepakkumar1984/sia-cog.git
 WORKDIR /opt/sia-cog/vis
 RUN make
 
-WORKDIR /opt/sia-cog
+WORKDIR /opt/sia-cog/data
 VOLUME ["/data"]
 
 WORKDIR /opt/sia-cog/data/__vision
 RUN mkdir weights
-WORKDIR /opt/sia-cog/data/__vision/weights
 
 RUN chown -R sia:sia /opt/sia-cog
 

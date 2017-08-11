@@ -1,5 +1,7 @@
 import cv2
 import sys
+import simplejson as json
+import jsonpickle
 from PIL import Image
 import pytesseract
 import os
@@ -14,7 +16,7 @@ def detectfaces(imgpath):
     result = []
     for (x, y, w, h) in rects:
         result.append({"x": x, "y": y, "w": w, "h": h})
-    return result
+    return json.loads(jsonpickle.encode(result, unpicklable=False))
 
 def extracttext(imagepath, preprocess):
     image = cv2.imread(imagepath)

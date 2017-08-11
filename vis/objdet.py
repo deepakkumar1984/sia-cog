@@ -142,19 +142,6 @@ def parse_args():
     args = parser.parse_args()
     return args
 
-
-def main():
-    args = parse_args()
-    #ctx = mx.gpu(args.gpu)
-    #symbol = get_vgg_test(num_classes=config.NUM_CLASSES, num_anchors=config.NUM_ANCHORS)
-    ctx = mx.gpu()
-    symbol = get_resnet_test(num_classes=config.NUM_CLASSES)
-    predictor = get_net(symbol, args.prefix, args.epoch, ctx)
-    demo_net(predictor, args.image, args.vis)
-
-if __name__ == '__main__':
-    main()
-
 def loadModel(modelType, epoch, isgpu):
     if isgpu:
         ctx = mx.gpu()
@@ -192,10 +179,9 @@ def predict(imagePath, predictor):
         if len(boxes) > 0:
             result.append({"object_name": CLASSES[ind], "confidence": boxes[0][4] ,"bounding_box": {"x1": boxes[0][0], "x2": boxes[0][1], "y1": boxes[0][2], "y2": boxes[0][3]}})
 
-    print(result)
     jsonpickle.handlers.registry.register(np.float, NumpyFloatHandler)
     jsonpickle.handlers.registry.register(np.float32, NumpyFloatHandler)
     jsonpickle.handlers.registry.register(np.float64, NumpyFloatHandler)
     result = jsonpickle.encode(result, unpicklable=False)
-    return result
+    return json.loads(result)
 

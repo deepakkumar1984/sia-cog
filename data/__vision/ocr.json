@@ -1,0 +1,8 @@
+{
+  "name": "Find Text",
+  "servicename": "ocr",
+  "type": "ocr",
+  "options":{
+    "preprocess": "thresh"
+  }
+}

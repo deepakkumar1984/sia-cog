@@ -1,1 +1,1 @@
-{"name": "housing", "servicename": "housing", "data_format": "csv", "model_type": "mlp"}
+{"name": "housing", "servicename": "dl1", "data_format": "csv", "model_type": "mlp"}
