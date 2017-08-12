@@ -18,16 +18,13 @@ def visioncreate():
     message = "Success"
     code = 200
     try:
-        rjson = json.loads(request.json)
-        name = rjson["name"]
+        rjson = request.get_json()
+        name = rjson["servicename"]
         directory = "./data/__vision"
         file = directory + "/" + name + ".json"
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-            json_string = json.dumps(request.json)
-            file = open(file, "w")
-            file.write(json_string)
-            file.close()
+        if not os.path.exists(file):
+            with open(file, "wb") as f:
+                json.dump(request.json, f)
         else:
             code = 1001
             message = "Service already exists!"
@@ -45,7 +42,7 @@ def visionupdate(name):
     try:
         directory = "./data/__vision"
         file = directory + "/" + name + ".json"
-        if not os.path.exists(directory):
+        if not os.path.exists(file):
             code = 1001
             message = "Service does not exists!"
         else:
@@ -84,7 +81,7 @@ def visionpredict(name):
     message = "Success"
     code = 200
     try:
-        data = json.loads(request.data)
+        data = request.get_json()
         directory = "./data/__vision"
         file = directory + "/" + name + ".json"
         servicejson = utility.getJsonData(file)
