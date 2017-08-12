@@ -115,10 +115,15 @@ def data_preprocess(dataframe, pipeline):
     return pandas.DataFrame(data, columns = dataframe.columns)
 
 def data_featureselection(X, Y, pipeline):
-    method = pipeline['method']
-    transform = pipeline['transform']
+    method = pipeline["options"]['method']
+    transform = pipeline["options"]['transform']
     args = {}
     for p in pipeline["options"]:
+        if "method" in p:
+            continue
+        if "transform" in p:
+            continue
+
         if "score_func" in p:
             scorefunc = eval("feature_selection." + pipeline["options"][p])
             args[p] = scorefunc
@@ -165,18 +170,18 @@ def data_getfeatures(X, Y, result, pipeline):
     return X, Y, result
 
 def data_featureselection_withestimator(estimator, X, Y, pipeline):
-    method = pipeline['method']
-    transform = pipeline['transform']
+    method = pipeline["options"]['method']
+    transform = pipeline["options"]['transform']
     args = {}
     for p in pipeline["options"]:
-        if "score_func" in p:
-            scorefunc = eval("feature_selection." + pipeline["options"][p])
-            args[p] = scorefunc
+        if "method" in p:
+            continue
+        if "transform" in p:
             continue
 
         args[p] = pipeline["options"][p]
 
-    module = eval("feature_selection." + method)(estimator = estimator , **args)
+    module = eval("feature_selection." + method)(estimator = estimator, **args)
     fit = getattr(module, "fit")
     mtransform = getattr(module, "fit_transform")
     f = fit(X, Y)
@@ -194,8 +199,7 @@ def data_featureselection_withestimator(estimator, X, Y, pipeline):
         selected_columns = names
 
     result = {}
-    result['scores'] = sorted(zip(map(lambda x: round(x, 4), f.scores_), names), reverse=True)
-    result['pvalues'] = sorted(zip(map(lambda x: round(x, 4), f.pvalues_), names), reverse=True)
+
     result["features"] = selected_columns
     return (X, Y, result)
 
@@ -206,7 +210,7 @@ def model_build(pipeline):
         model = scikitlearn.getSKLearnModel(pipeline['options']['method'])
     return model
 
-def model_evalute(model, X, Y, pipeline):
+def model_evaluate(model, X, Y, pipeline):
     if "scoring" in pipeline["options"]:
         if len(pipeline['options']['scoring']) > 0:
             scoring = pipeline['options']['scoring'][0]
