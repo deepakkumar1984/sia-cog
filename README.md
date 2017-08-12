@@ -7,3 +7,5 @@ We are trying to provide an easy interface in form of web API to build or host v
 * [Scikit-learn](http://scikit-learn.org/)
 * [Keras](https://keras.io/)
 * [MxNet](http://mxnet.io)
+
+API and Usage Documentation: http://cog.siadroid.com/
