@@ -4,4 +4,6 @@
 /data/__vision/weights
 *.so
 *.pyc
-
+*.out
+*.csv
+/intent_cache

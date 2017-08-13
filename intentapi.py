@@ -61,15 +61,15 @@ def deleteintobjects(objtype):
 
     return jsonify({"statuscode": code, "message": message})
 
-@app.route('/api/int/<type>/<name>', methods=['GET'])
-def getintobjects(type, name):
+@app.route('/api/int/<otype>/<name>', methods=['GET'])
+def getintobjects(otype, name):
     message = "Success"
     code = 200
     result = []
     try:
-        if type.lower() == "entity":
+        if otype == "entity":
             result = intentanalyzer.getEntityRecords(name)
-        elif type.lower() == "intent":
+        elif otype == "intent":
             result = intentanalyzer.getIntentRecords(name)
         else:
             raise Exception("Invalid api call")

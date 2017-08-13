@@ -1,4 +1,4 @@
-FROM nvidia/cuda
+FROM tensorflow/tensorflow:latest-gpu
 
 RUN echo 'building GPU sia-cog image'
 
@@ -11,8 +11,9 @@ RUN ln -sf /dev/stderr /var/log/siacog.log
 RUN useradd -ms /bin/bash sia
 
 RUN apt-get update && apt-get install -y python-pip python-dev git cmake build-essential wget unzip
-RUN apt-get install -y libopencv-dev libssl-dev libffi-dev libfann-dev swig tesseract-ocr python-tk openmpi-bin
-RUN pip install setuptools Flask Cython Keras mxnet-cu80 sklearn pandas matplotlib h5py pillow tinydb requests simplejson opencv-python jsonpickle pytesseract nltk chatterbot tensorflow-gpu urllib
+RUN apt-get install -y libopencv-dev libssl-dev libffi-dev libfann-dev swig tesseract-ocr python-tk
+RUN pip install setuptools Flask Cython Keras mxnet-cu80 sklearn pandas matplotlib h5py pillow tinydb requests simplejson opencv-python jsonpickle pytesseract nltk chatterbot urllib easydict padatious
+RUN pip install -e git+https://github.com/mycroftai/adapt#egg=adapt-parser
 
 ENV KERAS_BACKEND=tensorflow
 

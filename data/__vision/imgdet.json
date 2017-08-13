@@ -1,9 +1,0 @@
-{
-  "name": "Object Detection",
-  "servicename": "objdet",
-  "type": "det",
-  "options":{
-    "model": "resnet",
-    "gpu": true
-  }
-}

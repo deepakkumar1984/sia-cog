@@ -1,5 +1,1 @@
-{
-  "name": "Face Detection",
-  "servicename": "facedet",
-  "type": "face"
-}
+{"servicename": "facedet", "type": "face", "name": "Face Detection"}

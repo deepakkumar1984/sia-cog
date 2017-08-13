@@ -222,6 +222,7 @@ def ContinueTraining(epoches=32, batch_size=32):
 def Output(name, num = None, to_json=False):
     pipelinecomponents.init(pipelinecomponents, srvname, model_type)
     result = pipelinecomponents.return_result(name, num)
+    jsonpickle.handlers.registry.register(numpy.int32, NumpyFloatHandler)
     jsonpickle.handlers.registry.register(numpy.float, NumpyFloatHandler)
     jsonpickle.handlers.registry.register(numpy.float32, NumpyFloatHandler)
     jsonpickle.handlers.registry.register(numpy.float64, NumpyFloatHandler)

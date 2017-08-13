@@ -241,9 +241,10 @@ def model_train(model, X, Y, pipeline, more = False):
         batch_size = pipeline["options"]["batch_size"]
         weightpath = projectfolder + "/weights.hdf5"
         if more == "true":
-            modelObj.load_weights(weightpath)
+            if os.path.exists(weightpath):
+                modelObj.load_weights(weightpath)
 
-        result = DLTask.Train(modelObj, X, Y, weightpath, epoches, batch_size)
+        result = deeplearning.Train(modelObj, X, Y, weightpath, epoches, batch_size)
         picklefile = projectfolder + "/model.json"
         model_json = modelObj.to_json()
         with open(picklefile, "w") as json_file:
