@@ -10,6 +10,7 @@ RUN apt-get update
 ENV KERAS_BACKEND=cntk
 
 WORKDIR /opt
+
 RUN git clone https://github.com/deepakkumar1984/sia-cog.git
 WORKDIR /opt/sia-cog/vis
 RUN make

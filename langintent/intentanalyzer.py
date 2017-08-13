@@ -14,6 +14,19 @@ import pickle
 import jsonpickle
 import os
 
+def createDataFolder():
+    basefolder = "./data/"
+    if not os.path.exists(basefolder + "__vision"):
+        os.makedirs(basefolder + "__vision")
+    if not os.path.exists(basefolder + "__intent"):
+        os.makedirs(basefolder + "__intent")
+    if not os.path.exists(basefolder + "__chatbot"):
+        os.makedirs(basefolder + "__chatbot")
+    if not os.path.exists(basefolder + "__text"):
+        os.makedirs(basefolder + "__text")
+
+createDataFolder()
+
 entity_db =  TinyDB("./data/__intent/entity_db.json")
 intent_db = TinyDB("./data/__intent/intent_db.json")
 
