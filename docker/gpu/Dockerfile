@@ -1,6 +1,6 @@
 FROM deepakkumarb/sia-cog_base:gpu
 
-RUN echo 'building CPU sia-cog image'
+RUN echo 'building GPU sia-cog image'
 
 MAINTAINER Deepak Battini "deepak.battini@siadroid.com"
 LABEL description="sia-cog cognitive and machine learning API / GPU version"

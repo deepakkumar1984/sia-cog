@@ -1,4 +1,4 @@
-FROM deepakkumarb/sia-cog_base:gpu
+FROM deepakkumarb/sia-cog_base:cpu
 
 RUN echo 'building CPU sia-cog image'
 

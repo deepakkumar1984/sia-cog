@@ -13,6 +13,19 @@ from flask import request
 from Interface import utility, DatasetTask, app
 from ml import backgroundproc, pipeline
 
+def createDataFolder():
+    basefolder = "./data/"
+    if not os.path.exists(basefolder + "__vision"):
+        os.makedirs(basefolder + "__vision")
+    if not os.path.exists(basefolder + "__intent"):
+        os.makedirs(basefolder + "__intent")
+    if not os.path.exists(basefolder + "__chatbot"):
+        os.makedirs(basefolder + "__chatbot")
+    if not os.path.exists(basefolder + "__text"):
+        os.makedirs(basefolder + "__text")
+
+createDataFolder()
+
 @app.route('/api/ml/create', methods=['POST'])
 def create():
     message = "Success"
