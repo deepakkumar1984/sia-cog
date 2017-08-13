@@ -7,7 +7,7 @@ import pytesseract
 import os
 import numpy
 
-face_cascade_xml = "./data/__vision/haarcascades/haarcascade_frontalface_default.xml"
+face_cascade_xml = "./vis/haarcascades/haarcascade_frontalface_default.xml"
 class NumpyFloatHandler(jsonpickle.handlers.BaseHandler):
     """
     Automatic conversion of numpy float  to python floats

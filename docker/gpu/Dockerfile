@@ -1,21 +1,4 @@
-FROM tensorflow/tensorflow:latest-gpu
-
-RUN echo 'building GPU sia-cog image'
-
-MAINTAINER Deepak Battini "deepak.battini@siadroid.com"
-LABEL description="sia-cog cognitive and machine learning API / GPU version"
-
-RUN ln -sf /dev/stdout /var/log/siacog.log
-RUN ln -sf /dev/stderr /var/log/siacog.log
-
-RUN useradd -ms /bin/bash sia
-
-RUN apt-get update && apt-get install -y python-pip python-dev git cmake build-essential wget unzip
-RUN apt-get install -y libopencv-dev libssl-dev libffi-dev libfann-dev swig tesseract-ocr python-tk
-RUN pip install setuptools Flask Cython Keras mxnet-cu80 sklearn pandas matplotlib h5py pillow tinydb requests simplejson opencv-python jsonpickle pytesseract nltk chatterbot urllib easydict padatious
-RUN pip install -e git+https://github.com/mycroftai/adapt#egg=adapt-parser
-
-ENV KERAS_BACKEND=tensorflow
+FROM deepakkumarb/sia-cog_base_gpu
 
 WORKDIR /opt
 RUN git clone https://github.com/deepakkumar1984/sia-cog.git

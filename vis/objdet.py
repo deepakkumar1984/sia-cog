@@ -12,6 +12,7 @@ from rcnn.utils.load_model import load_param
 from rcnn.processing.nms import py_nms_wrapper, cpu_nms_wrapper, gpu_nms_wrapper
 import simplejson as json
 import jsonpickle
+from urllib2 import Request, urlopen, HTTPError, URLError
 
 CLASSES = ('__background__',
            'aeroplane', 'bicycle', 'bird', 'boat',
@@ -142,7 +143,36 @@ def parse_args():
     args = parser.parse_args()
     return args
 
+
+def downloadModel(modelType):
+    if modelType == "resnet":
+        url = "https://siastore.blob.core.windows.net/demo/models/rcnn/resnet-0010.params"
+        filename = "resnet-0010.params"
+    elif modelType == "resnet":
+        url = "https://siastore.blob.core.windows.net/demo/models/rcnn/vgg-0010.params"
+        filename = "vgg-0010.params"
+
+    saveFolder = "./data/__vision/weights/"
+    req = Request(url)
+    if os.path.exists(saveFolder + filename):
+        return
+
+    # Open the url
+    try:
+        f = urlopen(req)
+        print "downloading " + url
+
+        with open(saveFolder + filename, "wb") as local_file:
+            local_file.write(f.read())
+
+    # handle errors
+    except HTTPError, e:
+        print "HTTP Error:", e.code, url
+    except URLError, e:
+        print "URL Error:", e.reason, url
+
 def loadModel(modelType, epoch, isgpu):
+    downloadModel(modelType)
     if isgpu:
         ctx = mx.gpu()
     else:
