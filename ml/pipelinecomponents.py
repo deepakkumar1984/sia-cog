@@ -14,7 +14,7 @@ from pandas import read_csv
 from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import Imputer
 from sklearn import preprocessing, feature_selection, feature_extraction
-
+from keras.utils import np_utils
 from ml import scikitlearn, deeplearning
 
 projectfolder = ""
@@ -113,6 +113,32 @@ def data_preprocess(dataframe, pipeline):
     m = getattr(module, "fit_transform")
     data = m(data)
     return pandas.DataFrame(data, columns = dataframe.columns)
+
+def image_preprocess(X, Y, pipeline):
+    normalize = pipeline["options"]["normalize"]
+    encode = pipeline["options"]["encode"]
+    reshape = False
+    if "reshape" in pipeline["options"]:
+        reshape = True
+        pixels = pipeline["options"]["reshape"]["pixels"]
+        width = pipeline["options"]["reshape"]["width"]
+        height = pipeline["options"]["reshape"]["height"]
+
+
+    if reshape is True:
+        X = X.reshape(X.shape[0], pixels, width, height).astype('float32')
+    else:
+        X = X.astype('float32')
+
+    if normalize is True:
+        X = X/255
+
+    if encode is True:
+        Y = np_utils.to_categorical(Y)
+
+    num_classes = Y.shape[1]
+
+    return X,Y,num_classes
 
 def data_featureselection(X, Y, pipeline):
     method = pipeline["options"]['method']

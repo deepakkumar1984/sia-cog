@@ -17,6 +17,25 @@ from tinydb import TinyDB, Query
 
 modellist = []
 
+def getLayer(m):
+    l = layers.Dense()
+    if m['type'] == 'dense':
+        l = layers.Dense()
+    elif m['type'] == 'conv1d':
+        l = layers.Conv1D()
+    elif m['type'] == 'conv2d':
+        l = layers.Conv2D()
+    elif m['type'] == 'conv3d':
+        l = layers.Conv3D()
+    elif m['type'] == 'maxpool1d':
+        l = layers.MaxPooling1D()
+
+    if "activation" in m:
+        l.activation = m['activation']
+
+    return l
+
+
 def buildModel(modelDef, fromFile = False, modelFolder=""):
     if fromFile:
         json_file = open(modelFolder + '/model.out', 'r')
