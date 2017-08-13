@@ -24,6 +24,8 @@ def createDataFolder():
         os.makedirs(basefolder + "__chatbot")
     if not os.path.exists(basefolder + "__text"):
         os.makedirs(basefolder + "__text")
+    if not os.path.exists(basefolder + "__vision/weights"):
+        os.makedirs(basefolder + "__vision/weights")
 
 createDataFolder()
 
