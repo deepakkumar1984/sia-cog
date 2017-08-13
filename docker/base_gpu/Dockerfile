@@ -5,9 +5,6 @@ RUN echo 'building GPU sia-cog image'
 MAINTAINER Deepak Battini "deepak.battini@siadroid.com"
 LABEL description="sia-cog cognitive and machine learning API / GPU version"
 
-RUN ln -sf /dev/stdout /var/log/siacog.log
-RUN ln -sf /dev/stderr /var/log/siacog.log
-
 RUN useradd -ms /bin/bash sia
 
 RUN apt-get update && apt-get install -y python-pip python-dev git cmake build-essential wget unzip
