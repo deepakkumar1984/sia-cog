@@ -7,8 +7,6 @@ LABEL description="sia-cog cognitive and machine learning API / CPU version"
 
 RUN apt-get update
 
-ENV KERAS_BACKEND=cntk
-
 WORKDIR /opt
 
 RUN git clone https://github.com/deepakkumar1984/sia-cog.git
