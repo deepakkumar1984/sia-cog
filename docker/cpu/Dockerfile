@@ -1,21 +1,11 @@
-FROM ubuntu:16.04
+FROM deepakkumarb/sia-cog_base:gpu
 
 RUN echo 'building CPU sia-cog image'
 
 MAINTAINER Deepak Battini "deepak.battini@siadroid.com"
 LABEL description="sia-cog cognitive and machine learning API / CPU version"
 
-RUN ln -sf /dev/stdout /var/log/siacog.log
-RUN ln -sf /dev/stderr /var/log/siacog.log
-
-RUN useradd -ms /bin/bash sia
-
-RUN apt-get update && apt-get install -y python-pip python-dev git cmake build-essential wget unzip
-RUN apt-get install -y libopencv-dev libssl-dev libffi-dev libfann-dev swig tesseract-ocr python-tk openmpi-bin
-RUN pip install setuptools Flask Cython Keras mxnet sklearn pandas matplotlib h5py pillow tinydb requests simplejson opencv-python jsonpickle pytesseract nltk chatterbot urllib urllib2 easydict padatious
-RUN pip install -e git+https://github.com/mycroftai/adapt#egg=adapt-parser
-RUN apt-get -y install openmpi-bin
-RUN pip install https://cntk.ai/PythonWheel/CPU-Only/cntk-2.1-cp27-cp27mu-linux_x86_64.whl
+RUN apt-get update
 
 ENV KERAS_BACKEND=cntk
 

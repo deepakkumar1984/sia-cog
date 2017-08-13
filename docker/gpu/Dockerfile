@@ -1,4 +1,11 @@
-FROM deepakkumarb/sia-cog_base_gpu
+FROM deepakkumarb/sia-cog_base:gpu
+
+RUN echo 'building CPU sia-cog image'
+
+MAINTAINER Deepak Battini "deepak.battini@siadroid.com"
+LABEL description="sia-cog cognitive and machine learning API / GPU version"
+
+RUN apt-get update
 
 WORKDIR /opt
 RUN git clone https://github.com/deepakkumar1984/sia-cog.git
