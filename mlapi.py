@@ -10,7 +10,7 @@ import werkzeug
 from flask import jsonify
 from flask import request
 
-from Interface import utility, DatasetTask, app
+from Interface import utility, app
 from ml import backgroundproc, pipeline
 
 @app.route('/api/ml/create', methods=['POST'])

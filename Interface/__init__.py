@@ -10,3 +10,4 @@ import visionapi
 import botapi
 import intentapi
 import siacogapi
+import views

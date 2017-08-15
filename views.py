@@ -6,14 +6,13 @@ from datetime import datetime
 from flask import render_template
 from flask import request
 from Interface import app
-from Interface import DataManager
 from Interface import DataAnalyzer
 import matplotlib.pyplot as plt
 
 @app.route('/', methods=['GET'])
 @app.route('/home', methods=['GET'])
 def home():
-    projects = DataManager.ListProjects()
+    projects = []
     return render_template(
         'index.html',
         title='My Projects',
@@ -23,7 +22,7 @@ def home():
 @app.route('/', methods=['POST'])
 @app.route('/home', methods=['POST'])
 def homepost():
-    projects = DataManager.ListProjects()
+    projects = []
     return render_template(
         'index.html',
         title='My Projects',
@@ -94,7 +93,7 @@ def datainsighthead(id):
 
 @app.route('/services', methods=['GET'])
 def services():
-    services = DataManager.ListServices("")
+    services = []
     result = [];
     for s in services:
         rec = {"name": s[1], "description": s[2], "project" : s[6], "servicename": s[5]}
