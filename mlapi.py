@@ -102,20 +102,6 @@ def upload(name):
 
     return jsonify({"statuscode": code, "message": message})
 
-@app.route('/api/ml/data/<name>', methods=['POST'])
-def datamgr(name):
-    message = "Success"
-    code = 200
-    result = []
-    try:
-        rjson = json.loads(request.data)
-        result = DatasetTask.invoke(name, rjson)
-    except Exception as e:
-        code = 500
-        message = str(e)
-
-    return result
-
 @app.route('/api/ml/pipeline/<name>', methods=['POST'])
 def pipeline(name):
     message = "Success"
