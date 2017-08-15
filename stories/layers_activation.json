@@ -1,0 +1,122 @@
+[
+  {
+    "name": "softmax",
+    "advance": false,
+    "desc": "The softmax function is often used in the final layer of a neural network-based classifier. Such networks are commonly trained under a log loss (or cross-entropy) regime, giving a non-linear variant of multinomial logistic regression."
+  },
+  {
+    "name": "elu",
+    "advance":  false,
+    "desc": ""
+  },
+  {
+    "name": "selu",
+    "advance":  false,
+    "desc": ""
+  },
+  {
+    "name": "softplus",
+    "advance":  false,
+    "desc": ""
+  },
+  {
+    "name": "softsign",
+    "advance":  false
+  },
+  {
+    "name": "relu",
+    "advance":  false,
+    "desc": ""
+  },
+  {
+    "name": "tanh",
+    "advance":  false,
+    "desc": ""
+  },
+  {
+    "name": "sigmoid",
+    "advance":  false,
+    "desc": ""
+  },
+  {
+    "name": "hard_sigmoid",
+    "advance":  false,
+    "desc": ""
+  },
+  {
+    "name": "linear",
+    "advance":  false,
+    "desc": "A straight line function where activation is proportional to input ( which is the weighted sum from neuron )."
+  },
+  {
+    "name": "LeakyReLU",
+    "advance":  true,
+    "desc": "Leaky version of a Rectified Linear Unit. It allows a small gradient when the unit is not active: f(x) = alpha * x for x < 0, f(x) = x for x >= 0.",
+    "params": [
+      {
+        "name": "alpha",
+        "type": "float",
+        "optional": true,
+        "default": 0.3,
+        "desc": "float >= 0. Negative slope coefficient."
+      }
+    ]
+  },
+  {
+    "name": "PReLU",
+    "advance":  true,
+    "desc": "Parametric Rectified Linear Unit. It follows: f(x) = alpha * x for x < 0, f(x) = x for x >= 0, where alpha is a learned array with the same shape as x.",
+    "params": [
+      {
+        "name": "alpha_initializer",
+        "type": "opt",
+        "optname": "initializers",
+        "optional": true,
+        "default": "zeros",
+        "desc": "initializer function for the weights."
+      },
+      {
+        "name": "alpha_regularizer",
+        "type": "opt",
+        "optname": "regularizers",
+        "optional": true,
+        "desc": "regularizer for the weights."
+      },
+      {
+        "name": "alpha_constraint",
+        "type": "opt",
+        "optname": "constraints",
+        "optional": true,
+        "desc": "constraint function for the weights."
+      }
+    ]
+  },
+  {
+    "name": "ELU-1",
+    "advance":  true,
+    "desc": "Exponential Linear Unit. It follows: f(x) =  alpha * (exp(x) - 1.) for x < 0, f(x) = x for x >= 0.",
+    "params": [
+      {
+        "name": "alpha",
+        "type": "float",
+        "optional": true,
+        "default": 1.0,
+        "desc": "scale for the negative factor."
+      }
+    ]
+  },
+  {
+    "name": "ThresholdedReLU",
+    "advance":  true,
+    "desc": "Thresholded Rectified Linear Unit. It follows: f(x) = x for x > theta, f(x) = 0 otherwise.",
+    "params": [
+      {
+        "name": "theta",
+        "type": "float",
+        "optional": true,
+        "default": 1.0,
+        "desc": "float >= 0. Threshold location of activation."
+      }
+    ]
+  }
+]

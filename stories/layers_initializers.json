@@ -1,0 +1,164 @@
+[
+  {
+    "name": "Initializer",
+    "desc": "Initializer base class: all initializers inherit from this class."
+  },
+  {
+    "name": "Zeros",
+    "desc": "Initializer that generates tensors initialized to 0."
+  },
+  {
+    "name": "Ones",
+    "desc": "Initializer that generates tensors initialized to 1."
+  },
+
+  {
+    "name": "Constant",
+    "desc": "Initializer that generates tensors initialized to a constant value.",
+    "params": [
+      {
+        "name": "value",
+        "type": "int",
+        "optional": true,
+        "default": 0
+      }
+    ]
+  },
+  {
+    "name": "RandomNormal",
+    "desc": "Initializer that generates tensors with a normal distribution.",
+    "params": [
+      {
+        "name": "mean",
+        "type": "float",
+        "optional": true,
+        "default": 0.0,
+        "desc": "a python scalar or a scalar tensor. Mean of the random values to generate."
+      },
+      {
+        "name": "stddev",
+        "type": "float",
+        "optional": true,
+        "default": 0.05,
+        "desc": "a python scalar or a scalar tensor. Standard deviation of the random values to generate."
+      }
+    ]
+  },
+  {
+    "name": "RandomUniform",
+    "desc": "Initializer that generates tensors with a uniform distribution.",
+    "params": [
+      {
+        "name": "minval",
+        "type": "float",
+        "optional": true,
+        "default": -0.05,
+        "desc": "A python scalar or a scalar tensor. Lower bound of the range of random values to generate."
+      },
+      {
+        "name": "maxval",
+        "type": "float",
+        "optional": true,
+        "default": 0.05,
+        "desc": "A python scalar or a scalar tensor. Upper bound of the range of random values to generate. Defaults to 1 for float types."
+      }
+    ]
+  },
+  {
+    "name": "TruncatedNormal",
+    "desc": "Initializer that generates a truncated normal distribution.",
+    "params": [
+      {
+        "name": "mean",
+        "type": "float",
+        "optional": true,
+        "default": 0.0,
+        "desc": "a python scalar or a scalar tensor. Mean of the random values to generate."
+      },
+      {
+        "name": "stddev",
+        "type": "float",
+        "optional": true,
+        "default": 0.05,
+        "desc": "a python scalar or a scalar tensor. Standard deviation of the random values to generate."
+      }
+    ]
+  },
+  {
+    "name": "VarianceScaling",
+    "desc": "Initializer capable of adapting its scale to the shape of weights.",
+    "params": [
+      {
+        "name": "scale",
+        "type": "float",
+        "optional": true,
+        "default": 1.0,
+        "desc": "Scaling factor (positive float)."
+      },
+      {
+        "name": "mode",
+        "type": "string",
+        "optional": true,
+        "default": "fan_in",
+        "desc": "One of \"fan_in\", \"fan_out\", \"fan_avg\"."
+      },
+      {
+        "name": "distribution",
+        "type": "string",
+        "optional": true,
+        "default": "normal",
+        "desc": "Random distribution to use. One of \"normal\", \"uniform\""
+      }
+    ]
+  },
+  {
+    "name": "Orthogonal",
+    "desc": "Initializer that generates a random orthogonal matrix.",
+    "params": [
+      {
+        "name": "gain",
+        "type": "float",
+        "optional": true,
+        "default": 1.0,
+        "desc": "Multiplicative factor to apply to the orthogonal matrix."
+      }
+    ]
+  },
+  {
+    "name": "Identity",
+    "desc": "Initializer that generates a random orthogonal matrix.",
+    "params": [
+      {
+        "name": "gain",
+        "type": "float",
+        "optional": true,
+        "default": 1.0,
+        "desc": "Multiplicative factor to apply to the identity matrix."
+      }
+    ]
+  },
+  {
+    "name": "lecun_uniform",
+    "desc": "LeCun uniform initializer. It draws samples from a uniform distribution within [-limit, limit] where limit is sqrt(3 / fan_in) where  fan_in is the number of input units in the weight tensor."
+  },
+  {
+    "name": "glorot_normal",
+    "desc": "Glorot normal initializer, also called Xavier normal initializer. It draws samples from a truncated normal distribution centered on 0 with  stddev = sqrt(2 / (fan_in + fan_out)) where fan_in is the number of input units in the weight tensor and  fan_out is the number of output units in the weight tensor."
+  },
+  {
+    "name": "glorot_uniform",
+    "desc": "Glorot uniform initializer, also called Xavier uniform initializer. It draws samples from a uniform distribution within [-limit, limit] where limit is sqrt(6 / (fan_in + fan_out)) where fan_in is the number of input units in the weight tensor and fan_out is the number of output units in the weight tensor."
+  },
+  {
+    "name": "he_normal",
+    "desc": "He normal initializer. It draws samples from a truncated normal distribution centered on 0 with stddev = sqrt(2 / fan_in) where  fan_in is the number of input units in the weight tensor."
+  },
+  {
+    "name": "lecun_normal",
+    "desc": "LeCun normal initializer. It draws samples from a truncated normal distribution centered on 0 with stddev = sqrt(1 / fan_in) where  fan_in is the number of input units in the weight tensor."
+  },
+  {
+    "name": "he_uniform",
+    "desc": "He uniform variance scaling initializer. It draws samples from a uniform distribution within [-limit, limit] where limit is sqrt(6 / fan_in) where  fan_in is the number of input units in the weight tensor."
+  },
+]

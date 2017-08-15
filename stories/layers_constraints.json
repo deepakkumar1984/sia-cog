@@ -1,0 +1,66 @@
+[
+  {
+    "name": "MaxNorm",
+    "desc": "",
+    "params": [
+      {
+        "name": "max_value",
+        "type": "int",
+        "optional": true,
+        "default": 2
+      },
+      {
+        "name": "axis",
+        "type": "int",
+        "optional": true,
+        "default": 0
+      }
+    ]
+  },
+  {
+    "name": "UnitNorm",
+    "desc": "",
+    "params": [
+      {
+        "name": "axis",
+        "type": "int",
+        "optional": true,
+        "default": 0
+      }
+    ]
+  },
+  {
+    "name": "NonNeg",
+    "desc": ""
+  },
+  {
+    "name": "MinMaxNorm",
+    "desc": "",
+    "params": [
+      {
+        "name": "min_value",
+        "type": "float",
+        "optional": true,
+        "default": 0.0
+      },
+      {
+        "name": "min_value",
+        "type": "float",
+        "optional": true,
+        "default": 0.0
+      },
+      {
+        "name": "rate",
+        "type": "float",
+        "optional": true,
+        "default": 1.0
+      },
+	  {
+        "name": "axis",
+        "type": "int",
+        "optional": true,
+        "default": 0
+      }
+    ]
+  }
+]
