@@ -5,6 +5,12 @@ This script runs the SiaWizard application using a development server.
 from os import environ
 from Interface import app
 
+import mlapi
+import visionapi
+import botapi
+import intentapi
+import siacogapi
+
 if __name__ == '__main__':
     HOST = environ.get('SERVER_HOST', '0.0.0.0')
 
