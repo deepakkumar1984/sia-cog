@@ -157,19 +157,11 @@ def downloadModel(modelType):
     if os.path.exists(saveFolder + filename):
         return
 
-    # Open the url
-    try:
-        f = urlopen(req)
-        print "downloading " + url
+    f = urlopen(req)
+    print("downloading " + url)
 
-        with open(saveFolder + filename, "wb") as local_file:
-            local_file.write(f.read())
-
-    # handle errors
-    except HTTPError, e:
-        print "HTTP Error:", e.code, url
-    except URLError, e:
-        print "URL Error:", e.reason, url
+    with open(saveFolder + filename, "wb") as local_file:
+        local_file.write(f.read())
 
 def loadModel(modelType, epoch, isgpu):
     downloadModel(modelType)
