@@ -3,8 +3,8 @@ import json
 import jsonpickle
 from Interface import dataanalyzer
 
-d = dataanalyzer.basic_info("housing", "train.csv")
-print(json.loads(d))
+d = dataanalyzer.plot("housing", "train.csv", "FacetPlot", x="crim", y="medv")
+print(d)
 #iris = sns.load_dataset("iris")
 #g = sns.PairGrid(iris)
 

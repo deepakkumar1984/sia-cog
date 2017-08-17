@@ -1,7 +1,7 @@
 from pandas import read_csv
 from pandas import set_option
 import matplotlib.pyplot as plt, mpld3
-import seaborn as sns; sns.set()
+from Interface import plotmgr
 import simplejson as json
 import jsonpickle
 
@@ -39,7 +39,8 @@ def basic_info(name, filename, columns=None, count = 5):
 
     return jsonpickle.encode(result, unpicklable=False)
 
-def plot(name, filename, method, x, y):
+def plot(name, filename, method, options=None, x = None, y = None, hue=None):
     df = loaddata(name, filename)
-    ax = sns.regplot(x=x, y=y, data=df)
-    ax.map(plt.scatter)
+    d = plotmgr.Axis_PairPlot(df)
+    print(d)
+
