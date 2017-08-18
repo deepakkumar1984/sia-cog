@@ -2,6 +2,7 @@ import platform
 import psutil
 import pynvml
 import jsonpickle
+import math
 def getSystemInfo():
     result = {"machine": platform.machine(),
               "platform": platform.platform(),
@@ -21,21 +22,25 @@ def getCPUUsage():
     return result
 
 def getGPUUsage():
-    pynvml.nvmlInit()
-    count = pynvml.nvmlDeviceGetCount()
-    if count == 0:
-        return None
+    try:
+        pynvml.nvmlInit()
+        count = pynvml.nvmlDeviceGetCount()
+        if count == 0:
+            return None
 
-    result = {"driver": pynvml.nvmlSystemGetDriverVersion(),
-              "gpu_count": count
-              }
-    i = 0
-    gpuData = []
-    while i<count:
-        handle = pynvml.nvmlDeviceGetHandleByIndex(i)
-        mem = pynvml.nvmlDeviceGetMemoryInfo(handle)
-        gpuData.append({"device_num": i, "mem_usage": mem})
-        i = i+1
+        result = {"driver": pynvml.nvmlSystemGetDriverVersion(),
+                  "gpu_count": int(count)
+                  }
+        i = 0
+        gpuData = []
+        while i<count:
+            handle = pynvml.nvmlDeviceGetHandleByIndex(i)
+            mem = pynvml.nvmlDeviceGetMemoryInfo(handle)
+            gpuData.append({"device_num": i, "total": round(float(mem.total)/1000000000, 2), "used": round(float(mem.used)/1000000000, 2)})
+            i = i+1
 
-    result["devices"] = jsonpickle.encode(gpuData, unpicklable=False)
+        result["devices"] = jsonpickle.encode(gpuData, unpicklable=False)
+    except Exception as e:
+        result = None
+
     return result
