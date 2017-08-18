@@ -41,6 +41,6 @@ def basic_info(name, filename, columns=None, count = 5):
 
 def plot(name, filename, method, options=None, x = None, y = None, hue=None):
     df = loaddata(name, filename)
-    d = plotmgr.Axis_PairPlot(df)
+    d = plotmgr.Reg_RegPlot(df, x, y)
     print(d)
 
