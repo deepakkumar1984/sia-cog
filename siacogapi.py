@@ -5,9 +5,9 @@ Routes and views for the flask application.
 import os
 import simplejson as json
 import jsonpickle
-from flask import jsonify
+from flask import jsonify, request
 
-from Interface import utility, app
+from Interface import utility, app, dataanalyzer
 
 @app.route('/api/status', methods=['GET'])
 def apistatus():
@@ -57,3 +57,51 @@ def apilist(name):
         message = str(e)
 
     return jsonify({"statuscode": code, "message": message, "result": json.loads(jsonpickle.encode(result, unpicklable=False))})
+
+@app.route('/api/data/info', methods=['POST'])
+def databasicinfo():
+    message = "Success"
+    code = 200
+    try:
+        rjson = request.json
+
+        if not "name" in rjson:
+            raise Exception("Please provide name of the service")
+
+        if not "filename" in rjson:
+            raise Exception("Please provide filename")
+
+        columns = None
+        count = 5
+        if "columns" in rjson:
+            columns = rjson["columns"]
+
+        if "count" in rjson:
+            count = rjson["count"]
+
+        result = dataanalyzer.basic_info(rjson["name"], rjson["filename"], columns, count)
+
+    except Exception as e:
+        message = str(e)
+        code = 500
+    return jsonify({"statuscode": code, "message": message, "result": result})
+
+@app.route('/api/data/plot', methods=['POST'])
+def dataplot():
+    message = "Success"
+    code = 200
+    try:
+        rjson = request.json
+        result = []
+        utility.validateParam(rjson, "name")
+        utility.validateParam(rjson, "filename")
+        utility.validateParam(rjson, "method")
+        options = utility.getVal(rjson, "options")
+        result = dataanalyzer.plot(rjson["name"], rjson["filename"], rjson["method"], options)
+
+    except Exception as e:
+        message = str(e)
+        code = 500
+    return jsonify({"statuscode": code, "message": message, "result": result})
+
+

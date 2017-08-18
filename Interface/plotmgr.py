@@ -5,7 +5,7 @@ import seaborn as sns; sns.set()
 import simplejson as json
 import jsonpickle
 
-def Axis_FactorPlot(data, x, y=None, row=None, col=None, hue=None, kind=None):
+def Axis_FactorPlot(data, x, y=None, hue=None, row=None, col=None, kind="point"):
     sns.set(style="ticks")
     ax = sns.factorplot(x=x, y=y, hue=hue, data=data, kind=kind, row=row, col=col)
     d = mpld3.fig_to_dict(ax.fig)
@@ -27,7 +27,6 @@ def Axis_JointPlot(data, x, y, kind="scatter"):
     g = sns.jointplot(x, y, data, kind)
     d = mpld3.fig_to_dict(g.fig)
     return d
-
 
 def Cat_StripPlot(data, x, y, hue=None, jitter=False):
     sns.set_style("whitegrid")

@@ -186,8 +186,8 @@ def data_featureselection(X, Y, pipeline):
     return X, Y, result
 
 def data_getfeatures(X, Y, result, pipeline):
-    method = pipeline['method']
-    transform = pipeline['transform']
+    method = pipeline["options"]['method']
+    transform = pipeline["options"]['transform']
     result = json.loads(result)
     names = result["features"]
     if transform is True:

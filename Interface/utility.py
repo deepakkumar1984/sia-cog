@@ -46,4 +46,15 @@ def updateModelResetCache(name, flag):
     modeljson['reset_cache'] = flag
     json_string = json.dumps(modeljson)
     saveFileData(modelfile, json_string)
+
+def getVal(json, param, default=None):
+    ret = default
+    if param in json:
+        ret = json[param]
+
+    return  ret
+
+def validateParam(json, param):
+    if not param in json:
+        raise Exception(param + " is required.")
     

@@ -1,9 +1,10 @@
 
 import json
 import jsonpickle
-from Interface import dataanalyzer
+from Interface import dataanalyzer, sysinfo
 
-d = dataanalyzer.plot("housing", "train.csv", "FacetPlot", x="crim", y="medv")
+#d = dataanalyzer.plot("housing", "train.csv", "FacetPlot", x="crim", y="medv")
+d = sysinfo.getGPUUsage()
 print(d)
 #iris = sns.load_dataset("iris")
 #g = sns.PairGrid(iris)
