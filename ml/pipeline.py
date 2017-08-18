@@ -30,8 +30,7 @@ def init(self, srvname, model_type):
 
 def getPipelineData():
     pipelineFile = pipelinecomponents.projectfolder + '/pipeline.json'
-    pipelinedata = utility.getFileData(pipelineFile)
-    pipelinejson = json.loads(pipelinedata)
+    pipelinejson = utility.getJsonData(pipelineFile)
     return pipelinejson
 
 def Run():
@@ -83,8 +82,7 @@ def Run():
 def Predict(filename, savePrediction = False):
     pipelinecomponents.init(pipelinecomponents, srvname, model_type)
     pipelinefile = pipelinecomponents.projectfolder + '/pipeline.json'
-    pipelinedata = utility.getFileData(pipelinefile)
-    pipelinejson = json.loads(pipelinedata)
+    pipelinejson = utility.getJsonData(pipelinefile)
     resultset = {}
     initialX = []
     predType = "csv"
@@ -171,8 +169,8 @@ def ContinueTraining(epoches=32, batch_size=32):
     pipelinecomponents.init(pipelinecomponents, srvname, model_type)
     pipelineFile = pipelinecomponents.projectfolder + '/pipeline.json'
     pickleFile = pipelinecomponents.projectfolder + '/pipeline.out'
-    pipelinedata = utility.getFileData(pipelineFile)
-    pipelinejson = json.loads(pipelinedata)
+    pipelinejson = utility.getJsonData(pipelineFile)
+
     resultset = {}
     for p in pipelinejson:
         name = p['name']

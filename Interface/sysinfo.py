@@ -17,8 +17,6 @@ def getCPUUsage():
     result = {"cpu_usage": psutil.cpu_percent(True),
               "mem_usage": psutil.virtual_memory().percent}
 
-    pynvml.nvmlInit()
-    pynvml.nvmlSystemGetDriverVersion()
     return result
 
 def getGPUUsage():
@@ -36,11 +34,11 @@ def getGPUUsage():
         while i<count:
             handle = pynvml.nvmlDeviceGetHandleByIndex(i)
             mem = pynvml.nvmlDeviceGetMemoryInfo(handle)
-            gpuData.append({"device_num": i, "total": round(float(mem.total)/1000000000, 2), "used": round(float(mem.used)/1000000000, 2)})
+            gpuData.append({"device_num": i, "name": pynvml.nvmlDeviceGetName(handle), "total": round(float(mem.total)/1000000000, 2), "used": round(float(mem.used)/1000000000, 2)})
             i = i+1
 
         result["devices"] = jsonpickle.encode(gpuData, unpicklable=False)
     except Exception as e:
-        result = None
+        result = {"driver": "No GPU found!", "gpu_count": 0, "devices": []}
 
     return result

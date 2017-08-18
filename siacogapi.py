@@ -7,7 +7,7 @@ import simplejson as json
 import jsonpickle
 from flask import jsonify, request
 
-from Interface import utility, app, dataanalyzer
+from Interface import utility, app, dataanalyzer, sysinfo
 
 @app.route('/api/status', methods=['GET'])
 def apistatus():
@@ -15,6 +15,24 @@ def apistatus():
     code = 200
 
     return jsonify({"statuscode": code, "message": message})
+
+@app.route('/api/server/<infotype>', methods=['GET'])
+def systeminfo(infotype):
+    message = "Success"
+    code = 200
+    try:
+        result = {}
+        if infotype == "info":
+            result = sysinfo.getSystemInfo()
+        elif infotype == "cpu":
+            result = sysinfo.getCPUUsage()
+        elif infotype == "gpu":
+            result = sysinfo.getGPUUsage()
+    except Exception as e:
+        message = str(e)
+        code = 500
+
+    return jsonify({"statuscode": code, "message": message, "result": result})
 
 @app.route('/api/list/<name>', methods=['GET'])
 def apilist(name):
