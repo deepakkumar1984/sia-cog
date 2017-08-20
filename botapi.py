@@ -8,8 +8,8 @@ import shutil
 import simplejson as json
 from flask import jsonify
 from flask import request
-
-from Interface import app, utility
+from datetime import datetime
+from Interface import app, utility, dbutility
 from bot import chatbot
 
 
@@ -87,12 +87,15 @@ def botpredict(name):
     message = "Success"
     code = 200
     try:
+        start = datetime.now()
         rjson = json.loads(request.json)
         name = rjson["name"]
         data = rjson["data"]
         result = chatbot.predict(name, data)
+        dbutility.logCalls(name, start, datetime.now())
     except Exception as e:
         code = 500
         message = str(e)
+        dbutility.logCalls(name, start, datetime.now(), False, message)
 
     return jsonify({"statuscode": code, "message": message, "result": result})

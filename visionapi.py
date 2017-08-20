@@ -8,8 +8,8 @@ import shutil
 import simplejson as json
 from flask import jsonify
 from flask import request
-
-from Interface import app, utility
+from datetime import datetime
+from Interface import app, utility, dbutility
 from vis import objcls, objdet, cvmgr
 
 
@@ -81,6 +81,7 @@ def visionpredict(name):
     message = "Success"
     code = 200
     try:
+        start = datetime.now()
         data = request.get_json()
         directory = "./data/__vision"
         file = directory + "/" + name + ".json"
@@ -107,9 +108,11 @@ def visionpredict(name):
                 preprocess = servicejson["options"]["preprocess"]
 
             result = cvmgr.extracttext(imagepath, preprocess)
+        dbutility.logCalls(name, start, datetime.now())
     except Exception as e:
         code = 500
         message = str(e)
+        dbutility.logCalls(name, start, datetime.now(), False, message)
 
     return jsonify({"statuscode": code, "message": message, "result": result})
 

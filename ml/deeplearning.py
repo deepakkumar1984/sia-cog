@@ -1,21 +1,49 @@
 import numpy
-import keras
-import json
-import datetime
-import os
-import csv
 import pandas
-from pandas import read_csv
-from Interface import utility
+from keras import callbacks
 from keras.models import Sequential, model_from_json
 from keras import layers
-from keras.wrappers.scikit_learn import KerasRegressor, KerasClassifier
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import KFold
-from sklearn import preprocessing
-from tinydb import TinyDB, Query
+from Interface import dbutility, app
+import os
 
 modellist = []
+name = ""
+
+def init(self, name):
+    self.name = name
+
+class Histories(callbacks.Callback):
+    def on_train_begin(self, logs={}):
+        app.trainingstatus = 1
+        dbpath = "./data/training_db.json"
+        if os.path.exists(dbpath):
+            os.remove(dbpath)
+        self.losses = []
+
+    def on_train_end(self, logs={}):
+        app.trainingstatus = 0
+        return
+
+    def on_epoch_begin(self, epoch, logs={}):
+        return
+
+    def on_epoch_end(self, epoch, logs={}):
+        try:
+            list = {}
+            for m in logs:
+                list[m] = logs[m]
+
+            dbutility.logDeepTraining("mlp", name, epoch, logs.get("loss"), list)
+        except Exception as e:
+            app.trainingstatus = 0
+            raise e
+        return
+
+    def on_batch_begin(self, batch, logs={}):
+        return
+
+    def on_batch_end(self, batch, logs={}):
+        return
 
 def getLayer(m):
     l = layers.Dense()
@@ -34,7 +62,6 @@ def getLayer(m):
         l.activation = m['activation']
 
     return l
-
 
 def buildModel(modelDef, fromFile = False, modelFolder=""):
     if fromFile:
@@ -66,10 +93,11 @@ def Train(model, X, Y, weightpath, epoch=32, batch_size=32, validation_split = N
 
     seed = 7
     numpy.random.RandomState(seed)
+    hist = Histories()
     if validation_split is None:
-        hist = model.fit(X, Y, epochs=epoch, batch_size=batch_size, verbose=1)
+        hist = model.fit(X, Y, epochs=epoch, batch_size=batch_size, verbose=1, callbacks=[hist])
     else:
-        hist = model.fit(X, Y, validation_split=validation_split, epochs=epoch, batch_size=batch_size, verbose=1)
+        hist = model.fit(X, Y, validation_split=validation_split, epochs=epoch, batch_size=batch_size, verbose=1, callbacks=[hist])
 
     model.save_weights(weightpath)
     return hist.history

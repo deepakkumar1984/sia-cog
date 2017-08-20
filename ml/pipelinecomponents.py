@@ -19,11 +19,12 @@ from ml import scikitlearn, deeplearning
 
 projectfolder = ""
 model_type = ""
-
+name = ""
 optionslist = {}
 
 def init(self, name, modeltype):
     self.projectfolder = "./data/" + name
+    self.name = name
     self.model_type = modeltype
 
 def addOption(options):
@@ -269,7 +270,7 @@ def model_train(model, X, Y, pipeline, more = False):
         if more == "true":
             if os.path.exists(weightpath):
                 modelObj.load_weights(weightpath)
-
+        deeplearning.init(deeplearning, name)
         result = deeplearning.Train(modelObj, X, Y, weightpath, epoches, batch_size)
         picklefile = projectfolder + "/model.json"
         model_json = modelObj.to_json()

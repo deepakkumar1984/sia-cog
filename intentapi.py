@@ -6,8 +6,8 @@ import jsonpickle
 import simplejson as json
 from flask import jsonify
 from flask import request
-
-from Interface import app
+from datetime import datetime
+from Interface import app, dbutility
 from langintent import intentanalyzer
 import shutil
 import os
@@ -98,10 +98,12 @@ def predictint():
     code = 200
     result = []
     try:
+        start = datetime.now()
         data = request.args.get('data')
         print(data)
         result = intentanalyzer.predict(data)
         result = json.loads(jsonpickle.encode(result, unpicklable=False))
+        dbutility.logCalls("intent", )
     except Exception as e:
         code = 500
         message = str(e)

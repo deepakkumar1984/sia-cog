@@ -6,9 +6,9 @@ from os import environ
 from Interface import app
 
 import mlapi
-#import visionapi
+import visionapi
 import botapi
-#import intentapi
+import intentapi
 import siacogapi
 
 if __name__ == '__main__':
@@ -16,7 +16,8 @@ if __name__ == '__main__':
 
     try:
         #app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 1024
-        PORT = int(environ.get('SERVER_PORT', '5555'))
+        PORT = int(environ.get('SERVER_PORT', '1000'))
     except ValueError:
         PORT = 80
-    app.run(HOST, PORT)
+    app.run(HOST, PORT, threaded=True)
+

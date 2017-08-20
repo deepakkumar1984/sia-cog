@@ -4,13 +4,13 @@ Routes and views for the flask application.
 
 import os
 import shutil
-
+from datetime import datetime
 import simplejson as json
 import werkzeug
-from flask import jsonify
+from flask import jsonify, sessions
 from flask import request
 
-from Interface import utility, app
+from Interface import utility, app, dbutility
 from ml import backgroundproc, pipeline
 
 @app.route('/api/ml/create', methods=['POST'])
@@ -107,6 +107,7 @@ def pipeline(name):
     message = "Success"
     code = 200
     try:
+
         directory = "./data/" + name
         file = directory + "/pipeline.json"
 
@@ -125,8 +126,15 @@ def evaluate(name):
     message = ""
     code = 200
     try:
-        taskid = backgroundproc.StartValidateThread(name)
-        message = "Job started! Please check status for id: " + taskid
+        taskid = ""
+        trainingstatus = app.trainingstatus
+
+        if trainingstatus == 1:
+            message = "Training in progress! Please try after the current training is completed."
+            code = 500
+        else:
+            taskid = backgroundproc.StartValidateThread(name)
+            message = "Job started! Please check status for id: " + taskid
     except Exception as e:
         code = 500
         message = str(e)
@@ -139,16 +147,21 @@ def train(name):
     code = 200
     try:
         data = json.loads(request.data)
-        directory = "./data/" + name
         epoches = 32
         batch_size = 32
+        taskid = ""
         if "epoches" in data:
             epoches = data['epoches']
         if "batch_size" in data:
             batch_size = data['batch_size']
+        trainingstatus = app.trainingstatus
 
-        taskid = backgroundproc.StartTrainThread(name, epoches, batch_size)
-        message = "Job started! Please check status for id: " + taskid
+        if trainingstatus == 1:
+            message = "Training in progress! Please try after the current training is completed."
+            code = 500
+        else:
+            taskid = backgroundproc.StartTrainThread(name, epoches, batch_size)
+            message = "Job started! Please check status for id: " + taskid
     except Exception as e:
         code = 500
         message = str(e)
@@ -173,6 +186,7 @@ def predict(name):
     message = "Success"
     code = 200
     try:
+        start = datetime.now()
         data = json.loads(request.data)
         servicedata = utility.getFileData("./data/" + name + "/service.json")
         servicejson = json.loads(servicedata)
@@ -193,8 +207,12 @@ def predict(name):
             result = predictions["0"]
         else:
             result = predictions
+
+        end = datetime.now()
+        dbutility.logCalls(name, start, end)
     except Exception as e:
         code = 500
         message = str(e)
+        dbutility.logCalls(name, start, end, False, message)
 
     return jsonify({"statuscode": code, "message": message, "result": result})
