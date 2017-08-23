@@ -68,7 +68,7 @@ def visiondelete(name):
             code = 1001
             message = "Service does not exists!"
         else:
-            shutil.rmtree(directory)
+            os.remove(file)
 
     except Exception as e:
         code = 500

@@ -24,5 +24,5 @@ RUN chown -R sia:sia /opt/sia-cog
 USER sia
 WORKDIR /opt/sia-cog
 CMD python runserver.py
-EXPOSE 1000
+EXPOSE 5555
 
