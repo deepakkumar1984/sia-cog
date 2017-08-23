@@ -45,23 +45,22 @@ class Histories(callbacks.Callback):
     def on_batch_end(self, batch, logs={}):
         return
 
-def getLayer(m):
-    l = layers.Dense()
-    if m['type'] == 'dense':
-        l = layers.Dense()
-    elif m['type'] == 'conv1d':
-        l = layers.Conv1D()
-    elif m['type'] == 'conv2d':
-        l = layers.Conv2D()
-    elif m['type'] == 'conv3d':
-        l = layers.Conv3D()
-    elif m['type'] == 'maxpool1d':
-        l = layers.MaxPooling1D()
+def createModel(modelDef):
+    model = Sequential()
+    for item in modelDef:
+        layerName = item["name"]
+        module = eval("keras.layers.core")
+        func = getattr(module, layerName)
+        args = {}
+        for p in item:
+            if p == "name":
+                continue
+            args[p] = item[p]
 
-    if "activation" in m:
-        l.activation = m['activation']
+        layer = func(**args)
+        model.add(layer)
 
-    return l
+    return model
 
 def buildModel(modelDef, fromFile = False, modelFolder=""):
     if fromFile:

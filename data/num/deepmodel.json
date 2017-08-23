@@ -1,0 +1,6 @@
+[
+  {"name": "Dense", "units": 20, "input_dim": 13, "activation": "relu"},
+  {"name": "Dense", "units": 20, "activation": "relu"},
+  {"name": "Dropout", "rate": 0.5},
+  {"name": "Dense", "units": 1}
+]
