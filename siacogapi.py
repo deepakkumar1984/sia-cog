@@ -6,8 +6,9 @@ import os
 import simplejson as json
 import jsonpickle
 from flask import jsonify, request
-
-from Interface import utility, app, dataanalyzer, sysinfo
+from datetime import datetime
+from dateutil import parser
+from Interface import utility, app, dataanalyzer, sysinfo, dbutility
 
 @app.route('/api/status', methods=['GET'])
 def apistatus():
@@ -123,3 +124,27 @@ def dataplot():
     return jsonify({"statuscode": code, "message": message, "result": result})
 
 
+@app.route('/api/logs/pred', methods=['POST'])
+def predlogs():
+    message = "Success"
+    code = 200
+    try:
+        rjson = request.json
+        result = []
+        utility.validateParam(rjson, "category")
+        utility.validateParam(rjson, "servicename")
+        utility.validateParam(rjson, "status")
+        utility.validateParam(rjson, "start")
+        utility.validateParam(rjson, "end")
+        start = parser.parse(rjson["start"] + " 00:00")
+        end = parser.parse(rjson["end"] + " 23:59");
+        success = True
+        if rjson["status"] == "Error":
+            success = False
+
+        result = dbutility.getPredLogs(rjson["category"], rjson["servicename"], start, end, success)
+
+    except Exception as e:
+        message = str(e)
+        code = 500
+    return jsonify({"statuscode": code, "message": message, "result": result})

@@ -11,14 +11,14 @@ class DateTimeSerializer(Serializer):
     def decode(self, s):
         return datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%S')
 
-def getPredLogs(cat, srvname, success = True, filterDays = 7):
+def getPredLogs(cat, srvname, start, end, success = True):
     serialization = SerializationMiddleware()
     serialization.register_serializer(DateTimeSerializer(), 'TinyDate')
     dbpath = "./data/predlogs_db.json"
     db = TinyDB(dbpath, storage=serialization)
     log = Query()
-    filterDate = datetime.datetime.now() - datetime.timedelta(days=filterDays)
-    return db.search((log.cat == cat)& (log.name == srvname) & (log.success == success) & (log.createdon >= filterDate))
+
+    return db.search((log.cat == cat)& (log.name == srvname) & (log.success == success) & (log.createdon >= start) & (log.createdon <= end))
 
 def getPredCount(cat, srvname, filterDays = 7):
     serialization = SerializationMiddleware()
