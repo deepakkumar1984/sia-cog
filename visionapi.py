@@ -82,7 +82,7 @@ def visionpredict(name):
     code = 200
     try:
         start = datetime.now()
-        data = request.get_json()
+        data = request.json
         directory = "./data/__vision"
         file = directory + "/" + name + ".json"
         servicejson = utility.getJsonData(file)
@@ -108,11 +108,11 @@ def visionpredict(name):
                 preprocess = servicejson["options"]["preprocess"]
 
             result = cvmgr.extracttext(imagepath, preprocess)
-        dbutility.logCalls(name, start, datetime.now())
+        dbutility.logCalls("vision", name, start, datetime.now())
     except Exception as e:
         code = 500
         message = str(e)
-        dbutility.logCalls(name, start, datetime.now(), False, message)
+        dbutility.logCalls("vision", name, start, datetime.now(), False, message)
 
     return jsonify({"statuscode": code, "message": message, "result": result})
 

@@ -1,0 +1,1 @@
+{"servicename": "objcls", "type": "cls", "name": "objcls", "options": {"target_size_y": 224, "target_size_x": 224, "model": "ResNet50"}}

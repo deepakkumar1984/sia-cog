@@ -6,9 +6,9 @@ from os import environ
 from Interface import app
 
 import mlapi
-#import visionapi
+import visionapi
 import botapi
-#import intentapi
+import intentapi
 import siacogapi
 
 if __name__ == '__main__':

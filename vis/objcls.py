@@ -1,10 +1,7 @@
 from keras import applications
 from keras.preprocessing import image
-from keras.models import Model
-from keras.layers import Dense, Input
-from keras import backend as K
+from keras.layers import Input
 import numpy as np
-from Interface import utility
 import requests
 from io import BytesIO
 from PIL import Image

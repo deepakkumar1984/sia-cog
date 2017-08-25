@@ -3,6 +3,10 @@ import os
 import cv2
 import mxnet as mx
 import numpy as np
+import requests
+import urllib
+from PIL import Image
+from io import BytesIO
 from vis.rcnn.logger import logger
 from vis.rcnn.config import config
 from vis.rcnn.symbol import get_vgg_test, get_vgg_rpn_test, get_resnet_test
@@ -179,8 +183,15 @@ def loadModel(modelType, epoch, isgpu):
     return predictor
 
 def predict(imagePath, predictor):
-    assert os.path.exists(imagePath), imagePath + ' not found'
-    im = cv2.imread(imagePath)
+    if imagePath.startswith('http://') or imagePath.startswith('https://') or imagePath.startswith('ftp://'):
+        req = urllib.urlopen(imagePath)
+        arr = np.asarray(bytearray(req.read()), dtype=np.uint8)
+        im = cv2.imdecode(arr, -1)
+    else:
+        if not os.path.exists(imagePath):
+            raise Exception('Input image file does not exist')
+        im = cv2.imread(imagePath)
+
     data_batch, data_names, im_scale = generate_batch(im)
     scores, boxes, data_dict = im_detect(predictor, data_batch, data_names, im_scale)
     all_boxes = [[] for _ in CLASSES]

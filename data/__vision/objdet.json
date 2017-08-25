@@ -1,0 +1,1 @@
+{"servicename": "objdet", "type": "det", "name": "object detection", "options": {"gpu": false, "model": "resnet"}}
