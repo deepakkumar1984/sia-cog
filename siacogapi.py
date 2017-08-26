@@ -137,7 +137,7 @@ def predlogs():
         utility.validateParam(rjson, "start")
         utility.validateParam(rjson, "end")
         start = parser.parse(rjson["start"] + " 00:00")
-        end = parser.parse(rjson["end"] + " 23:59");
+        end = parser.parse(rjson["end"] + " 23:59")
         success = True
         if rjson["status"] == "Error":
             success = False
