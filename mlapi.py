@@ -102,6 +102,26 @@ def upload(name):
 
     return jsonify({"statuscode": code, "message": message})
 
+
+@app.route('/api/ml/files/<name>', methods=['GET'])
+def getfiles(name):
+    message = "Success"
+    code = 200
+    result = []
+    try:
+        dataset_folder = "./data/" + name + "/dataset/"
+        if not os.path.exists(dataset_folder):
+            os.makedirs(dataset_folder)
+
+        files = os.listdir(dataset_folder)
+        for f in files:
+            result.append(f)
+    except Exception as e:
+        code = 500
+        message = str(e)
+
+    return jsonify({"statuscode": code, "message": message, "result": result})
+
 @app.route('/api/ml/pipeline/<name>', methods=['POST'])
 def pipeline(name):
     message = "Success"
