@@ -26,7 +26,7 @@ def basic_info(name, filename, columns=None, count = 5):
     result["attr_corr"] = df.corr(method='pearson').to_html()
     result["skew"] = json.loads(df.skew().to_json())
 
-    return jsonpickle.encode(result, unpicklable=False)
+    return result
 
 def plot(name, filename, method, options=None):
     df = loaddata(name, filename)

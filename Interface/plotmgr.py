@@ -1,9 +1,5 @@
-from pandas import read_csv
-from pandas import set_option
-import matplotlib.pyplot as plt, mpld3
+import mpld3
 import seaborn as sns; sns.set()
-import simplejson as json
-import jsonpickle
 
 def Axis_FactorPlot(data, x, y=None, hue=None, row=None, col=None, kind="point"):
     sns.set(style="ticks")

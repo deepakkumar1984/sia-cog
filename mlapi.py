@@ -122,6 +122,22 @@ def getfiles(name):
 
     return jsonify({"statuscode": code, "message": message, "result": result})
 
+@app.route('/api/ml/delfile/<name>', methods=['POST'])
+def delfile(name):
+    message = "Success"
+    code = 200
+    try:
+        dataset_folder = "./data/" + name + "/dataset/"
+        if not os.path.exists(dataset_folder):
+            os.makedirs(dataset_folder)
+        filename = request.json["filename"]
+        os.remove(dataset_folder + filename)
+    except Exception as e:
+        code = 500
+        message = str(e)
+
+    return jsonify({"statuscode": code, "message": message})
+
 @app.route('/api/ml/pipeline/<name>', methods=['POST'])
 def pipeline(name):
     message = "Success"

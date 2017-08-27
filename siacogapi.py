@@ -81,6 +81,7 @@ def apilist(name):
 def databasicinfo():
     message = "Success"
     code = 200
+    result = []
     try:
         rjson = request.json
 
