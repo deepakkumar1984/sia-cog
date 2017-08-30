@@ -1,3 +1,5 @@
+import matplotlib.pyplot as p;
+p.switch_backend("SVG")
 import mpld3
 import seaborn as sns; sns.set()
 
@@ -11,10 +13,11 @@ def Axis_LMPlot(data, x, y=None, hue=None):
     sns.set(color_codes=True)
     ax = sns.lmplot(x=x, y=y, hue=hue, data=data)
     d = mpld3.fig_to_dict(ax.fig)
+
     return d
 
-def Axis_PairPlot(data, hue=None):
-    g = sns.pairplot(data, hue=hue)
+def Axis_PairPlot(data, vars=None, hue=None):
+    g = sns.pairplot(data, hue=hue, vars=vars)
     d = mpld3.fig_to_dict(g.fig)
     return d
 

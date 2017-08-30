@@ -42,7 +42,7 @@ def plot(name, filename, method, options=None):
         utility.validateParam(options, "y")
         d = plotmgr.Axis_LMPlot(df, options["x"], options["y"], utility.getVal(options, "hue"))
     elif method == "pair":
-        d = plotmgr.Axis_PairPlot(df, utility.getVal(options, "hue"))
+        d = plotmgr.Axis_PairPlot(df, utility.getVal(options, "vars"), utility.getVal(options, "hue"))
     elif method == "joint":
         utility.validateParam(options, "x")
         utility.validateParam(options, "y")
