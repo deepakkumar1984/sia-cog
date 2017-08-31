@@ -90,6 +90,16 @@ def saveUtter(intetName, utter):
     with open(utterpath, "wb") as f:
         f.write(utter)
 
+def getUtter(intetName):
+    res = []
+    utterpath = "./data/__intent/utter/" + intetName + ".intent"
+    if not os.path.exists("./data/__intent/utter/"):
+        os.makedirs("./data/__intent/utter")
+
+    with open(utterpath, "rb") as f:
+        res = f.readlines()
+    return res
+
 def getEntityRecords(name = ""):
     name = name.lower()
     Entity = Query()
@@ -109,7 +119,7 @@ def getIntentRecords(name=""):
         result = intent_db.all()
     else:
         result = intent_db.get(Intent.name == name)
-
+        result.utter = getUtter(name)
     return result
 
 def deleteEntity(name):
