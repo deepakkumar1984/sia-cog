@@ -25,6 +25,7 @@ def Axis_JointPlot(data, x, y, kind="scatter"):
     sns.set(style="white", color_codes=True)
     g = sns.jointplot(x, y, data, kind)
     d = mpld3.fig_to_dict(g.fig)
+
     return d
 
 def Cat_StripPlot(data, x, y, hue=None, jitter=False):

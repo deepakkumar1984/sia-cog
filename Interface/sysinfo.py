@@ -39,6 +39,6 @@ def getGPUUsage():
 
         result["devices"] = jsonpickle.encode(gpuData, unpicklable=False)
     except Exception as e:
-        result = {"driver": "No GPU found!", "gpu_count": 0, "devices": []}
+        result = {"driver": "No GPU!", "gpu_count": 0, "devices": []}
 
     return result
