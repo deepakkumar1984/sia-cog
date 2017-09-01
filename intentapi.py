@@ -40,7 +40,7 @@ def defineintobjects(objtype):
 
     return jsonify({"statuscode": code, "message": message})
 
-@app.route('/api/int/delete/<type>', methods=['POST'])
+@app.route('/api/int/delete/<objtype>', methods=['POST'])
 def deleteintobjects(objtype):
     message = "Success"
     code = 200
@@ -100,12 +100,12 @@ def predictint():
     try:
         start = datetime.now()
         data = request.args.get('data')
-        print(data)
         result = intentanalyzer.predict(data)
         result = json.loads(jsonpickle.encode(result, unpicklable=False))
-        dbutility.logCalls("intent", )
+        dbutility.logCalls("intent", "intent", start, datetime.now())
     except Exception as e:
         code = 500
         message = str(e)
+        dbutility.logCalls("intent", "intent", start, datetime.now(), False, message)
 
     return jsonify({"statuscode": code, "message": message, "result": result})

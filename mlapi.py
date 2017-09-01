@@ -245,10 +245,10 @@ def predict(name):
             result = predictions
 
         end = datetime.now()
-        dbutility.logCalls(name, start, end)
+        dbutility.logCalls("ml", name, start, end)
     except Exception as e:
         code = 500
         message = str(e)
-        dbutility.logCalls(name, start, end, False, message)
+        dbutility.logCalls("ml", name, start, end, False, message)
 
     return jsonify({"statuscode": code, "message": message, "result": result})

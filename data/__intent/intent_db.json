@@ -1,1 +1,1 @@
-{"_default": {}}
+{"_default":{"2":{"optional_entities":["location"],"name":"weatherintent","required_entities":["weather"]},"3":{"optional_entities":[],"name":"getstatus","required_entities":[]}}}

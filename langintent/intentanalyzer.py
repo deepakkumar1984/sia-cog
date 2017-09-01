@@ -51,7 +51,11 @@ def saveEntity(entityName, keywords):
 
         list.append(k.lower())
 
-    entity_db.update({"keywords": list}, q.name == entityName)
+    entity = entity_db.get(q.name == entityName)
+    if not entity is None:
+        entity_db.update({"keywords": list}, q.name == entityName)
+    else:
+        entity_db.insert({"name": entityName, "keywords": list})
 
 def saveIntent(intentName, required_entities, optional_entities):
     intentName = intentName.lower()
@@ -80,24 +84,27 @@ def saveIntent(intentName, required_entities, optional_entities):
         olist.append(k.lower())
 
     q = Query()
-    entity_db.update({"required_entities": rlist, "optional_entities": olist}, q.name == intentName)
+
+    intent = intent_db.get(q.name == intentName)
+    if not intent is None:
+        intent_db.update({"required_entities": rlist, "optional_entities": olist}, q.name == intentName)
+    else:
+        intent_db.insert({"name": intentName, "required_entities": rlist, "optional_entities": olist})
 
 def saveUtter(intetName, utter):
     utterpath = "./data/__intent/utter/" + intetName + ".intent"
     if not os.path.exists("./data/__intent/utter/"):
         os.makedirs("./data/__intent/utter")
 
-    with open(utterpath, "wb") as f:
-        f.write(utter)
+    with open(utterpath, "w") as f:
+        f.writelines(utter)
 
 def getUtter(intetName):
     res = []
     utterpath = "./data/__intent/utter/" + intetName + ".intent"
-    if not os.path.exists("./data/__intent/utter/"):
-        os.makedirs("./data/__intent/utter")
-
-    with open(utterpath, "rb") as f:
-        res = f.readlines()
+    if os.path.exists(utterpath):
+        with open(utterpath, "r") as f:
+            res = f.readlines()
     return res
 
 def getEntityRecords(name = ""):
@@ -119,7 +126,8 @@ def getIntentRecords(name=""):
         result = intent_db.all()
     else:
         result = intent_db.get(Intent.name == name)
-        result.utter = getUtter(name)
+        result['utter'] = getUtter(name)
+
     return result
 
 def deleteEntity(name):
@@ -193,12 +201,15 @@ def predict(text, confidence=0.1):
             container.load_file(i["name"], utterpath)
 
     foundIntent = False
-    intents = trainedEngine.determine_intent(text.lower())
+    intentResult = trainedEngine.determine_intent(text.lower())
     result = []
-    for intent in intents:
-        if intent and intent.get('confidence') > confidence:
-            result.append(intent)
-            foundIntent = True
+    try:
+        for intent in intentResult:
+            if intent and intent.get('confidence') > confidence:
+                result.append(intent)
+                foundIntent = True
+    except Exception as e:
+        foundIntent = False
 
     if not foundIntent:
         data = container.calc_intents(text)
