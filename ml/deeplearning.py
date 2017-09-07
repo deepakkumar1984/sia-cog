@@ -8,9 +8,11 @@ import os
 
 modellist = []
 name = ""
+jobid = ""
 
-def init(self, name):
+def init(self, name, jobid):
     self.name = name
+    self.jobid = jobid
 
 class Histories(callbacks.Callback):
     def on_train_begin(self, logs={}):

@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Load CSV File",
+    "module": "data_loadcsv",
+    "desc": "Load the csv file into data frame",
+    "option":[
+      {"name": "Select File", "param": "filename", "type": "opt", "optname": "func->getUploadedFiles"}
+    ]
+  },
+  {
+    "name": "Load Sample Dataset",
+    "module": "data_loadsample",
+    "desc": "Load sample dataset into data frame",
+    "option":[
+      {"name": "", "param": "filename", "type": "opt", "optname": "func->getUploadedFiles"}
+    ]
+  }
+]

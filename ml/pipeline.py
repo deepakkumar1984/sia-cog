@@ -5,11 +5,12 @@ import numpy
 import pandas
 import simplejson as json
 
-from Interface import utility
+from Interface import utility, projectmgr
 from ml import pipelinecomponents
 
 srvname = ""
 model_type = ""
+jobid = ""
 
 class NumpyFloatHandler(jsonpickle.handlers.BaseHandler):
     """
@@ -22,15 +23,15 @@ class NumpyFloatHandler(jsonpickle.handlers.BaseHandler):
         """
         return round(obj,6)
 
-def init(self, srvname, model_type):
+def init(self, srvname, model_type, jobid):
     self.srvname = srvname
     self.model_type = model_type
+    self.jobid = jobid
 
-    pipelinecomponents.init(pipelinecomponents, srvname, model_type)
+    pipelinecomponents.init(pipelinecomponents, srvname, model_type, jobid)
 
 def getPipelineData():
-    pipelineFile = pipelinecomponents.projectfolder + '/pipeline.json'
-    pipelinejson = utility.getJsonData(pipelineFile)
+    pipelinejson = json.loads(projectmgr.GetPipeline(srvname, "ml").pipelinedata)
     return pipelinejson
 
 def Run():
@@ -80,7 +81,7 @@ def Run():
             pickle.dump(resultset, f)
 
 def Predict(filename, savePrediction = False):
-    pipelinecomponents.init(pipelinecomponents, srvname, model_type)
+    pipelinecomponents.init(pipelinecomponents, srvname, model_type, jobid)
     pipelinefile = pipelinecomponents.projectfolder + '/pipeline.json'
     pipelinejson = utility.getJsonData(pipelinefile)
     resultset = {}
@@ -166,7 +167,7 @@ def Predict(filename, savePrediction = False):
     return predictions
 
 def ContinueTraining(epoches=32, batch_size=32):
-    pipelinecomponents.init(pipelinecomponents, srvname, model_type)
+    pipelinecomponents.init(pipelinecomponents, srvname, model_type, jobid)
     pipelineFile = pipelinecomponents.projectfolder + '/pipeline.json'
     pickleFile = pipelinecomponents.projectfolder + '/pipeline.out'
     pipelinejson = utility.getJsonData(pipelineFile)
@@ -218,7 +219,7 @@ def ContinueTraining(epoches=32, batch_size=32):
             pickle.dump(resultset, f)
 
 def Output(name, num = None, to_json=False):
-    pipelinecomponents.init(pipelinecomponents, srvname, model_type)
+    pipelinecomponents.init(pipelinecomponents, srvname, model_type, jobid)
     result = pipelinecomponents.return_result(name, num)
     jsonpickle.handlers.registry.register(numpy.int, NumpyFloatHandler)
     jsonpickle.handlers.registry.register(numpy.int32, NumpyFloatHandler)

@@ -10,8 +10,9 @@ import werkzeug
 from flask import jsonify, sessions
 from flask import request
 
-from Interface import utility, app, dbutility
+from Interface import utility, app, dbutility, projectmgr
 from ml import backgroundproc, pipeline
+
 
 @app.route('/api/ml/create', methods=['POST'])
 def create():
@@ -20,16 +21,11 @@ def create():
     try:
         servicename = request.json.get('servicename')
         directory = "./data/" + servicename
-        file = directory + "/service.json"
+
         if not os.path.exists(directory):
             os.makedirs(directory)
-            json_string = json.dumps(request.json)
-            file = open(file, "w")
-            file.write(json_string)
-            file.close()
-        else:
-            code = 1001
-            message = "Service already exists!"
+
+        projectmgr.UpsertService(servicename, "ml", request.json)
 
     except Exception as e:
         code = 500
@@ -43,7 +39,6 @@ def update(name):
     code = 200
     try:
         directory = "./data/" + name
-        file = directory + "/service.json"
         if not os.path.exists(directory):
             code = 1001
             message = "Service does not exists!"
@@ -51,11 +46,8 @@ def update(name):
             if request.json["servicename"] != name:
                 code = 1001
                 message = "Service name is not matching with the api calls"
-
-            json_string = json.dumps(request.json)
-            file = open(file, "w")
-            file.write(json_string)
-            file.close()
+            else:
+                projectmgr.UpsertService(name, "ml", request.json)
 
     except Exception as e:
         code = 500
@@ -69,12 +61,10 @@ def delete(name):
     code = 200
     try:
         directory = "./data/" + name
-        if not os.path.exists(directory):
-            code = 1001
-            message = "Service does not exists!"
-        else:
+        if os.path.exists(directory):
             shutil.rmtree(directory)
 
+        projectmgr.DeleteService(name, "ml")
     except Exception as e:
         code = 500
         message = str(e)
@@ -143,19 +133,29 @@ def pipeline(name):
     message = "Success"
     code = 200
     try:
-
-        directory = "./data/" + name
-        file = directory + "/pipeline.json"
-
-        json_string = json.dumps(request.json)
-        file = open(file, "w")
-        file.write(json_string)
-        file.close()
+        projectmgr.UpsertPipeline(name, "ml", request.json)
     except Exception as e:
         code = 500
         message = e
 
     return jsonify({"statuscode": code, "message": message})
+
+@app.route('/api/ml/pipeline/<name>', methods=['GET'])
+def pipelineinfo(name):
+    message = "Success"
+    code = 200
+    result = []
+    try:
+        pipelineRec = projectmgr.GetPipeline(name, "ml")
+        if pipelineRec is None:
+            raise Exception("No Pipeline Found!")
+
+        result = json.loads(pipelineRec.pipelinedata)
+    except Exception as e:
+        code = 500
+        message = e
+
+    return jsonify({"statuscode": code, "message": message, "result": result})
 
 @app.route('/api/ml/evaluate/<name>', methods=['POST'])
 def evaluate(name):

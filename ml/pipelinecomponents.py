@@ -1,19 +1,13 @@
 import json
 import os
 import pickle
-from io import BytesIO
-
 import numpy
 import pandas
-import requests
-from PIL import Image
 from keras import datasets
 from keras.models import model_from_json
-from keras.preprocessing import image
 from pandas import read_csv
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_validate
 from sklearn.preprocessing import Imputer
-from sklearn import preprocessing, feature_selection, feature_extraction
 from keras.utils import np_utils
 from ml import scikitlearn, deeplearning
 
@@ -21,10 +15,12 @@ projectfolder = ""
 model_type = ""
 name = ""
 optionslist = {}
+jobid = ""
 
-def init(self, name, modeltype):
+def init(self, name, modeltype, jobid):
     self.projectfolder = "./data/" + name
     self.name = name
+    self.jobid = jobid
     self.model_type = modeltype
 
 def addOption(options):
@@ -240,7 +236,7 @@ def model_build(pipeline):
 def model_evaluate(model, X, Y, pipeline):
     if "scoring" in pipeline["options"]:
         if len(pipeline['options']['scoring']) > 0:
-            scoring = pipeline['options']['scoring'][0]
+            scoring = pipeline['options']['scoring']
         else:
             scoring = "neg_mean_squared_error"
     else:
@@ -250,7 +246,7 @@ def model_evaluate(model, X, Y, pipeline):
     if "kfold" in pipeline['options']:
         kfold = pipeline["options"]["kfold"]
 
-    results = cross_val_score(model, X, Y, cv=kfold, scoring=scoring)
+    results = cross_validate(model, X, Y, cv=kfold, scoring=scoring)
     output = {"mean": results.mean(), "std": results.std(), "results": results}
     model.fit(X, Y)
     picklefile = projectfolder + "/model.out"

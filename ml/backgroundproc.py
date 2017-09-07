@@ -4,15 +4,14 @@ import threading
 import uuid
 
 from tinydb import TinyDB, Query
-
-from ml import  pipeline, pipelinecomponents
+from Interface import projectmgr
+from ml import pipeline, pipelinecomponents
 
 def Validate(id, name):
     results = {}
     status = "Completed"
     try:
-        with open("./data/" + name + "/service.json") as f:
-            srvjson = json.load(f)
+        srvjson = json.loads(projectmgr.GetService(name, "ml").pipelinedata)
 
         model_type = srvjson["model_type"]
         pipeline.init(pipeline, name, model_type)
@@ -38,11 +37,8 @@ def Train(id, name, epoches, batch_size):
     results = {}
     status = "Completed"
     try:
-        with open("./data/" + name + "/service.json") as f:
-            srvjson = json.load(f)
-
+        srvjson = json.loads(projectmgr.GetService(name, "ml").pipelinedata)
         model_type = srvjson["model_type"]
-
         pipeline.init(pipeline, name, model_type)
         pipelinejson = pipeline.getPipelineData()
         pipeline.ContinueTraining(epoches=epoches, batch_size=batch_size)
@@ -51,7 +47,7 @@ def Train(id, name, epoches, batch_size):
             if p["module"] == "return_result":
                 mlist = p["input"]["module_output"]
                 for m in mlist:
-                    r = ml.pipeline.Output(m, to_json=True)
+                    r = pipeline.Output(m, to_json=True)
                     results[m] = json.loads(r)
     except Exception as e:
         results["message"] = str(e)
