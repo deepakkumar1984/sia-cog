@@ -7,12 +7,10 @@ import shutil
 from datetime import datetime
 import simplejson as json
 import werkzeug
-from flask import jsonify, sessions
+from flask import jsonify
 from flask import request
-
-from Interface import utility, app, dbutility, projectmgr
+from Interface import utility, app, projectmgr, logmgr, constants
 from ml import backgroundproc, pipeline
-
 
 @app.route('/api/ml/create', methods=['POST'])
 def create():
@@ -39,15 +37,8 @@ def update(name):
     code = 200
     try:
         directory = "./data/" + name
-        if not os.path.exists(directory):
-            code = 1001
-            message = "Service does not exists!"
-        else:
-            if request.json["servicename"] != name:
-                code = 1001
-                message = "Service name is not matching with the api calls"
-            else:
-                projectmgr.UpsertService(name, "ml", request.json)
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.MachineLearning)
+        projectmgr.UpsertService(name, "ml", request.json)
 
     except Exception as e:
         code = 500
@@ -61,6 +52,7 @@ def delete(name):
     code = 200
     try:
         directory = "./data/" + name
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.MachineLearning)
         if os.path.exists(directory):
             shutil.rmtree(directory)
 
@@ -77,6 +69,7 @@ def upload(name):
     code = 200
     try:
         datasetFolder = "./data/" + name + "/dataset/"
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.MachineLearning)
         if not os.path.exists(datasetFolder):
             os.makedirs(datasetFolder)
         if len(request.files) == 0:
@@ -100,6 +93,7 @@ def getfiles(name):
     result = []
     try:
         dataset_folder = "./data/" + name + "/dataset/"
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.MachineLearning)
         if not os.path.exists(dataset_folder):
             os.makedirs(dataset_folder)
 
@@ -118,6 +112,7 @@ def delfile(name):
     code = 200
     try:
         dataset_folder = "./data/" + name + "/dataset/"
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.MachineLearning)
         if not os.path.exists(dataset_folder):
             os.makedirs(dataset_folder)
         filename = request.json["filename"]
@@ -133,10 +128,11 @@ def pipeline(name):
     message = "Success"
     code = 200
     try:
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.MachineLearning)
         projectmgr.UpsertPipeline(name, "ml", request.json)
     except Exception as e:
         code = 500
-        message = e
+        message = str(e)
 
     return jsonify({"statuscode": code, "message": message})
 
@@ -146,6 +142,7 @@ def pipelineinfo(name):
     code = 200
     result = []
     try:
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.MachineLearning)
         pipelineRec = projectmgr.GetPipeline(name, "ml")
         if pipelineRec is None:
             raise Exception("No Pipeline Found!")
@@ -153,7 +150,7 @@ def pipelineinfo(name):
         result = json.loads(pipelineRec.pipelinedata)
     except Exception as e:
         code = 500
-        message = e
+        message = str(e)
 
     return jsonify({"statuscode": code, "message": message, "result": result})
 
@@ -164,7 +161,7 @@ def evaluate(name):
     try:
         taskid = ""
         trainingstatus = app.trainingstatus
-
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.MachineLearning)
         if trainingstatus == 1:
             message = "Training in progress! Please try after the current training is completed."
             code = 500
@@ -181,7 +178,10 @@ def evaluate(name):
 def train(name):
     message = "Success"
     code = 200
+    taskid = ""
+
     try:
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.MachineLearning)
         data = json.loads(request.data)
         epoches = 32
         batch_size = 32
@@ -204,18 +204,21 @@ def train(name):
 
     return jsonify({"statuscode": code, "message": message, "jobid": taskid})
 
-@app.route('/api/ml/jobs/<name>', methods=['GET'])
-def jobs(name):
-    message = "Started!"
+@app.route('/api/ml/jobs/<id>', methods=['GET'])
+def jobs(id):
+    message = "Started"
+    result = []
     code = 200
     try:
-        id = request.args.get("id")
-        result = backgroundproc.GetStatus(name, id)
+        job = projectmgr.GetJob(id)
+        if not job.result is None:
+            result = json.loads(job.result)
+
     except Exception as e:
         code = 500
         message = str(e)
 
-    return jsonify(result)
+    return jsonify({"statuscode": code, "message": message, "result": result})
 
 @app.route('/api/ml/predict/<name>', methods=['POST'])
 def predict(name):
@@ -236,7 +239,7 @@ def predict(name):
         elif servicejson["data_format"] == "csv":
             testfile = data['testfile']
 
-        pipeline.init(pipeline, name, servicejson["model_type"])
+        pipeline.init(pipeline, name, servicejson["model_type"], "")
         predictions = pipeline.Predict(testfile, savePrediction)
         predictions = json.loads(predictions)
         if servicejson["data_format"] == "csv":
@@ -244,11 +247,10 @@ def predict(name):
         else:
             result = predictions
 
-        end = datetime.now()
-        dbutility.logCalls("ml", name, start, end)
+        logmgr.LogPredSuccess(name, constants.ServiceTypes.MachineLearning, start)
     except Exception as e:
         code = 500
         message = str(e)
-        dbutility.logCalls("ml", name, start, end, False, message)
+        logmgr.LogPredError(name, constants.ServiceTypes.MachineLearning, start, message)
 
     return jsonify({"statuscode": code, "message": message, "result": result})

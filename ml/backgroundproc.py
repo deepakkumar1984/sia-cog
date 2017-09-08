@@ -2,19 +2,18 @@ import datetime
 import json
 import threading
 import uuid
-
-from tinydb import TinyDB, Query
 from Interface import projectmgr
-from ml import pipeline, pipelinecomponents
+from ml import pipeline
 
 def Validate(id, name):
     results = {}
     status = "Completed"
+    message = "Completed"
     try:
-        srvjson = json.loads(projectmgr.GetService(name, "ml").pipelinedata)
+        srvjson = json.loads(projectmgr.GetService(name, "ml").servicedata)
 
         model_type = srvjson["model_type"]
-        pipeline.init(pipeline, name, model_type)
+        pipeline.init(pipeline, name, model_type, "")
         pipelinejson = pipeline.getPipelineData()
         pipeline.Run()
 
@@ -22,24 +21,24 @@ def Validate(id, name):
             if p["module"] == "return_result":
                 mlist = p["input"]["module_output"]
                 for m in mlist:
-                    r = pipeline.Output(m, to_json=True)
+                    r = pipeline.Output(m)
                     results[m] = json.loads(r)
 
     except Exception as e:
-        results["message"] = str(e)
+        results["message"] = pipeline.lastpipeline + ": " + str(e)
+        message = str(e)
         status = "Error"
 
-    taskdb = TinyDB('./data/' + name + '/jobs_db.json')
-    Task = Query()
-    taskdb.update({"end": str(datetime.datetime.now()), "status": "Completed", "results": results}, Task.id == id)
+    projectmgr.EndJob(id, "status", message, json.dumps(results))
 
 def Train(id, name, epoches, batch_size):
     results = {}
     status = "Completed"
+    message = "Completed"
     try:
-        srvjson = json.loads(projectmgr.GetService(name, "ml").pipelinedata)
+        srvjson = json.loads(projectmgr.GetService(name, "ml").servicedata)
         model_type = srvjson["model_type"]
-        pipeline.init(pipeline, name, model_type)
+        pipeline.init(pipeline, name, model_type, id)
         pipelinejson = pipeline.getPipelineData()
         pipeline.ContinueTraining(epoches=epoches, batch_size=batch_size)
 
@@ -47,40 +46,23 @@ def Train(id, name, epoches, batch_size):
             if p["module"] == "return_result":
                 mlist = p["input"]["module_output"]
                 for m in mlist:
-                    r = pipeline.Output(m, to_json=True)
+                    r = pipeline.Output(m)
                     results[m] = json.loads(r)
     except Exception as e:
-        results["message"] = str(e)
+        results["message"] = pipeline.lastpipeline + ": " + str(e)
+        message = str(e)
         status = "Error"
 
-    taskdb = TinyDB('./data/' + name + '/jobs_db.json')
-    Task = Query()
-    taskdb.update({"end": str(datetime.datetime.now()), "status": status, "results": results}, Task.id == id)
+    projectmgr.EndJob(id, status, message, json.dumps(results))
 
 def StartValidateThread(name):
-    id = str(uuid.uuid4())
-    taskdb = TinyDB('./data/' + name + '/jobs_db.json')
-    taskdb.insert({"id": id, "start": str(datetime.datetime.now()), "end": "", "status": "Started", "results": []})
+    id = projectmgr.StartJob(name, "ml", 0);
     t = threading.Thread(target=Validate, args=(id, name))
     t.start()
     return id
 
 def StartTrainThread(name, epoches, batch_size):
-    id = str(uuid.uuid4())
-    taskdb = TinyDB('./data/' + name + '/jobs_db.json')
-    taskdb.insert({"id": id, "start": str(datetime.datetime.now()), "end": "", "status": "Started", "results": []})
+    id = projectmgr.StartJob(name, "ml", epoches);
     t = threading.Thread(target=Train, args=(id, name, epoches, batch_size))
     t.start()
     return id
-
-def GetStatus(name, id):
-    taskdb = TinyDB('./data/' + name + '/jobs_db.json')
-    Task = Query()
-    return taskdb.search(Task.id == id)
-
-def UpdateTaskError(name, id, message):
-    taskdb = TinyDB('./data/' + name + '/jobs_db.json')
-    Task = Query()
-    results = {"message": message}
-
-    taskdb.update({"end": str(datetime.datetime.now()), "status": "Error", "results": results}, Task.id == id)

@@ -1,14 +1,8 @@
-"""
-Routes and views for the flask application.
-"""
-
-import os
 import simplejson as json
-import jsonpickle
 from flask import jsonify, request
-from datetime import datetime
 from dateutil import parser
-from Interface import utility, app, dataanalyzer, sysinfo, dbutility
+from Interface import utility, app, dataanalyzer, sysinfo, projectmgr, logmgr
+import jsonpickle
 
 @app.route('/api/status', methods=['GET'])
 def apistatus():
@@ -35,47 +29,55 @@ def systeminfo(infotype):
 
     return jsonify({"statuscode": code, "message": message, "result": result})
 
-@app.route('/api/list/<name>', methods=['GET'])
-def apilist(name):
+@app.route('/api/list/<srvtype>', methods=['GET'])
+def apilist(srvtype):
     message = "Success"
     code = 200
+    result = []
     try:
-        directory = "./data/"
-        result = []
-        if name == "ml":
-            dirs = os.listdir(directory)
-            for d in dirs:
-                if d == "__vision" or d == "__chatbot" or d == "__intent" or d == "__speech" or d == "__text":
-                    continue
-
-                if os.path.isfile(directory + d):
-                    continue
-
-                srvpath = directory + d + "/service.json"
-                if os.path.exists(srvpath):
-                    result.append(utility.getJsonData(srvpath))
-        elif name == "vision":
-            directory = directory + "__vision/"
-            files = os.listdir(directory)
-            for f in files:
-                if f.endswith(".json"):
-                    result.append(utility.getJsonData(directory + f))
-        elif name == "bot":
-            directory = directory + "__chatbot/"
-            dirs = os.listdir(directory)
-            for d in dirs:
-                if os.path.isfile(directory + d):
-                    continue
-
-                botpath = directory + d + "/bot.json"
-                if os.path.exists(botpath):
-                    result.append(utility.getJsonData(botpath))
+        services = projectmgr.GetServices(srvtype)
+        for s in services:
+            result.append(json.loads(s.servicedata));
 
     except Exception as e:
         code = 500
         message = str(e)
 
-    return jsonify({"statuscode": code, "message": message, "result": json.loads(jsonpickle.encode(result, unpicklable=False))})
+    return jsonify({"statuscode": code, "message": message, "result": result})
+
+@app.route('/api/list/<srvtype>/<srvname>', methods=['GET'])
+def apilistwithname(srvtype, srvname):
+    message = "Success"
+    code = 200
+    result = []
+    try:
+        service = projectmgr.GetService(srvtype, srvname)
+        if service is None:
+            raise Exception("Service API not found")
+
+        result = json.loads(service.servicedata)
+
+    except Exception as e:
+        code = 500
+        message = str(e)
+
+    return jsonify({"statuscode": code, "message": message, "result": result})
+
+@app.route('/api/jobs/<id>', methods=['GET'])
+def jobswithid(id):
+    message = "Started"
+    result = []
+    code = 200
+    try:
+        job = projectmgr.GetJob(id)
+        if not job.result is None:
+            result = json.loads(job.result)
+
+    except Exception as e:
+        code = 500
+        message = str(e)
+
+    return jsonify({"statuscode": code, "message": message, "result": result})
 
 @app.route('/api/data/info', methods=['POST'])
 def databasicinfo():
@@ -84,7 +86,6 @@ def databasicinfo():
     result = []
     try:
         rjson = request.json
-
         if not "name" in rjson:
             raise Exception("Please provide name of the service")
 
@@ -110,9 +111,9 @@ def databasicinfo():
 def dataplot():
     message = "Success"
     code = 200
+    result = []
     try:
         rjson = request.json
-        result = []
         utility.validateParam(rjson, "name")
         utility.validateParam(rjson, "filename")
         utility.validateParam(rjson, "method")
@@ -124,14 +125,13 @@ def dataplot():
         code = 500
     return jsonify({"statuscode": code, "message": message, "result": result})
 
-
 @app.route('/api/logs/pred', methods=['POST'])
 def predlogs():
     message = "Success"
     code = 200
+    result = []
     try:
-        rjson = request.json
-        result = []
+        rjson = request.get_json()
         utility.validateParam(rjson, "category")
         utility.validateParam(rjson, "servicename")
         utility.validateParam(rjson, "status")
@@ -139,11 +139,9 @@ def predlogs():
         utility.validateParam(rjson, "end")
         start = parser.parse(rjson["start"] + " 00:00")
         end = parser.parse(rjson["end"] + " 23:59")
-        success = True
-        if rjson["status"] == "Error":
-            success = False
 
-        result = dbutility.getPredLogs(rjson["category"], rjson["servicename"], start, end, success)
+        logs = logmgr.GetLogs(rjson["servicename"], rjson["category"], start, end, rjson["status"])
+        result = jsonpickle.encode(logs, unpicklable=False)
 
     except Exception as e:
         message = str(e)

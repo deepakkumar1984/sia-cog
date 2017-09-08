@@ -1,5 +1,6 @@
 import os
 import json
+from Interface import projectmgr
 
 def getFileData(filePath):
     data = ""
@@ -14,6 +15,14 @@ def getJsonData(filePath):
         with open(filePath, "r") as text_file:
             data = text_file.read()
     return json.loads(data)
+
+def getServiceJson(srvname, srvpath):
+    result = {}
+    service = projectmgr.GetService(srvname, srvpath)
+    if not service is None:
+        result = json.loads(service.servicedata)
+
+    return result
 
 def saveFileData(filePath, content):
     with open(filePath, "w") as text_file:

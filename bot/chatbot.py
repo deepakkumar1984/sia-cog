@@ -1,22 +1,7 @@
 from chatterbot import ChatBot
-import chatterbot
 from chatterbot.trainers import ListTrainer, ChatterBotCorpusTrainer
-import pickle
 import os
-import shutil
 import simplejson as json
-from datetime import datetime
-from tinydb import TinyDB, Query
-from tinydb_serialization import SerializationMiddleware, Serializer
-
-class DateTimeSerializer(Serializer):
-    OBJ_CLASS = datetime  # The class this serializer handles
-
-    def encode(self, obj):
-        return obj.strftime('%Y-%m-%dT%H:%M:%S')
-
-    def decode(self, s):
-        return datetime.strptime(s, '%Y-%m-%dT%H:%M:%S')
 
 def getBot(name):
     botfolder = "./data/__chatbot/" + name
@@ -47,32 +32,6 @@ def getBot(name):
 
     return bot
 
-def create(name, serviceName, threshold=0.65, defaultResponse="I am sorry, but I do not understand."):
-    botfolder = "./data/__chatbot/" + serviceName
-    if os.path.exists(botfolder):
-        raise Exception("Chat bot already exists!")
-
-    os.mkdir(botfolder)
-
-    botjson = {"name": name, "servicename": serviceName, "threshold": threshold, "default_response": defaultResponse}
-
-    with open(botfolder + "/bot.json", "wb") as f:
-        json.dump(botjson, f)
-
-def update(name, serviceName, threshold=0.65, defaultResponse="I am sorry, but I do not understand."):
-    botfolder = "./data/__chatbot/" + serviceName
-    if not os.path.exists(botfolder):
-        raise Exception("Chat bot does not exists!")
-
-    botjson = {"name": name, "servicename": serviceName, "threshold": threshold, "default_response": defaultResponse}
-    with open(botfolder + "/bot.json", "wb") as f:
-        json.dump(botjson, f)
-
-def delete(name):
-    botfolder = "./data/__chatbot/" + name
-    if os.path.exists(botfolder):
-        shutil.rmtree(botfolder)
-
 def corpustrain(name, corpus):
     bot = getBot(name)
     bot.set_trainer(ChatterBotCorpusTrainer)
@@ -99,22 +58,9 @@ def predict(name, text):
         result = {"confidence": response.confidence, "response_text": botjson["default_response"]}
     return result
 
-def saveTrainingData(name, corpus, data):
-    serialization = SerializationMiddleware()
-    serialization.register_serializer(DateTimeSerializer(), 'TinyDate')
-    db = TinyDB('./data/__chatbot/' + name + '/train_db.json', storage=serialization)
-    db.insert({"corpus": corpus, "data": data, "train_date": datetime.now()})
-
-def getTrainingData(name):
-    serialization = SerializationMiddleware()
-    serialization.register_serializer(DateTimeSerializer(), 'TinyDate')
-    db = TinyDB('./data/__chatbot/' + name + '/train_db.json', storage=serialization)
-    return db.all()
-
 def resetBot(name):
     botfolder = "./data/__chatbot/" + name
     if not os.path.exists(botfolder):
-        raise Exception("Chat bot does not exists!")
+        raise Exception("Chat bot folder does not exists!")
 
     os.remove(botfolder + "/bot.db")
-    os.remove(botfolder + "/train_db.json")

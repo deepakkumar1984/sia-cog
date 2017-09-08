@@ -3,8 +3,7 @@ This script runs the SiaWizard application using a development server.
 """
 
 from os import environ
-from Interface import app
-
+from Interface import app, projectmodels, logmodels
 import mlapi
 import visionapi
 import botapi
@@ -19,5 +18,8 @@ if __name__ == '__main__':
         PORT = int(environ.get('SERVER_PORT', '5555'))
     except ValueError:
         PORT = 80
+
+    projectmodels.InitDB()
+    logmodels.InitDB()
     app.run(HOST, PORT, threaded=True)
 

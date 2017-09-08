@@ -1,15 +1,12 @@
 import simplejson as json
-from tinydb import TinyDB, Query
-from tinydb.operations import delete
 from adapt.entity_tagger import EntityTagger
 from adapt.tools.text.tokenizer import EnglishTokenizer
 from adapt.tools.text.trie import Trie
 from adapt.intent import IntentBuilder
 from adapt.parser import Parser
 from adapt.engine import IntentDeterminationEngine
-from Interface import utility
+from Interface import projectmgr, constants
 from padatious.intent_container import IntentContainer
-
 import pickle
 import jsonpickle
 import os
@@ -29,16 +26,12 @@ def createDataFolder():
 
 createDataFolder()
 
-entity_db =  TinyDB("./data/__intent/entity_db.json")
-intent_db = TinyDB("./data/__intent/intent_db.json")
-
 tokenizer = EnglishTokenizer()
 trie = Trie()
 tagger = EntityTagger(trie, tokenizer)
 parser = Parser(tokenizer, tagger)
 
 def saveEntity(entityName, keywords):
-    q = Query()
     entityName = entityName.lower()
 
     list = []
@@ -51,11 +44,7 @@ def saveEntity(entityName, keywords):
 
         list.append(k.lower())
 
-    entity = entity_db.get(q.name == entityName)
-    if not entity is None:
-        entity_db.update({"keywords": list}, q.name == entityName)
-    else:
-        entity_db.insert({"name": entityName, "keywords": list})
+    projectmgr.UpsertService(entityName, constants.ServiceTypes.LangEntity, {"name": entityName, "keywords": list})
 
 def saveIntent(intentName, required_entities, optional_entities):
     intentName = intentName.lower()
@@ -83,13 +72,7 @@ def saveIntent(intentName, required_entities, optional_entities):
 
         olist.append(k.lower())
 
-    q = Query()
-
-    intent = intent_db.get(q.name == intentName)
-    if not intent is None:
-        intent_db.update({"required_entities": rlist, "optional_entities": olist}, q.name == intentName)
-    else:
-        intent_db.insert({"name": intentName, "required_entities": rlist, "optional_entities": olist})
+    projectmgr.UpsertService(intentName, constants.ServiceTypes.LangIntent, {"name": intentName, "required_entities": rlist, "optional_entities": olist})
 
 def saveUtter(intetName, utter):
     utterpath = "./data/__intent/utter/" + intetName + ".intent"
@@ -107,42 +90,39 @@ def getUtter(intetName):
             res = f.readlines()
     return res
 
-def getEntityRecords(name = ""):
+def getEntityRecords(name = "all"):
     name = name.lower()
-    Entity = Query()
-
+    result = []
     if name == "all":
-        result = entity_db.all()
+        services = projectmgr.GetServices(constants.ServiceTypes.LangEntity)
+        for s in services:
+            result.append(json.loads(s.servicedata))
     else:
-        result = entity_db.get(Entity.name == name)
+        service = projectmgr.GetService(name, constants.ServiceTypes.LangEntity)
+        result = json.loads(service.servicedata)
 
     return result
 
 def getIntentRecords(name=""):
     name = name.lower()
-    Intent = Query()
-
+    result = []
     if name == "all":
-        result = intent_db.all()
+        services = projectmgr.GetServices(constants.ServiceTypes.LangIntent)
+        for s in services:
+            result.append(json.loads(s.servicedata))
     else:
-        result = intent_db.get(Intent.name == name)
-        result['utter'] = getUtter(name)
+        service = projectmgr.GetService(name, constants.ServiceTypes.LangIntent)
+        result = json.loads(service.servicedata)
 
     return result
 
 def deleteEntity(name):
     name = name.lower()
-    Entity = Query()
-    el = entity_db.get(Entity.name == name)
-    if not el is None:
-        entity_db.remove(eids = [el.eid])
+    projectmgr.DeleteService(name, constants.ServiceTypes.LangEntity)
 
 def deleteIntent(name):
     name = name.lower()
-    Intent = Query()
-    el = intent_db.get(Intent.name == name)
-    if not el is None:
-        intent_db.remove(eids=[el.eid])
+    projectmgr.DeleteService(name, constants.ServiceTypes.LangIntent)
 
 def buildEntity(engine, entityName, keywords):
     for k in keywords:
@@ -162,31 +142,36 @@ def buildIntent(engine, intentName, requiredentities, optionalentities):
     return engine
 
 def train():
-    engine = IntentDeterminationEngine()
-    entities = entity_db.all()
-    container = IntentContainer('intent_cache')
+    id = projectmgr.StartJob("intent", constants.ServiceTypes.LangIntent, 0)
+    try:
+        engine = IntentDeterminationEngine()
+        entities = getEntityRecords()
+        container = IntentContainer('intent_cache')
 
-    for e in entities:
-        engine = buildEntity(engine, e["name"], e["keywords"])
+        for e in entities:
+            engine = buildEntity(engine, e["name"], e["keywords"])
 
-    intents = intent_db.all()
-    for i in intents:
-        engine = buildIntent(engine, i["name"], i["required_entities"], i["optional_entities"])
-        utterpath = "./data/__intent/utter/" + i["name"] + ".intent"
-        if os.path.exists(utterpath):
-            container.load_file(i["name"], utterpath)
+        intents = getIntentRecords()
+        for i in intents:
+            engine = buildIntent(engine, i["name"], i["required_entities"], i["optional_entities"])
+            utterpath = "./data/__intent/utter/" + i["name"] + ".intent"
+            if os.path.exists(utterpath):
+                container.load_file(i["name"], utterpath)
 
-    with open("./data/__intent/model.out", "wb") as f:
-        pickle.dump(engine, f)
+        with open("./data/__intent/model.out", "wb") as f:
+            pickle.dump(engine, f)
 
-    container.train()
-    with open("./data/__intent/container.json", "wb") as f:
-        jpicked = jsonpickle.encode(container)
-        json.dump(jpicked, f)
+        container.train()
+        with open("./data/__intent/container.json", "wb") as f:
+            jpicked = jsonpickle.encode(container)
+            json.dump(jpicked, f)
+
+        projectmgr.EndJob(id, "Completed", "Completed")
+    except Exception as e:
+        projectmgr.EndJob(id, "Error", str(e))
 
 def predict(text, confidence=0.1):
     modelpath = "./data/__intent/model.out"
-    containerpath = "./data/__intent/container.json"
     container = IntentContainer('intent_cache')
     if not os.path.exists(modelpath):
         raise Exception("Please train the model")
@@ -194,7 +179,7 @@ def predict(text, confidence=0.1):
     with open(modelpath, "rb") as f:
         trainedEngine = pickle.load(f)
 
-    intents = intent_db.all()
+    intents = getIntentRecords()
     for i in intents:
         utterpath = "./data/__intent/utter/" + i["name"] + ".intent"
         if os.path.exists(utterpath):

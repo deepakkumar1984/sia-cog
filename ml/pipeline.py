@@ -1,17 +1,15 @@
 import pickle
-
 import jsonpickle
 import numpy
 import pandas
 import simplejson as json
-
-from Interface import utility, projectmgr
+from Interface import utility, projectmgr, dumpmgr, constants
 from ml import pipelinecomponents
 
 srvname = ""
 model_type = ""
 jobid = ""
-
+lastpipeline = ""
 class NumpyFloatHandler(jsonpickle.handlers.BaseHandler):
     """
     Automatic conversion of numpy float  to python floats
@@ -31,7 +29,7 @@ def init(self, srvname, model_type, jobid):
     pipelinecomponents.init(pipelinecomponents, srvname, model_type, jobid)
 
 def getPipelineData():
-    pipelinejson = json.loads(projectmgr.GetPipeline(srvname, "ml").pipelinedata)
+    pipelinejson = json.loads(projectmgr.GetPipeline(srvname, constants.ServiceTypes.MachineLearning).pipelinedata)
     return pipelinejson
 
 def Run():
@@ -42,6 +40,7 @@ def Run():
     for p in pipelinejson:
         name = p['name']
         module = p['module']
+        lastpipeline = name
         options = {}
         if "options" in p:
             options = p["options"]
@@ -74,11 +73,10 @@ def Run():
         else:
             resultset["output->" + name] = output
 
-    savePipeline = True
-
-    if savePipeline is True:
-        with open(pickleFile, "wb") as f:
-            pickle.dump(resultset, f)
+    with open(pickleFile, "wb") as f:
+        pickle.dump(resultset, f)
+    pickledata = pickle.dumps(resultset)
+    dumpmgr.DumpPipelineResult(jobid, srvname, getPipelineData(), pickledata)
 
 def Predict(filename, savePrediction = False):
     pipelinecomponents.init(pipelinecomponents, srvname, model_type, jobid)
@@ -91,7 +89,7 @@ def Predict(filename, savePrediction = False):
         name = p['name']
         module = p['module']
         input = {}
-
+        lastpipeline = name
         options = {}
         if "options" in p:
             options = p["options"]
@@ -168,9 +166,8 @@ def Predict(filename, savePrediction = False):
 
 def ContinueTraining(epoches=32, batch_size=32):
     pipelinecomponents.init(pipelinecomponents, srvname, model_type, jobid)
-    pipelineFile = pipelinecomponents.projectfolder + '/pipeline.json'
     pickleFile = pipelinecomponents.projectfolder + '/pipeline.out'
-    pipelinejson = utility.getJsonData(pipelineFile)
+    pipelinejson = getPipelineData()
 
     resultset = {}
     for p in pipelinejson:
@@ -178,6 +175,7 @@ def ContinueTraining(epoches=32, batch_size=32):
         module = p['module']
         input = {}
         options = {}
+        lastpipeline = name
         if "options" in p:
             options = p["options"]
             pipelinecomponents.addOption(options)
@@ -213,12 +211,13 @@ def ContinueTraining(epoches=32, batch_size=32):
         else:
             resultset["output->" + name] = output
 
-    savePipeline = True
-    if savePipeline is True:
-        with open(pickleFile, "wb") as f:
-            pickle.dump(resultset, f)
+    with open(pickleFile, "wb") as f:
+        pickle.dump(resultset, f)
 
-def Output(name, num = None, to_json=False):
+    pickledata = pickle.dumps(resultset)
+    dumpmgr.DumpPipelineResult(jobid, srvname, getPipelineData(), pickledata)
+
+def Output(name, num = None):
     pipelinecomponents.init(pipelinecomponents, srvname, model_type, jobid)
     result = pipelinecomponents.return_result(name, num)
     jsonpickle.handlers.registry.register(numpy.int, NumpyFloatHandler)

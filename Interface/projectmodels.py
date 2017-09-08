@@ -1,8 +1,5 @@
-import os
-import sys
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
 from sqlalchemy.types import String, DateTime, Integer, Float
 
@@ -24,27 +21,16 @@ class Pipeline(Base):
     createdon = Column(DateTime, nullable=False)
     modifiedon = Column(DateTime, nullable=False)
 
-class PipelineJob(Base):
-    __tablename__ = 'pipelinejob'
-    id = Column(Integer, primary_key=True)
-    servicename = Column(String(20), nullable=False)
-    servicetype = Column(String(20), nullable=False)
-    start = Column(DateTime, nullable=True)
-    end = Column(DateTime, nullable=True)
-    message = Column(String, nullable=True)
-    status = Column(String(20), nullable=False)
-    createdon = Column(DateTime, nullable=False)
-
 class TrainingJob(Base):
     __tablename__ = 'trainingjob'
-    id = Column(Integer, primary_key=True)
+    id = Column(String, primary_key=True)
     servicename = Column(String(20), nullable=False)
     servicetype = Column(String(20), nullable=False)
     start = Column(DateTime, nullable=True)
     end = Column(DateTime, nullable=True)
     totalepoch = Column(Integer, nullable=True)
     result = Column(String, nullable=True)
-    learninghistory = Column(String, nullable=True)
+    modelhistory = Column(String, nullable=True)
     message = Column(String, nullable=True)
     status = Column(String(20), nullable=False)
     createdon = Column(DateTime, nullable=False)
@@ -56,7 +42,7 @@ class CurrentTraining(Base):
     loss = Column(Float, nullable=False)
 
 def DBPath():
-    return "sqlite:///projects.db"
+    return "sqlite:///./data/projects.db"
 
 def InitDB():
     engine = create_engine(DBPath())

@@ -266,7 +266,7 @@ def model_train(model, X, Y, pipeline, more = False):
         if more == "true":
             if os.path.exists(weightpath):
                 modelObj.load_weights(weightpath)
-        deeplearning.init(deeplearning, name)
+        deeplearning.init(deeplearning, name, jobid)
         result = deeplearning.Train(modelObj, X, Y, weightpath, epoches, batch_size)
         picklefile = projectfolder + "/model.json"
         model_json = modelObj.to_json()

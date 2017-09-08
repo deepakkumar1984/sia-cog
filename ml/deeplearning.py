@@ -3,8 +3,8 @@ import pandas
 from keras import callbacks
 from keras.models import Sequential, model_from_json
 from keras import layers
-from Interface import dbutility, app
-import os
+from Interface import app, projectmgr
+import simplejson as json
 
 modellist = []
 name = ""
@@ -17,13 +17,12 @@ def init(self, name, jobid):
 class Histories(callbacks.Callback):
     def on_train_begin(self, logs={}):
         app.trainingstatus = 1
-        dbpath = "./data/training_db.json"
-        if os.path.exists(dbpath):
-            os.remove(dbpath)
         self.losses = []
 
     def on_train_end(self, logs={}):
         app.trainingstatus = 0
+        projectmgr.ClearCurrentTraining(jobid)
+
         return
 
     def on_epoch_begin(self, epoch, logs={}):
@@ -35,9 +34,10 @@ class Histories(callbacks.Callback):
             for m in logs:
                 list[m] = logs[m]
 
-            dbutility.logDeepTraining("mlp", name, epoch, logs.get("loss"), list)
+            projectmgr.LogCurrentTraining(jobid, epoch, logs.get("loss"))
         except Exception as e:
             app.trainingstatus = 0
+            projectmgr.ClearCurrentTraining(jobid)
             raise e
         return
 
@@ -100,6 +100,7 @@ def Train(model, X, Y, weightpath, epoch=32, batch_size=32, validation_split = N
     else:
         hist = model.fit(X, Y, validation_split=validation_split, epochs=epoch, batch_size=batch_size, verbose=1, callbacks=[hist])
 
+    projectmgr.UpdateModelHistory(jobid, json.dumps(hist.history))
     model.save_weights(weightpath)
     return hist.history
 

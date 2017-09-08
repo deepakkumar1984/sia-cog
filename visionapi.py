@@ -2,14 +2,10 @@
 Routes and views for the flask application.
 """
 
-import os
-import shutil
-
-import simplejson as json
 from flask import jsonify
 from flask import request
 from datetime import datetime
-from Interface import app, utility, dbutility
+from Interface import app, utility, logmgr, projectmgr, constants
 from vis import objcls, objdet, cvmgr
 
 
@@ -20,14 +16,7 @@ def visioncreate():
     try:
         rjson = request.get_json()
         name = rjson["servicename"]
-        directory = "./data/__vision"
-        file = directory + "/" + name + ".json"
-        if not os.path.exists(file):
-            with open(file, "wb") as f:
-                json.dump(request.json, f)
-        else:
-            code = 1001
-            message = "Service already exists!"
+        projectmgr.UpsertService(name, constants.ServiceTypes.Vision, rjson)
 
     except Exception as e:
         code = 500
@@ -40,17 +29,8 @@ def visionupdate(name):
     message = "Success"
     code = 200
     try:
-        directory = "./data/__vision"
-        file = directory + "/" + name + ".json"
-        if not os.path.exists(file):
-            code = 1001
-            message = "Service does not exists!"
-        else:
-            json_string = json.dumps(request.json)
-            file = open(file, "w")
-            file.write(json_string)
-            file.close()
-
+        rjson = request.get_json()
+        projectmgr.UpsertService(name, constants.ServiceTypes.Vision, rjson)
     except Exception as e:
         code = 500
         message = str(e)
@@ -62,14 +42,7 @@ def visiondelete(name):
     message = "Success"
     code = 200
     try:
-        directory = "./data/__vision"
-        file = directory + "/" + name + ".json"
-        if not os.path.exists(file):
-            code = 1001
-            message = "Service does not exists!"
-        else:
-            os.remove(file)
-
+        projectmgr.DeleteService(name, constants.ServiceTypes.Vision)
     except Exception as e:
         code = 500
         message = str(e)
@@ -80,12 +53,10 @@ def visiondelete(name):
 def visionpredict(name):
     message = "Success"
     code = 200
+    start = datetime.now()
     try:
-        start = datetime.now()
-        data = request.json
-        directory = "./data/__vision"
-        file = directory + "/" + name + ".json"
-        servicejson = utility.getJsonData(file)
+        data = request.get_json()
+        servicejson = utility.getServiceJson(name, constants.ServiceTypes.Vision)
         result = {}
         imagepath = data['imagepath']
 
@@ -108,11 +79,12 @@ def visionpredict(name):
                 preprocess = servicejson["options"]["preprocess"]
 
             result = cvmgr.extracttext(imagepath, preprocess)
-        dbutility.logCalls("vision", name, start, datetime.now())
+
+        logmgr.LogPredSuccess(name, constants.ServiceTypes.ChatBot, start)
     except Exception as e:
         code = 500
         message = str(e)
-        dbutility.logCalls("vision", name, start, datetime.now(), False, message)
+        logmgr.LogPredError(name, constants.ServiceTypes.ChatBot, start, message)
 
     return jsonify({"statuscode": code, "message": message, "result": result})
 

@@ -7,10 +7,9 @@ import simplejson as json
 from flask import jsonify
 from flask import request
 from datetime import datetime
-from Interface import app, dbutility
+from Interface import app, logmgr, constants
 from langintent import intentanalyzer
 import shutil
-import os
 
 @app.route('/api/int/define/<objtype>', methods=['POST'])
 def defineintobjects(objtype):
@@ -102,10 +101,10 @@ def predictint():
         data = request.args.get('data')
         result = intentanalyzer.predict(data)
         result = json.loads(jsonpickle.encode(result, unpicklable=False))
-        dbutility.logCalls("intent", "intent", start, datetime.now())
+        logmgr.LogPredSuccess("intent", constants.ServiceTypes.LangIntent, start)
     except Exception as e:
         code = 500
         message = str(e)
-        dbutility.logCalls("intent", "intent", start, datetime.now(), False, message)
+        logmgr.LogPredError("intent", constants.ServiceTypes.LangIntent, start, message)
 
     return jsonify({"statuscode": code, "message": message, "result": result})

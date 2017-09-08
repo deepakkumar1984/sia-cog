@@ -160,5 +160,5 @@
   {
     "name": "he_uniform",
     "desc": "He uniform variance scaling initializer. It draws samples from a uniform distribution within [-limit, limit] where limit is sqrt(6 / fan_in) where  fan_in is the number of input units in the weight tensor."
-  },
+  }
 ]
