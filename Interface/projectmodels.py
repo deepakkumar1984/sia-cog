@@ -18,6 +18,17 @@ class Pipeline(Base):
     servicename = Column(String(20), primary_key=True)
     servicetype = Column(String(20), primary_key=True)
     pipelinedata = Column(String, nullable=False)
+    pipelineflow = Column(String, nullable=True)
+    createdon = Column(DateTime, nullable=False)
+    modifiedon = Column(DateTime, nullable=False)
+
+class DeepModel(Base):
+    __tablename__ = 'deepmodel'
+    servicename = Column(String(20), primary_key=True)
+    servicetype = Column(String(20), primary_key=True)
+    modelname = Column(String(20), primary_key=True)
+    modeldata = Column(String, nullable=False)
+    modelflow = Column(String, nullable=False)
     createdon = Column(DateTime, nullable=False)
     modifiedon = Column(DateTime, nullable=False)
 
@@ -40,6 +51,15 @@ class CurrentTraining(Base):
     id = Column(Integer, primary_key=True)
     epoch = Column(Integer, nullable=False)
     loss = Column(Float, nullable=False)
+
+class LoginUser(Base):
+    __tablename__ = 'loginuser'
+    username = Column(String, primary_key=True)
+    password = Column(String, nullable=False)
+    name = Column(String, nullable=False)
+    email = Column(String, nullable=True)
+    createdon = Column(DateTime, nullable=False)
+    modifiedon = Column(DateTime, nullable=False)
 
 def DBPath():
     return "sqlite:///./data/projects.db"

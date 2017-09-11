@@ -136,6 +136,19 @@ def pipeline(name):
 
     return jsonify({"statuscode": code, "message": message})
 
+@app.route('/api/ml/pipelineflow/<name>', methods=['POST'])
+def pipelineflow(name):
+    message = "Success"
+    code = 200
+    try:
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.MachineLearning)
+        projectmgr.UpdatePipelineFlow(name, "ml", request.json)
+    except Exception as e:
+        code = 500
+        message = str(e)
+
+    return jsonify({"statuscode": code, "message": message})
+
 @app.route('/api/ml/pipeline/<name>', methods=['GET'])
 def pipelineinfo(name):
     message = "Success"
@@ -146,6 +159,86 @@ def pipelineinfo(name):
         pipelineRec = projectmgr.GetPipeline(name, "ml")
         if pipelineRec is None:
             raise Exception("No Pipeline Found!")
+
+        result = json.loads(pipelineRec.pipelinedata)
+    except Exception as e:
+        code = 500
+        message = str(e)
+
+    return jsonify({"statuscode": code, "message": message, "result": result})
+
+@app.route('/api/ml/pipelineflow/<name>', methods=['GET'])
+def pipelineflowinfo(name):
+    message = "Success"
+    code = 200
+    result = None
+    try:
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.MachineLearning)
+        pipelineRec = projectmgr.GetPipeline(name, "ml")
+        if pipelineRec is None:
+            raise Exception("No Pipeline Found!")
+
+        result = json.loads(pipelineRec.pipelineflow)
+    except Exception as e:
+        code = 500
+        message = str(e)
+
+    return jsonify({"statuscode": code, "message": message, "result": result})
+
+@app.route('/api/ml/model/<name>/<modelname>', methods=['POST'])
+def modeldefine(name, modelname):
+    message = "Success"
+    code = 200
+    try:
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.MachineLearning)
+        projectmgr.UpsertDeepModels(name, "ml", modelname, request.json)
+    except Exception as e:
+        code = 500
+        message = str(e)
+
+    return jsonify({"statuscode": code, "message": message})
+
+@app.route('/api/ml/modelflow/<name>/<modelname>', methods=['POST'])
+def modelflow(name, modelname):
+    message = "Success"
+    code = 200
+    try:
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.MachineLearning)
+        projectmgr.UpdateModelFlow(name, "ml", modelname, request.json)
+    except Exception as e:
+        code = 500
+        message = str(e)
+
+    return jsonify({"statuscode": code, "message": message})
+
+@app.route('/api/ml/model/<name>/<modelname>', methods=['GET'])
+def modelinfo(name, modelname):
+    message = "Success"
+    code = 200
+    result = []
+    try:
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.MachineLearning)
+        modelRec = projectmgr.GetDeepModel(name, constants.ServiceTypes.MachineLearning, modelname)
+        if modelRec is None:
+            raise Exception("No Model Found!")
+
+        result = json.loads(modelRec.modeldata)
+    except Exception as e:
+        code = 500
+        message = str(e)
+
+    return jsonify({"statuscode": code, "message": message, "result": result})
+
+@app.route('/api/ml/model/<name>', methods=['GET'])
+def modellist(name):
+    message = "Success"
+    code = 200
+    result = []
+    try:
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.MachineLearning)
+        pipelineRec = projectmgr.GetDeepModels(name, constants.ServiceTypes.MachineLearning)
+        if pipelineRec is None:
+            raise Exception("No Model Found!")
 
         result = json.loads(pipelineRec.pipelinedata)
     except Exception as e:

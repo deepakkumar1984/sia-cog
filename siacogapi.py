@@ -107,6 +107,26 @@ def databasicinfo():
         code = 500
     return jsonify({"statuscode": code, "message": message, "result": result})
 
+@app.route('/api/data/columns', methods=['POST'])
+def datacolumns():
+    message = "Success"
+    code = 200
+    result = []
+    try:
+        rjson = request.json
+        if not "name" in rjson:
+            raise Exception("Please provide name of the service")
+
+        if not "filename" in rjson:
+            raise Exception("Please provide filename")
+
+        result = dataanalyzer.data_columns(rjson["name"], rjson["filename"])
+
+    except Exception as e:
+        message = str(e)
+        code = 500
+    return jsonify({"statuscode": code, "message": message, "result": result})
+
 @app.route('/api/data/plot', methods=['POST'])
 def dataplot():
     message = "Success"

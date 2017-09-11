@@ -15,6 +15,13 @@ def loaddata(name, filename, columns=None):
         
     return df
 
+def data_columns(name, filename):
+    df = loaddata(name, filename)
+    result = list(df)
+
+    return result
+
+
 def basic_info(name, filename, columns=None, count = 5):
     df = loaddata(name, filename, columns)
     result = {}

@@ -64,26 +64,18 @@ def createModel(modelDef):
 
     return model
 
-def buildModel(modelDef, fromFile = False, modelFolder=""):
-    if fromFile:
-        json_file = open(modelFolder + '/model.out', 'r')
-        loaded_model_json = json_file.read()
-        json_file.close()
-        model = model_from_json(loaded_model_json)
-        model.load_weights(modelFolder + "/model.hdf5")
-    else:
-        model = Sequential()
-        for m in modelDef['options']['layers']:
-            if m['type'] == 'input':
-                model.add(layers.Dense(m['val'], input_dim=m['dim'], kernel_initializer=m['init'], activation=m['activation']))
-            elif m['type'] == 'dense':
-                model.add(layers.Dense(m['val'], kernel_initializer=m['init'], activation=m['activation']))
-            elif m['type'] == 'output':
-                model.add(layers.Dense(m['val'], kernel_initializer=m['init']))
-    
+def buildModel(modelDef):
+    model = Sequential()
+    for m in modelDef['layers']:
+        if m['type'] == 'input':
+            model.add(
+                layers.Dense(m['val'], input_dim=m['dim'], kernel_initializer=m['init'], activation=m['activation']))
+        elif m['type'] == 'dense':
+            model.add(layers.Dense(m['val'], kernel_initializer=m['init'], activation=m['activation']))
+        elif m['type'] == 'output':
+            model.add(layers.Dense(m['val'], kernel_initializer=m['init']))
 
-    model_json = model.to_json()
-    return model_json
+    return model
 
 def Train(model, X, Y, weightpath, epoch=32, batch_size=32, validation_split = None):
     if type(X) is pandas.DataFrame:

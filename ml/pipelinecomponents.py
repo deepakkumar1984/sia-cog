@@ -1,4 +1,4 @@
-import json
+import simplejson as json
 import os
 import pickle
 import numpy
@@ -10,6 +10,7 @@ from sklearn.model_selection import cross_validate
 from sklearn.preprocessing import Imputer
 from keras.utils import np_utils
 from ml import scikitlearn, deeplearning
+from Interface import projectmgr
 
 projectfolder = ""
 model_type = ""
@@ -121,7 +122,6 @@ def image_preprocess(X, Y, pipeline):
         width = pipeline["options"]["reshape"]["width"]
         height = pipeline["options"]["reshape"]["height"]
 
-
     if reshape is True:
         X = X.reshape(X.shape[0], pixels, width, height).astype('float32')
     else:
@@ -226,14 +226,7 @@ def data_featureselection_withestimator(estimator, X, Y, pipeline):
     result["features"] = selected_columns
     return (X, Y, result)
 
-def model_build(pipeline):
-    if model_type == "mlp":
-        model = deeplearning.buildModel(pipeline)
-    else:
-        model = scikitlearn.getSKLearnModel(pipeline['options']['method'])
-    return model
-
-def model_evaluate(model, X, Y, pipeline):
+def model_evaluate(X, Y, pipeline):
     if "scoring" in pipeline["options"]:
         if len(pipeline['options']['scoring']) > 0:
             scoring = pipeline['options']['scoring']
@@ -246,6 +239,7 @@ def model_evaluate(model, X, Y, pipeline):
     if "kfold" in pipeline['options']:
         kfold = pipeline["options"]["kfold"]
 
+    model = scikitlearn.getSKLearnModel(pipeline['options']['model_name'])
     results = cross_validate(model, X, Y, cv=kfold, scoring=scoring)
     output = {"mean": results.mean(), "std": results.std(), "results": results}
     model.fit(X, Y)
@@ -255,9 +249,15 @@ def model_evaluate(model, X, Y, pipeline):
 
     return output
 
-def model_train(model, X, Y, pipeline, more = False):
+def model_train(X, Y, pipeline, more = False):
+    result = None
     if model_type == "mlp":
-        modelObj = model_from_json(model)
+        deepmodel = projectmgr.GetDeepModel(name, "ml", pipeline['options']['model_name'])
+        if deepmodel is None:
+            raise Exception(pipeline['options']['model_name'] + ": Model not found!")
+
+        modeljson = json.loads(deepmodel.modeldata)
+        modelObj = deeplearning.buildModel(modeljson)
         modelObj.compile(loss=pipeline['options']['loss'], optimizer=pipeline['options']['optimizer'],
                       metrics=pipeline['options']['scoring'])
         epoches = pipeline["options"]["epoches"]

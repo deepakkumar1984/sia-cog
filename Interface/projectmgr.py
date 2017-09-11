@@ -6,6 +6,7 @@ from projectmodels import *
 import simplejson as json
 from datetime import datetime
 import uuid
+from passlib.hash import pbkdf2_sha256
 
 engine = create_engine(DBPath())
 Base.metadata.bind = engine
@@ -44,6 +45,24 @@ def GetPipeline(srvname, srvtype):
 
     return result
 
+def GetDeepModel(srvname, srvtype, modelname):
+    result = None
+    try:
+        result = session.query(DeepModel).filter(DeepModel.servicetype == srvtype).filter(DeepModel.servicename == srvname).filter(DeepModel.modelname == modelname).one()
+    except NoResultFound as e:
+        result = None
+
+    return result
+
+def GetDeepModels(srvname, srvtype):
+    result = None
+    try:
+        result = session.query(DeepModel).filter(Service.servicetype == srvtype).filter(Service.servicename == srvname).all()
+    except NoResultFound as e:
+        result = None
+
+    return result
+
 def UpsertService(srvname, srvtype, srvdata):
     try:
         srv = GetService(srvname, srvtype)
@@ -59,15 +78,51 @@ def UpsertService(srvname, srvtype, srvdata):
         session.rollback()
         raise
 
-def UpsertPipeline(srvname, srvtype, pipelinedata):
+def UpsertPipeline(srvname, srvtype, pipelinedata, pipelineflow=None):
     try:
         pd = GetPipeline(srvname, srvtype)
         if pd is None:
-            pd = Pipeline(servicename=srvname, servicetype=srvtype, pipelinedata=json.dumps(pipelinedata), createdon=datetime.utcnow(), modifiedon=datetime.utcnow())
+            pd = Pipeline(servicename=srvname, servicetype=srvtype, pipelinedata=json.dumps(pipelinedata), pipelineflow=pipelineflow, createdon=datetime.utcnow(), modifiedon=datetime.utcnow())
             session.add(pd)
         else:
             pd.pipelinedata = json.dumps(pipelinedata)
             pd.modifiedon = datetime.utcnow()
+        session.commit()
+    except:
+        session.rollback()
+        raise
+
+def UpdatePipelineFlow(srvname, srvtype, pipelineflow):
+    try:
+        pd = GetPipeline(srvname, srvtype)
+        if not pd is None:
+            pd.pipelineflow = json.dumps(pipelineflow)
+            pd.modifiedon = datetime.utcnow()
+            session.commit()
+    except:
+        session.rollback()
+        raise
+
+def UpdateModelFlow(srvname, srvtype, modelname, modelflow):
+    try:
+        dm = GetDeepModel(srvname, srvtype, modelname)
+        if not dm is None:
+            dm.modelflow = json.dumps(modelflow)
+            dm.modifiedon = datetime.utcnow()
+            session.commit()
+    except:
+        session.rollback()
+        raise
+
+def UpsertDeepModels(srvname, srvtype, modelname, modeldata, modelflow=None):
+    try:
+        model = GetDeepModel(srvname, srvtype, modelname)
+        if model is None:
+            model = DeepModel(servicename=srvname, servicetype=srvtype, modelname=modelname, modeldata=json.dumps(modeldata), modelflow=modelflow, createdon=datetime.utcnow(), modifiedon=datetime.utcnow())
+            session.add(model)
+        else:
+            model.modeldata = json.dumps(modeldata)
+            model.modifiedon = datetime.utcnow()
         session.commit()
     except:
         session.rollback()
@@ -153,3 +208,57 @@ def LogCurrentTraining(id, epoch, loss):
 
 def GetCurrentTraining(id):
     return session.query(CurrentTraining).filter(CurrentTraining.id == id).order_by(CurrentTraining.epoch).all()
+
+def GetUserInfo(username):
+    result = None
+    try:
+        result = session.query(LoginUser).filter(LoginUser.username == username).one()
+    except NoResultFound as e:
+        result = None
+    return result
+
+def CreateUser(username, password, name, email):
+    try:
+        passhash = pbkdf2_sha256.hash(password)
+        user = LoginUser(username=username, password=passhash, name=name, email=email, createdon=datetime.utcnow(), modifiedon=datetime.utcnow())
+        session.add(user)
+        session.commit()
+    except:
+        session.rollback()
+        raise
+
+def UpdateUser(username, name, email):
+    try:
+        user = GetUserInfo(username)
+        if user is None:
+            raise Exception("User not found")
+        user.name = name
+        user.email = email
+        session.commit()
+    except:
+        session.rollback()
+        raise
+
+def UpdateUserPassword(username, password):
+    try:
+        user = GetUserInfo(username)
+        if user is None:
+            raise Exception("User not found")
+        user.password = pbkdf2_sha256.hash(password)
+        session.commit()
+    except:
+        session.rollback()
+        raise
+
+def ValidateUser(username, password):
+    result = False
+    try:
+        user = GetUserInfo(username)
+        if user is None:
+            raise Exception("User not found")
+
+        result = pbkdf2_sha256.verify(password, user.password)
+    except:
+        raise
+
+    return result
