@@ -48,16 +48,17 @@ def GetPipeline(srvname, srvtype):
 def GetDeepModel(srvname, srvtype, modelname):
     result = None
     try:
-        result = session.query(DeepModel).filter(DeepModel.servicetype == srvtype).filter(DeepModel.servicename == srvname).filter(DeepModel.modelname == modelname).one()
+        result = session.query(DeepModel.servicename, DeepModel.servicetype, DeepModel.modelname, DeepModel.modifiedon).filter(DeepModel.servicetype == srvtype).filter(DeepModel.servicename == srvname).filter(DeepModel.modelname == modelname).one()
     except NoResultFound as e:
         result = None
 
     return result
 
 def GetDeepModels(srvname, srvtype):
-    result = None
+    result = []
     try:
         result = session.query(DeepModel).filter(Service.servicetype == srvtype).filter(Service.servicename == srvname).all()
+
     except NoResultFound as e:
         result = None
 

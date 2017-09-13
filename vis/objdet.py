@@ -38,17 +38,6 @@ CONF_THRESH = 0.7
 NMS_THRESH = 0.3
 nms = py_nms_wrapper(NMS_THRESH)
 
-class NumpyFloatHandler(jsonpickle.handlers.BaseHandler):
-    """
-    Automatic conversion of numpy float  to python floats
-    Required for jsonpickle to work correctly
-    """
-    def flatten(self, obj, data):
-        """
-        Converts and rounds a Numpy.float* to Python float
-        """
-        return round(obj,6)
-
 def get_net(symbol, prefix, epoch, ctx):
     arg_params, aux_params = load_param(prefix, epoch, convert=True, ctx=ctx, process=True)
 
@@ -212,9 +201,6 @@ def predict(imagePath, predictor):
         if len(boxes) > 0:
             result.append({"object_name": CLASSES[ind], "confidence": boxes[0][4] ,"bounding_box": {"x1": boxes[0][0], "x2": boxes[0][1], "y1": boxes[0][2], "y2": boxes[0][3]}})
 
-    jsonpickle.handlers.registry.register(np.float, NumpyFloatHandler)
-    jsonpickle.handlers.registry.register(np.float32, NumpyFloatHandler)
-    jsonpickle.handlers.registry.register(np.float64, NumpyFloatHandler)
     result = jsonpickle.encode(result, unpicklable=False)
     return json.loads(result)
 

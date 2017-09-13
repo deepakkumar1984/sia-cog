@@ -10,7 +10,7 @@ import werkzeug
 from flask import jsonify
 from flask import request
 from Interface import utility, app, projectmgr, logmgr, constants
-from ml import backgroundproc, pipeline
+from ml import backgroundproc, pipeline, scikitlearn
 
 @app.route('/api/ml/create', methods=['POST'])
 def create():
@@ -229,18 +229,21 @@ def modelinfo(name, modelname):
 
     return jsonify({"statuscode": code, "message": message, "result": result})
 
-@app.route('/api/ml/model/<name>', methods=['GET'])
+@app.route('/api/ml/models/<name>', methods=['GET'])
 def modellist(name):
     message = "Success"
     code = 200
     result = []
     try:
-        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.MachineLearning)
-        pipelineRec = projectmgr.GetDeepModels(name, constants.ServiceTypes.MachineLearning)
-        if pipelineRec is None:
-            raise Exception("No Model Found!")
+        service = projectmgr.GetService(name, constants.ServiceTypes.MachineLearning)
+        modeltype = service.modeltype
+        if modeltype == "mlp":
+            models = projectmgr.GetDeepModels(name, constants.ServiceTypes.MachineLearning)
+            for m in models:
+                result.append({"name": m.modelname, "modifiedon": m.modifiedon})
+        elif modeltype == "general":
+            result = scikitlearn.getModels()
 
-        result = json.loads(pipelineRec.pipelinedata)
     except Exception as e:
         code = 500
         message = str(e)

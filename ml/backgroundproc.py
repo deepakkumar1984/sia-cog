@@ -29,7 +29,7 @@ def Validate(id, name):
         message = str(e)
         status = "Error"
 
-    projectmgr.EndJob(id, "status", message, json.dumps(results))
+    projectmgr.EndJob(id, status, message, json.dumps(results))
 
 def Train(id, name, epoches, batch_size):
     results = {}

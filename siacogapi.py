@@ -1,8 +1,13 @@
 import simplejson as json
 from flask import jsonify, request
 from dateutil import parser
-from Interface import utility, app, dataanalyzer, sysinfo, projectmgr, logmgr
+from Interface import utility, app, dataanalyzer, sysinfo, projectmgr, logmgr, dumpmgr
 import jsonpickle
+import pickle
+from pandas import DataFrame
+import numpy
+
+
 
 @app.route('/api/status', methods=['GET'])
 def apistatus():
@@ -65,13 +70,73 @@ def apilistwithname(srvtype, srvname):
 
 @app.route('/api/jobs/<id>', methods=['GET'])
 def jobswithid(id):
-    message = "Started"
+    message = "Success"
     result = []
     code = 200
     try:
         job = projectmgr.GetJob(id)
         if not job.result is None:
-            result = json.loads(job.result)
+            result = {"id": job.id, "start": job.start, "end": job.end, "message": job.message, "totalepoch": job.totalepoch, "status": job.status, "createdon": job.createdon}
+            result["resultdata"] = json.loads(job.result)
+
+    except Exception as e:
+        code = 500
+        message = str(e)
+
+    return jsonify({"statuscode": code, "message": message, "result": result})
+
+@app.route('/api/jobs/<srvtype>/<srvname>', methods=['GET'])
+def listjobs(srvtype, srvname):
+    message = "Success"
+    result = []
+    code = 200
+    try:
+        jobs = projectmgr.GetJobs(srvname, srvtype)
+        for j in jobs:
+            result.append({"id": j.id, "start": j.start, "end": j.end, "message": j.message, "totalepoch": j.totalepoch, "status": j.status, "createdon": j.createdon})
+
+    except Exception as e:
+        code = 500
+        message = str(e)
+
+    return jsonify({"statuscode": code, "message": message, "result": result})
+
+@app.route('/api/pipelinesnap/<name>/<id>', methods=['GET'])
+def getpipelinesnap(name, id):
+    message = "Success"
+    result = []
+    code = 200
+    try:
+        dump = dumpmgr.GetPipelineDump(id, name)
+        if not dump is None:
+            result = json.loads(dump.pipeline)
+
+    except Exception as e:
+        code = 500
+        message = str(e)
+
+    return jsonify({"statuscode": code, "message": message, "result": result})
+
+@app.route('/api/pipelinelog/<name>/<id>/<module>', methods=['GET'])
+def getpipelinelog(name, id, module):
+    message = "Success"
+    result = []
+    code = 200
+    try:
+        dump = dumpmgr.GetPipelineDump(id, name)
+        dumpresult = pickle.loads(dump.result)
+
+        for d in dumpresult:
+            if "output->" + module  in d:
+                data = dumpresult[d]
+                if type(data) is DataFrame:
+                    data = json.loads(data.head(20).to_json())
+                elif type(data) is dict:
+                    data = json.loads(jsonpickle.encode(data, unpicklable=False))
+                else:
+                    data = json.loads(data)
+
+                result.append({"name": d, "result": data})
 
     except Exception as e:
         code = 500
@@ -163,6 +228,73 @@ def predlogs():
         logs = logmgr.GetLogs(rjson["servicename"], rjson["category"], start, end, rjson["status"])
         result = jsonpickle.encode(logs, unpicklable=False)
 
+    except Exception as e:
+        message = str(e)
+        code = 500
+    return jsonify({"statuscode": code, "message": message, "result": result})
+
+@app.route('/api/users/create', methods=['POST'])
+def createuser():
+    message = "Success"
+    code = 200
+    result = []
+    try:
+        rjson = request.get_json()
+        utility.validateParam(rjson, "username")
+        utility.validateParam(rjson, "password")
+        utility.validateParam(rjson, "name")
+        projectmgr.CreateUser(rjson["username"], rjson["password"], rjson["name"], rjson["email"])
+
+    except Exception as e:
+        message = str(e)
+        code = 500
+    return jsonify({"statuscode": code, "message": message, "result": result})
+
+@app.route('/api/users/update/<username>', methods=['POST'])
+def updateuser(username):
+    message = "Success"
+    code = 200
+    result = []
+    try:
+        rjson = request.get_json()
+        utility.validateParam(rjson, "name")
+        projectmgr.UpdateUser(username, rjson["name"], rjson["email"])
+
+    except Exception as e:
+        message = str(e)
+        code = 500
+    return jsonify({"statuscode": code, "message": message, "result": result})
+
+@app.route('/api/users/changepwd/<username>', methods=['POST'])
+def updateuserpassword(username):
+    message = "Success"
+    code = 200
+    result = []
+    try:
+        rjson = request.get_json()
+        utility.validateParam(rjson, "currentpassword")
+        utility.validateParam(rjson, "password")
+        valid = projectmgr.ValidateUser(username, rjson["currentpassword"])
+        if valid:
+            projectmgr.UpdateUserPassword(username, rjson["password"])
+        else:
+            raise Exception("Please enter valid current password")
+
+    except Exception as e:
+        message = str(e)
+        code = 500
+    return jsonify({"statuscode": code, "message": message, "result": result})
+
+@app.route('/api/users/validate', methods=['POST'])
+def validateuser(username):
+    message = "Success"
+    code = 200
+    result = False
+    try:
+        rjson = request.get_json()
+        utility.validateParam(rjson, "username")
+        utility.validateParam(rjson, "password")
+        result = projectmgr.ValidateUser(rjson["username"], rjson["password"])
     except Exception as e:
         message = str(e)
         code = 500

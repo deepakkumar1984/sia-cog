@@ -10,16 +10,6 @@ srvname = ""
 model_type = ""
 jobid = ""
 lastpipeline = ""
-class NumpyFloatHandler(jsonpickle.handlers.BaseHandler):
-    """
-    Automatic conversion of numpy float  to python floats
-    Required for jsonpickle to work correctly
-    """
-    def flatten(self, obj, data):
-        """
-        Converts and rounds a Numpy.float* to Python float
-        """
-        return round(obj,6)
 
 def init(self, srvname, model_type, jobid):
     self.srvname = srvname
@@ -220,11 +210,4 @@ def ContinueTraining(epoches=32, batch_size=32):
 def Output(name, num = None):
     pipelinecomponents.init(pipelinecomponents, srvname, model_type, jobid)
     result = pipelinecomponents.return_result(name, num)
-    jsonpickle.handlers.registry.register(numpy.int, NumpyFloatHandler)
-    jsonpickle.handlers.registry.register(numpy.int32, NumpyFloatHandler)
-    jsonpickle.handlers.registry.register(numpy.int64, NumpyFloatHandler)
-    jsonpickle.handlers.registry.register(numpy.float, NumpyFloatHandler)
-    jsonpickle.handlers.registry.register(numpy.float32, NumpyFloatHandler)
-    jsonpickle.handlers.registry.register(numpy.float64, NumpyFloatHandler)
-
     return jsonpickle.encode(result, unpicklable=False)

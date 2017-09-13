@@ -58,53 +58,29 @@ def getSKLearnModel(modelName):
 
     return model
 
-def getRegressionModel(modelName):
-    if modelName=='LinearRegression':
-        model = linear_model.LinearRegression()
-    elif modelName=='BayesianRidge':
-        model = linear_model.BayesianRidge()
-    elif modelName=='ARDRegression':
-        model = linear_model.ARDRegression()
-    elif modelName=='ElasticNet':
-        model = linear_model.ElasticNet()
-    elif modelName=='HuberRegressor':
-        model = linear_model.HuberRegressor()
-    elif modelName=='Lasso':
-        model = linear_model.Lasso()
-    elif modelName=='LassoLars':
-        model = linear_model.LassoLars()
-    elif modelName=='Rigid':
-        model = linear_model.Ridge()
-    elif modelName=='SGDRegressor':
-        model = linear_model.SGDRegressor()
-    elif modelName=='SVR':
-        model = SVR()
-    
-    return model
-
-def getClassificationModel(modelName):
-    if modelName=='MLPClassifier':
-        model = MLPClassifier()
-    elif modelName=='KNeighborsClassifier':
-        model = KNeighborsClassifier()
-    elif modelName=='SVC':
-        model = SVC()
-    elif modelName=='GaussianProcessClassifier':
-        model = GaussianProcessClassifier()
-    elif modelName=='DecisionTreeClassifier':
-        model = DecisionTreeClassifier()
-    elif modelName=='RandomForestClassifier':
-        model = RandomForestClassifier()
-    elif modelName=='AdaBoostClassifier':
-        model = AdaBoostClassifier()
-    elif modelName=='GaussianNB':
-        model = GaussianNB()
-    elif modelName=='LogisticRegression':
-        model = linear_model.LogisticRegression()
-    elif modelName=='QuadraticDiscriminantAnalysis':
-        model = QuadraticDiscriminantAnalysis()
-    
-    return model
+def getModels():
+    result = []
+    result.append("LinearRegression")
+    result.append("BayesianRidge")
+    result.append("ARDRegression")
+    result.append("ElasticNet")
+    result.append("HuberRegressor")
+    result.append("Lasso")
+    result.append("LassoLars")
+    result.append("Rigid")
+    result.append("SGDRegressor")
+    result.append("SVR")
+    result.append("MLPClassifier")
+    result.append("KNeighborsClassifier")
+    result.append("SVC")
+    result.append("GaussianProcessClassifier")
+    result.append("DecisionTreeClassifier")
+    result.append("RandomForestClassifier")
+    result.append("AdaBoostClassifier")
+    result.append("GaussianNB")
+    result.append("LogisticRegression")
+    result.append("QuadraticDiscriminantAnalysis")
+    return result
 
 
 
