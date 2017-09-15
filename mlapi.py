@@ -236,7 +236,8 @@ def modellist(name):
     result = []
     try:
         service = projectmgr.GetService(name, constants.ServiceTypes.MachineLearning)
-        modeltype = service.modeltype
+        servicedata = json.loads(service.servicedata)
+        modeltype = servicedata["model_type"]
         if modeltype == "mlp":
             models = projectmgr.GetDeepModels(name, constants.ServiceTypes.MachineLearning)
             for m in models:

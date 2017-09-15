@@ -6,6 +6,8 @@ from flask import Flask
 from flask_cors import CORS, cross_origin
 import numpy
 import jsonpickle
+from flask_sqlalchemy import SQLAlchemy
+
 app = Flask(__name__)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 

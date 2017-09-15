@@ -57,7 +57,7 @@ def GetDeepModel(srvname, srvtype, modelname):
 def GetDeepModels(srvname, srvtype):
     result = []
     try:
-        result = session.query(DeepModel).filter(Service.servicetype == srvtype).filter(Service.servicename == srvname).all()
+        result = session.query(DeepModel.modelname, DeepModel.createdon, DeepModel.modifiedon).filter(Service.servicetype == srvtype).filter(Service.servicename == srvname).all()
 
     except NoResultFound as e:
         result = None
@@ -263,3 +263,36 @@ def ValidateUser(username, password):
         raise
 
     return result
+
+def GetSetting(key):
+    result = None
+    try:
+        keyVal = session.query(Setting).filter(Setting.key == key).one()
+    except NoResultFound as e:
+        result = None
+
+    return result
+
+def SetSetting(key, value):
+    setting = None
+    try:
+        try:
+            setting = session.query(Setting).filter(Setting.key == key).one()
+        except NoResultFound as re:
+            setting = None
+
+        if setting is None:
+            setting = Setting(key=key, value=value)
+            session.add(setting)
+            session.commit()
+        else:
+            setting.value = value
+            session.commit()
+    except:
+        session.rollback()
+        raise
+
+
+
+
+

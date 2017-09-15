@@ -61,6 +61,11 @@ class LoginUser(Base):
     createdon = Column(DateTime, nullable=False)
     modifiedon = Column(DateTime, nullable=False)
 
+class Setting(Base):
+    __tablename__ = 'setting'
+    key = Column(String, primary_key=True)
+    value = Column(String, nullable=False)
+
 def DBPath():
     return "sqlite:///./data/projects.db"
 
