@@ -41,14 +41,14 @@ class TrainingJob(Base):
     end = Column(DateTime, nullable=True)
     totalepoch = Column(Integer, nullable=True)
     result = Column(String, nullable=True)
-    modelhistory = Column(String, nullable=True)
     message = Column(String, nullable=True)
     status = Column(String(20), nullable=False)
     createdon = Column(DateTime, nullable=False)
 
 class CurrentTraining(Base):
     __tablename__ = 'currenttraining'
-    id = Column(Integer, primary_key=True)
+    autoid = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, nullable=False)
     epoch = Column(Integer, nullable=False)
     loss = Column(Float, nullable=False)
 

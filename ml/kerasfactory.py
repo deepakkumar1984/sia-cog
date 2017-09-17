@@ -1,5 +1,6 @@
 import numpy
 import pandas
+import keras
 from keras import callbacks
 from keras.models import Sequential, model_from_json
 from keras import layers
@@ -51,13 +52,14 @@ def createModel(modelDef):
     model = Sequential()
     for item in modelDef:
         layerName = item["name"]
-        module = eval("keras.layers.core")
+        module = eval("keras.layers." + item["cat"])
         func = getattr(module, layerName)
         args = {}
-        for p in item:
-            if p == "name":
-                continue
-            args[p] = item[p]
+        for p in item["options"]:
+            value = item["options"][p]
+            if type(value) is list:
+                value = tuple(value)
+            args[p] = value
 
         layer = func(**args)
         model.add(layer)
@@ -92,7 +94,7 @@ def Train(model, X, Y, weightpath, epoch=32, batch_size=32, validation_split = N
     else:
         hist = model.fit(X, Y, validation_split=validation_split, epochs=epoch, batch_size=batch_size, verbose=1, callbacks=[hist])
 
-    projectmgr.UpdateModelHistory(jobid, json.dumps(hist.history))
+
     model.save_weights(weightpath)
     return hist.history
 

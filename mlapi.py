@@ -10,7 +10,7 @@ import werkzeug
 from flask import jsonify
 from flask import request
 from Interface import utility, app, projectmgr, logmgr, constants
-from ml import backgroundproc, pipeline, scikitlearn
+from ml import backgroundproc, pipeline, scikitlearn, kerasfactory
 
 @app.route('/api/ml/create', methods=['POST'])
 def create():
@@ -215,7 +215,8 @@ def modelflow(name, modelname):
 def modelinfo(name, modelname):
     message = "Success"
     code = 200
-    result = []
+    result = None
+    model_json = None
     try:
         projectmgr.ValidateServiceExists(name, constants.ServiceTypes.MachineLearning)
         modelRec = projectmgr.GetDeepModel(name, constants.ServiceTypes.MachineLearning, modelname)
@@ -223,6 +224,26 @@ def modelinfo(name, modelname):
             raise Exception("No Model Found!")
 
         result = json.loads(modelRec.modeldata)
+        model_obj = kerasfactory.createModel(result)
+        model_json = json.loads(model_obj.to_json())
+    except Exception as e:
+        code = 500
+        message = str(e)
+
+    return jsonify({"statuscode": code, "message": message, "result": result, "model_json": model_json})
+
+@app.route('/api/ml/modelflow/<name>/<modelname>', methods=['GET'])
+def modelflowinfo(name, modelname):
+    message = "Success"
+    code = 200
+    result = None
+    try:
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.MachineLearning)
+        modelRec = projectmgr.GetDeepModel(name, constants.ServiceTypes.MachineLearning, modelname)
+        if modelRec is None:
+            raise Exception("No Model Found!")
+
+        result = json.loads(modelRec.modelflow)
     except Exception as e:
         code = 500
         message = str(e)
@@ -251,38 +272,19 @@ def modellist(name):
 
     return jsonify({"statuscode": code, "message": message, "result": result})
 
-@app.route('/api/ml/evaluate/<name>', methods=['POST'])
-def evaluate(name):
-    message = ""
-    code = 200
-    try:
-        taskid = ""
-        trainingstatus = app.trainingstatus
-        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.MachineLearning)
-        if trainingstatus == 1:
-            message = "Training in progress! Please try after the current training is completed."
-            code = 500
-        else:
-            taskid = backgroundproc.StartValidateThread(name)
-            message = "Job started! Please check status for id: " + taskid
-    except Exception as e:
-        code = 500
-        message = str(e)
-
-    return jsonify({"statuscode": code, "message": message, "jobid": taskid})
-
-@app.route('/api/ml/train/<name>', methods=['POST'])
-def train(name):
+@app.route('/api/ml/execute/<name>', methods=['POST'])
+def execute(name):
     message = "Success"
     code = 200
     taskid = ""
 
     try:
-        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.MachineLearning)
+        service = projectmgr.ValidateServiceExists(name, constants.ServiceTypes.MachineLearning)
         data = json.loads(request.data)
         epoches = 32
         batch_size = 32
         taskid = ""
+        servicejson = json.loads(service.servicedata)
         if "epoches" in data:
             epoches = data['epoches']
         if "batch_size" in data:
@@ -293,7 +295,11 @@ def train(name):
             message = "Training in progress! Please try after the current training is completed."
             code = 500
         else:
-            taskid = backgroundproc.StartTrainThread(name, epoches, batch_size)
+            if servicejson["model_type"] == "mlp":
+                taskid = backgroundproc.StartTrainThread(name, epoches, batch_size)
+            elif servicejson["model_type"] == "general":
+                taskid = backgroundproc.StartValidateThread(name)
+
             message = "Job started! Please check status for id: " + taskid
     except Exception as e:
         code = 500
@@ -349,5 +355,22 @@ def predict(name):
         code = 500
         message = str(e)
         logmgr.LogPredError(name, constants.ServiceTypes.MachineLearning, start, message)
+
+    return jsonify({"statuscode": code, "message": message, "result": result})
+
+@app.route('/api/ml/recentjob', methods=['GET'])
+def recentjob(id):
+    message = "Started"
+    result = []
+    code = 200
+    try:
+        currentList = projectmgr.GetCurrentTraining(id)
+
+        for l in currentList:
+            result.append({"epoch": l.epoch, "loss": l.loss});
+
+    except Exception as e:
+        code = 500
+        message = str(e)
 
     return jsonify({"statuscode": code, "message": message, "result": result})

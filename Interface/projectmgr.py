@@ -1,7 +1,7 @@
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm.exc import NoResultFound
-
+from sqlalchemy import and_
 from projectmodels import *
 import simplejson as json
 from datetime import datetime
@@ -26,6 +26,7 @@ def ValidateServiceExists(srvname, srvtype):
     s = GetService(srvname, srvtype)
     if s is None:
         raise Exception("Service does not exists")
+    return s
 
 def GetServices(srvtype):
     result = None
@@ -48,7 +49,7 @@ def GetPipeline(srvname, srvtype):
 def GetDeepModel(srvname, srvtype, modelname):
     result = None
     try:
-        result = session.query(DeepModel.servicename, DeepModel.servicetype, DeepModel.modelname, DeepModel.modifiedon).filter(DeepModel.servicetype == srvtype).filter(DeepModel.servicename == srvname).filter(DeepModel.modelname == modelname).one()
+        result = session.query(DeepModel).filter(DeepModel.servicetype == srvtype).filter(DeepModel.servicename == srvname).filter(DeepModel.modelname == modelname).one()
     except NoResultFound as e:
         result = None
 
@@ -57,7 +58,7 @@ def GetDeepModel(srvname, srvtype, modelname):
 def GetDeepModels(srvname, srvtype):
     result = []
     try:
-        result = session.query(DeepModel.modelname, DeepModel.createdon, DeepModel.modifiedon).filter(Service.servicetype == srvtype).filter(Service.servicename == srvname).all()
+        result = session.query(DeepModel.servicename, DeepModel.servicetype, DeepModel.modelname, DeepModel.modifiedon).filter(and_(DeepModel.servicetype == srvtype, DeepModel.servicename == srvname))
 
     except NoResultFound as e:
         result = None
@@ -176,16 +177,16 @@ def EndJob(id, status, message, result=None):
         job.end = datetime.utcnow()
         job.status = status
         job.message = message
-        job.result = result
+        #job.result = result
         session.commit()
     except:
         session.rollback()
         raise
 
-def UpdateModelHistory(id, history):
+def UpdateExecuteResult(id, history):
     try:
         job = GetJob(id)
-        job.modelhistory = history
+        job.result = history
         session.commit()
     except:
         raise
@@ -208,7 +209,10 @@ def LogCurrentTraining(id, epoch, loss):
         raise
 
 def GetCurrentTraining(id):
-    return session.query(CurrentTraining).filter(CurrentTraining.id == id).order_by(CurrentTraining.epoch).all()
+    return session.query(CurrentTraining)
+
+def GetLastTraining():
+    session.query(TrainingJob).order_by(TrainingJob.createdon)
 
 def GetUserInfo(username):
     result = None
