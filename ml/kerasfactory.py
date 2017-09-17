@@ -96,5 +96,6 @@ def Train(model, X, Y, weightpath, epoch=32, batch_size=32, validation_split = N
 
 
     model.save_weights(weightpath)
-    return hist.history
+    result = {"epoches": hist.epoch, "metrices": hist.history}
+    return result
 

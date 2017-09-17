@@ -93,7 +93,7 @@ def listjobs(srvtype, srvname):
     try:
         jobs = projectmgr.GetJobs(srvname, srvtype)
         for j in jobs:
-            result.append({"id": j.id, "start": j.start, "end": j.end, "message": j.message, "totalepoch": j.totalepoch, "status": j.status, "createdon": j.createdon})
+            result.append({"id": j.id, "servicename": j.servicename, "servicetype": j.servicetype, "start": j.start, "end": j.end, "message": j.message, "totalepoch": j.totalepoch, "status": j.status, "createdon": j.createdon})
 
     except Exception as e:
         code = 500

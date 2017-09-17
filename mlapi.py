@@ -358,17 +358,28 @@ def predict(name):
 
     return jsonify({"statuscode": code, "message": message, "result": result})
 
-@app.route('/api/ml/recentjob', methods=['GET'])
-def recentjob(id):
-    message = "Started"
-    result = []
+@app.route('/api/ml/recentjob/<name>', methods=['GET'])
+def recentjob(name):
+    message = "Completed"
+    result = {}
     code = 200
     try:
-        currentList = projectmgr.GetCurrentTraining(id)
+        data = projectmgr.GetLastTraining(name)
+        result = {"epoches": data[0], "losses": data[1]}
+    except Exception as e:
+        code = 500
+        message = str(e)
 
-        for l in currentList:
-            result.append({"epoch": l.epoch, "loss": l.loss});
+    return jsonify({"statuscode": code, "message": message, "result": result})
 
+@app.route('/api/ml/prevjob/<name>', methods=['GET'])
+def prevjob(name):
+    message = "Completed"
+    result = {}
+    code = 200
+    try:
+        data = projectmgr.GetPrevTraining(name)
+        result = {"epoches": data[0], "losses": data[1]}
     except Exception as e:
         code = 500
         message = str(e)

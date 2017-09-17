@@ -157,7 +157,7 @@ def GetJob(id):
     return result
 
 def GetJobs(srvname, srvtype):
-    result = session.query(TrainingJob).filter(TrainingJob.servicetype == srvtype).filter(TrainingJob.servicename == srvname).all()
+    result = session.query(TrainingJob).filter(TrainingJob.servicetype == srvtype).filter(TrainingJob.servicename == srvname).order_by(TrainingJob.createdon.desc()).all()
     return result
 
 def StartJob(srvname, srvtype, totalepoch):
@@ -211,8 +211,57 @@ def LogCurrentTraining(id, epoch, loss):
 def GetCurrentTraining(id):
     return session.query(CurrentTraining)
 
-def GetLastTraining():
-    session.query(TrainingJob).order_by(TrainingJob.createdon)
+def GetLastTraining(name=""):
+    job = None
+    epoches = []
+    losses = []
+    if name == "__all__":
+        jobs = session.query(TrainingJob).order_by(TrainingJob.createdon.desc()).limit(1).all()
+    else:
+        jobs = session.query(TrainingJob).filter(and_(TrainingJob.servicename==name, TrainingJob.servicetype=="ml")).order_by(TrainingJob.createdon.desc()).limit(1).all()
+
+    if len(jobs) == 0:
+        return epoches, losses
+
+    job = jobs[0]
+
+    if job.status == "Started":
+        epochData = session.query(CurrentTraining).filter(CurrentTraining.id == job.id)
+        for e in epochData:
+            epoches.append(e.epoch)
+            losses.append(e.loss)
+    elif job.status == "Completed":
+        trainingdata = json.loads(job.result)
+        if "epoches" in trainingdata:
+            epoches = trainingdata["epoches"]
+
+        if "metrices" in trainingdata:
+            losses = trainingdata["metrices"]["loss"]
+
+    return epoches, losses
+
+def GetPrevTraining(name=""):
+    job = None
+    epoches = []
+    losses = []
+    if name == "__all__":
+        jobs = session.query(TrainingJob).order_by(TrainingJob.createdon.desc()).limit(2).all()
+    else:
+        jobs = session.query(TrainingJob).filter(and_(TrainingJob.servicename==name, TrainingJob.servicetype=="ml")).order_by(TrainingJob.createdon.desc()).limit(2).all()
+
+    if len(jobs) != 2:
+        return epoches, losses
+
+    job = jobs[1]
+
+    trainingdata = json.loads(job.result)
+    if "epoches" in trainingdata:
+        epoches = trainingdata["epoches"]
+
+    if "metrices" in trainingdata:
+        losses = trainingdata["metrices"]["loss"]
+
+    return epoches, losses
 
 def GetUserInfo(username):
     result = None
