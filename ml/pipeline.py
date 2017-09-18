@@ -22,6 +22,10 @@ def getPipelineData():
     pipelinejson = json.loads(projectmgr.GetPipeline(srvname, constants.ServiceTypes.MachineLearning).pipelinedata)
     return pipelinejson
 
+def getPipelineFlowData():
+    pipelineflow = json.loads(projectmgr.GetPipeline(srvname, constants.ServiceTypes.MachineLearning).pipelineflow)
+    return pipelineflow
+
 def Run():
     pickleFile = pipelinecomponents.projectfolder + '/pipeline.out'
     pipelinejson = getPipelineData()
@@ -66,7 +70,7 @@ def Run():
     with open(pickleFile, "wb") as f:
         pickle.dump(resultset, f)
     pickledata = pickle.dumps(resultset)
-    dumpmgr.DumpPipelineResult(jobid, srvname, getPipelineData(), pickledata)
+    dumpmgr.DumpPipelineResult(jobid, srvname, getPipelineFlowData(), pickledata)
 
 def Predict(filename, savePrediction = False):
     pipelinecomponents.init(pipelinecomponents, srvname, model_type, jobid)
@@ -205,7 +209,7 @@ def ContinueTraining(epoches=32, batch_size=32):
         pickle.dump(resultset, f)
 
     pickledata = pickle.dumps(resultset)
-    dumpmgr.DumpPipelineResult(jobid, srvname, getPipelineData(), pickledata)
+    dumpmgr.DumpPipelineResult(jobid, srvname, getPipelineFlowData(), pickledata)
 
 def Output(name, num = None):
     pipelinecomponents.init(pipelinecomponents, srvname, model_type, jobid)

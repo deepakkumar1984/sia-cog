@@ -121,6 +121,7 @@ def getpipelinesnap(name, id):
 def getpipelinelog(name, id, module):
     message = "Success"
     result = []
+    dtype = ""
     code = 200
     try:
         dump = dumpmgr.GetPipelineDump(id, name)
@@ -131,8 +132,10 @@ def getpipelinelog(name, id, module):
                 data = dumpresult[d]
                 if type(data) is DataFrame:
                     data = json.loads(data.head(20).to_json())
+                    dtype = "frame"
                 elif type(data) is dict:
                     data = json.loads(jsonpickle.encode(data, unpicklable=False))
+                    dtype = "dict"
                 else:
                     data = json.loads(data)
 
@@ -142,7 +145,7 @@ def getpipelinelog(name, id, module):
         code = 500
         message = str(e)
 
-    return jsonify({"statuscode": code, "message": message, "result": result})
+    return jsonify({"statuscode": code, "message": message, "result": result, "dtype": dtype})
 
 @app.route('/api/data/info', methods=['POST'])
 def databasicinfo():
