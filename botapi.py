@@ -32,6 +32,7 @@ def botupdate(name):
     message = "Success"
     code = 200
     try:
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.ChatBot)
         projectmgr.UpsertService(name, constants.ServiceTypes.ChatBot, request.json)
     except Exception as e:
         code = 500
@@ -44,6 +45,7 @@ def botdelete(name):
     message = "Success"
     code = 200
     try:
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.ChatBot)
         botfolder = "./data/__chatbot/" + name
         if os.path.exists(botfolder):
             shutil.rmtree(botfolder)
@@ -61,6 +63,7 @@ def bottrain(name):
     message = "Success"
     code = 200
     try:
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.ChatBot)
         id = projectmgr.StartJob(name, constants.ServiceTypes.ChatBot, 0)
         rjson = request.json
         data = rjson["data"]
@@ -99,6 +102,7 @@ def botpredict(name):
     start = datetime.now()
     result = []
     try:
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.ChatBot)
         rjson = request.json
         data = rjson["data"]
         result = chatbot.predict(name, data)

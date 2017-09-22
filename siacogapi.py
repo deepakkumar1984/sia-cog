@@ -4,7 +4,8 @@ from dateutil import parser
 from Interface import utility, app, dataanalyzer, sysinfo, projectmgr, logmgr, dumpmgr
 import jsonpickle
 import pickle
-from pandas import DataFrame
+import pandas
+from pandas import DataFrame, Series
 import numpy
 
 
@@ -71,7 +72,7 @@ def apilistwithname(srvtype, srvname):
 @app.route('/api/jobs/<id>', methods=['GET'])
 def jobswithid(id):
     message = "Success"
-    result = []
+    result = None
     code = 200
     try:
         job = projectmgr.GetJob(id)
@@ -131,21 +132,25 @@ def getpipelinelog(name, id, module):
             if "output->" + module  in d:
                 data = dumpresult[d]
                 if type(data) is DataFrame:
-                    data = json.loads(data.head(20).to_json())
+                    data = data.head(20).to_html()
                     dtype = "frame"
                 elif type(data) is dict:
                     data = json.loads(jsonpickle.encode(data, unpicklable=False))
                     dtype = "dict"
+                elif type(data) is Series:
+                    data = data.to_frame()
+                    data = data.head(20).to_html()
+                    dtype = "frame"
                 else:
                     data = json.loads(data)
 
-                result.append({"name": d, "result": data})
+                result.append({"name": d, "result": data, "dtype": dtype})
 
     except Exception as e:
         code = 500
         message = str(e)
 
-    return jsonify({"statuscode": code, "message": message, "result": result, "dtype": dtype})
+    return jsonify({"statuscode": code, "message": message, "result": result})
 
 @app.route('/api/data/info', methods=['POST'])
 def databasicinfo():
@@ -229,7 +234,8 @@ def predlogs():
         end = parser.parse(rjson["end"] + " 23:59")
 
         logs = logmgr.GetLogs(rjson["servicename"], rjson["category"], start, end, rjson["status"])
-        result = jsonpickle.encode(logs, unpicklable=False)
+        for l in logs:
+            result.append({"cat": l.servicetype, "name": l.servicename, "start": l.start, "end": l.end, "duration": l.duration, "status": l.status, "message": l.message})
 
     except Exception as e:
         message = str(e)
@@ -298,6 +304,36 @@ def validateuser(username):
         utility.validateParam(rjson, "username")
         utility.validateParam(rjson, "password")
         result = projectmgr.ValidateUser(rjson["username"], rjson["password"])
+    except Exception as e:
+        message = str(e)
+        code = 500
+    return jsonify({"statuscode": code, "message": message, "result": result})
+
+@app.route('/api/logs/topcalls', methods=['GET'])
+def topcalls():
+    message = "Success"
+    code = 200
+    result = []
+    try:
+        logs = logmgr.GetTopCalls()
+        for l in logs:
+            result.append({"servicename": l.servicename, "servicetype": l.servicetype, "count": l.count})
+        result = json.loads(json.dumps(result))
+    except Exception as e:
+        message = str(e)
+        code = 500
+    return jsonify({"statuscode": code, "message": message, "result": result})
+
+@app.route('/api/logs/toperrors', methods=['GET'])
+def toperrors():
+    message = "Success"
+    code = 200
+    result = []
+    try:
+        logs = logmgr.GetTopErrors()
+        for l in logs:
+            result.append({"servicename": l.servicename, "servicetype": l.servicetype, "count": l.count})
+        result = json.loads(json.dumps(result))
     except Exception as e:
         message = str(e)
         code = 500

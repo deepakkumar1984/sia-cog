@@ -30,6 +30,7 @@ def visionupdate(name):
     code = 200
     try:
         rjson = request.get_json()
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.Vision)
         projectmgr.UpsertService(name, constants.ServiceTypes.Vision, rjson)
     except Exception as e:
         code = 500
@@ -42,6 +43,7 @@ def visiondelete(name):
     message = "Success"
     code = 200
     try:
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.Vision)
         projectmgr.DeleteService(name, constants.ServiceTypes.Vision)
     except Exception as e:
         code = 500
@@ -56,6 +58,7 @@ def visionpredict(name):
     start = datetime.now()
     try:
         data = request.get_json()
+        projectmgr.ValidateServiceExists(name, constants.ServiceTypes.Vision)
         servicejson = utility.getServiceJson(name, constants.ServiceTypes.Vision)
         result = {}
         imagepath = data['imagepath']
@@ -80,11 +83,11 @@ def visionpredict(name):
 
             result = cvmgr.extracttext(imagepath, preprocess)
 
-        logmgr.LogPredSuccess(name, constants.ServiceTypes.ChatBot, start)
+        logmgr.LogPredSuccess(name, constants.ServiceTypes.Vision, start)
     except Exception as e:
         code = 500
         message = str(e)
-        logmgr.LogPredError(name, constants.ServiceTypes.ChatBot, start, message)
+        logmgr.LogPredError(name, constants.ServiceTypes.Vision, start, message)
 
     return jsonify({"statuscode": code, "message": message, "result": result})
 
