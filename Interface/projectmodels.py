@@ -9,6 +9,7 @@ class Service(Base):
     __tablename__ = 'service'
     servicename = Column(String(20), primary_key=True)
     servicetype = Column(String(20), primary_key=True)
+    servicesubtype = Column(String(20), nullable=True)
     servicedata = Column(String, nullable=False)
     createdon = Column(DateTime, nullable=False)
     modifiedon = Column(DateTime, nullable=False)
@@ -51,6 +52,7 @@ class CurrentTraining(Base):
     id = Column(Integer, nullable=False)
     epoch = Column(Integer, nullable=False)
     loss = Column(Float, nullable=False)
+    metrices = Column(String, nullable=True)
 
 class LoginUser(Base):
     __tablename__ = 'loginuser'

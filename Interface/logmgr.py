@@ -36,7 +36,7 @@ def LogPredError(srvname, srvtype, start, errormsg):
         raise
 
 def GetLogs(srvname, srvtype, fromdate, todate, status):
-    result = session.query(PredLog).filter(PredLog.createdon >= fromdate).filter(PredLog.createdon <= todate).filter(PredLog.status == status.upper()).all()
+    result = session.query(PredLog).filter(PredLog.servicetype == srvtype).filter(PredLog.servicename == srvname).filter(PredLog.createdon >= fromdate).filter(PredLog.createdon <= todate).filter(PredLog.status == status.upper()).all()
     return result
 
 def GetTopCalls():

@@ -13,7 +13,7 @@ def Validate(id, name):
         srvjson = json.loads(projectmgr.GetService(name, "ml").servicedata)
 
         model_type = srvjson["model_type"]
-        pipeline.init(pipeline, name, model_type, "")
+        pipeline.init(pipeline, name, model_type, id)
         pipelinejson = pipeline.getPipelineData()
         pipeline.Run()
 

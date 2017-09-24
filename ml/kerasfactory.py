@@ -35,7 +35,7 @@ class Histories(callbacks.Callback):
             for m in logs:
                 list[m] = logs[m]
 
-            projectmgr.LogCurrentTraining(jobid, epoch, logs.get("loss"))
+            projectmgr.LogCurrentTraining(jobid, epoch, logs.get("loss"), json.dumps(logs))
         except Exception as e:
             app.trainingstatus = 0
             projectmgr.ClearCurrentTraining(jobid)

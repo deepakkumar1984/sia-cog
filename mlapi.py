@@ -18,12 +18,13 @@ def create():
     code = 200
     try:
         servicename = request.json.get('servicename')
+        subtype = request.json.get('model_type')
         directory = "./data/" + servicename
 
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        projectmgr.UpsertService(servicename, "ml", request.json)
+        projectmgr.UpsertService(servicename, "ml", request.json, subtype)
 
     except Exception as e:
         code = 500
@@ -264,7 +265,9 @@ def modellist(name):
             for m in models:
                 result.append({"name": m.modelname, "modifiedon": m.modifiedon})
         elif modeltype == "general":
-            result = scikitlearn.getModels()
+            models = scikitlearn.getModels()
+            for m in models:
+                result.append({"name": m, "modifiedon": datetime.utcnow()})
 
     except Exception as e:
         code = 500
@@ -374,7 +377,7 @@ def recentjob(name):
 
 @app.route('/api/ml/prevjob/<name>', methods=['GET'])
 def prevjob(name):
-    message = "Completed"
+    message = "Success"
     result = {}
     code = 200
     try:
@@ -385,3 +388,18 @@ def prevjob(name):
         message = str(e)
 
     return jsonify({"statuscode": code, "message": message, "result": result})
+
+@app.route('/api/ml/reset/<name>', methods=['POST'])
+def resetmlmodel(name):
+    message = "Success"
+    result = {}
+    code = 200
+    try:
+        wpath = "./data/" + name + "/weights.hdf5"
+        if os.path.exists(wpath):
+            os.remove(wpath)
+    except Exception as e:
+        code = 500
+        message = str(e)
+
+    return jsonify({"statuscode": code, "message": message})

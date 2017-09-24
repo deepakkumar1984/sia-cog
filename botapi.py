@@ -70,7 +70,9 @@ def bottrain(name):
         corpus = []
         if "corpus" in rjson:
             corpus = rjson["corpus"]
-            if not corpus is None:
+            if corpus == 'all':
+                chatbot.corpustrain(name, '')
+            elif corpus != '':
                 chatbot.corpustrain(name, corpus)
 
         chatbot.train(name, data)
@@ -99,7 +101,7 @@ def gettrainhistory(name):
 def botpredict(name):
     message = "Success"
     code = 200
-    start = datetime.now()
+    start = datetime.utcnow()
     result = []
     try:
         projectmgr.ValidateServiceExists(name, constants.ServiceTypes.ChatBot)

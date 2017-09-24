@@ -97,7 +97,7 @@ def predictint():
     code = 200
     result = []
     try:
-        start = datetime.now()
+        start = datetime.utcnow()
         data = request.args.get('data')
         result = intentanalyzer.predict(data)
         result = json.loads(jsonpickle.encode(result, unpicklable=False))

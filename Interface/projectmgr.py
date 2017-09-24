@@ -1,7 +1,7 @@
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 from projectmodels import *
 import simplejson as json
 from datetime import datetime
@@ -65,11 +65,11 @@ def GetDeepModels(srvname, srvtype):
 
     return result
 
-def UpsertService(srvname, srvtype, srvdata):
+def UpsertService(srvname, srvtype, srvdata, subtype=""):
     try:
         srv = GetService(srvname, srvtype)
         if srv is None:
-            srv = Service(servicename=srvname, servicetype=srvtype, servicedata=json.dumps(srvdata), createdon=datetime.utcnow(), modifiedon=datetime.utcnow())
+            srv = Service(servicename=srvname, servicetype=srvtype, servicesubtype=subtype, servicedata=json.dumps(srvdata), createdon=datetime.utcnow(), modifiedon=datetime.utcnow())
             session.add(srv)
         else:
             srv.servicedata = json.dumps(srvdata)
@@ -163,7 +163,7 @@ def GetJobs(srvname, srvtype):
 def StartJob(srvname, srvtype, totalepoch):
     try:
         id = str(uuid.uuid4())
-        job = TrainingJob(id=id, servicename=srvname, servicetype=srvtype, start=datetime.utcnow(), status="Started", createdon=datetime.utcnow(), totalepoch=totalepoch)
+        job = TrainingJob(id=id, servicename=srvname, servicetype=srvtype, start=datetime.utcnow(), status="Running", createdon=datetime.utcnow(), totalepoch=totalepoch)
         session.add(job)
         session.commit()
     except:
@@ -199,9 +199,9 @@ def ClearCurrentTraining(id):
         session.rollback()
         raise
 
-def LogCurrentTraining(id, epoch, loss):
+def LogCurrentTraining(id, epoch, loss, metrices):
     try:
-        log = CurrentTraining(id=id, epoch=epoch, loss=loss)
+        log = CurrentTraining(id=id, epoch=epoch, loss=loss, metrices=metrices)
         session.add(log)
         session.commit()
     except:
@@ -209,23 +209,23 @@ def LogCurrentTraining(id, epoch, loss):
         raise
 
 def GetCurrentTraining(id):
-    return session.query(CurrentTraining)
+    return session.query(CurrentTraining).filter(CurrentTraining.id == id)
 
 def GetLastTraining(name=""):
     job = None
     epoches = []
     losses = []
     if name == "__all__":
-        jobs = session.query(TrainingJob).order_by(TrainingJob.createdon.desc()).limit(1).all()
+        jobs = session.query(TrainingJob).filter(or_(TrainingJob.status == "Running", TrainingJob.status == "Completed")).order_by(TrainingJob.createdon.desc()).limit(1).all()
     else:
-        jobs = session.query(TrainingJob).filter(and_(TrainingJob.servicename==name, TrainingJob.servicetype=="ml")).order_by(TrainingJob.createdon.desc()).limit(1).all()
+        jobs = session.query(TrainingJob).filter(and_(TrainingJob.servicename==name, TrainingJob.servicetype=="ml")).filter(or_(TrainingJob.status == "Running", TrainingJob.status == "Completed")).order_by(TrainingJob.createdon.desc()).limit(1).all()
 
     if len(jobs) == 0:
         return epoches, losses
 
     job = jobs[0]
 
-    if job.status == "Started":
+    if job.status == "Running":
         epochData = session.query(CurrentTraining).filter(CurrentTraining.id == job.id)
         for e in epochData:
             epoches.append(e.epoch)
@@ -245,9 +245,9 @@ def GetPrevTraining(name=""):
     epoches = []
     losses = []
     if name == "__all__":
-        jobs = session.query(TrainingJob).order_by(TrainingJob.createdon.desc()).limit(2).all()
+        jobs = session.query(TrainingJob).filter(TrainingJob.status == "Completed").order_by(TrainingJob.createdon.desc()).limit(2).all()
     else:
-        jobs = session.query(TrainingJob).filter(and_(TrainingJob.servicename==name, TrainingJob.servicetype=="ml")).order_by(TrainingJob.createdon.desc()).limit(2).all()
+        jobs = session.query(TrainingJob).filter(and_(TrainingJob.servicename==name, TrainingJob.servicetype=="ml", TrainingJob.status == "Completed")).order_by(TrainingJob.createdon.desc()).limit(2).all()
 
     if len(jobs) != 2:
         return epoches, losses

@@ -1,6 +1,7 @@
 import simplejson as json
 import os
 import pickle
+import jsonpickle
 import numpy
 import pandas
 from keras import datasets
@@ -256,6 +257,7 @@ def data_featureselection_withestimator(estimator, X, Y, pipeline):
 
 def model_evaluate(X, Y, pipeline):
     try:
+        results = []
         if "scoring" in pipeline["options"]:
             if len(pipeline['options']['scoring']) > 0:
                 scoring = pipeline['options']['scoring']
@@ -266,13 +268,16 @@ def model_evaluate(X, Y, pipeline):
 
         kfold = 10
         if "kfold" in pipeline['options']:
-            kfold = pipeline["options"]["kfold"]
+            kfold = int(pipeline["options"]["kfold"])
+            #kfold = KFold(splits, False, None)
 
         model = scikitlearn.getSKLearnModel(pipeline['options']['model_name'])
-        results = cross_validate(model, X, Y, cv=kfold, scoring=scoring)
-        output = {"mean": results.mean(), "std": results.std(), "results": results}
+        valresult = cross_validate(model, X, Y, cv=kfold, scoring=scoring, return_train_score=True)
         model.fit(X, Y)
-        projectmgr.UpdateExecuteResult(jobid, json.dumps(output))
+        for p in valresult:
+            results.append({"param": p, "values": valresult[p].tolist(), "min": valresult[p].min, "max": valresult[p].max});
+        output = jsonpickle.encode(results, unpicklable=False)
+        projectmgr.UpdateExecuteResult(jobid, output)
         picklefile = projectfolder + "/model.out"
         with open(picklefile, "wb") as f:
             pickle.dump(model, f)

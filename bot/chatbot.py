@@ -2,15 +2,14 @@ from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer, ChatterBotCorpusTrainer
 import os
 import simplejson as json
+from Interface import projectmgr, constants
 
 def getBot(name):
     botfolder = "./data/__chatbot/" + name
     if not os.path.exists(botfolder):
-        raise Exception("Chat bot does not exists!")
+        os.makedirs(botfolder)
 
     dbpath = "sqlite:///" + botfolder + "/bot.db"
-    with open(botfolder + "/bot.json", "r") as f:
-        botjson = json.load(f)
 
     bot = ChatBot(
         name,
@@ -45,12 +44,8 @@ def train(name, data):
 
 def predict(name, text):
     botfolder = "./data/__chatbot/" + name
-    if not os.path.exists(botfolder):
-        raise Exception("Chat bot does not exists!")
-
-    with open(botfolder + "/bot.json", "r") as f:
-        botjson = json.load(f)
-
+    service = projectmgr.GetService(name, constants.ServiceTypes.ChatBot)
+    botjson = json.loads(service.servicedata)
     bot = getBot(name)
     response = bot.get_response(text.lower())
     result = {"confidence": response.confidence, "response_text": response.text}

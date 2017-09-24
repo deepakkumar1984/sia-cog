@@ -76,9 +76,28 @@ def jobswithid(id):
     code = 200
     try:
         job = projectmgr.GetJob(id)
-        if not job.result is None:
-            result = {"id": job.id, "start": job.start, "end": job.end, "message": job.message, "totalepoch": job.totalepoch, "status": job.status, "createdon": job.createdon}
-            result["resultdata"] = json.loads(job.result)
+        result = {"id": job.id, "start": job.start, "end": job.end, "message": job.message,
+                  "totalepoch": job.totalepoch, "status": job.status, "createdon": job.createdon, "resultdata": {}}
+
+        if job.status == "Running":
+            epoches = []
+            metrices = {}
+            metricesParamAdded = False
+            epochData = projectmgr.GetCurrentTraining(id)
+            for e in epochData:
+                epoches.append(e.epoch)
+                mjson = json.loads(e.metrices)
+                if metricesParamAdded == False:
+                    for m in mjson:
+                        metrices[m] = []
+                    metricesParamAdded = True
+                for m in mjson:
+                   metrices[m].append(mjson[m])
+
+            result["resultdata"] = {"epoches": epoches, "metrices": metrices}
+        elif job.status == "Completed":
+            if not job.result is None:
+                result["resultdata"] = json.loads(job.result)
 
     except Exception as e:
         code = 500
@@ -105,7 +124,7 @@ def listjobs(srvtype, srvname):
 @app.route('/api/pipelinesnap/<name>/<id>', methods=['GET'])
 def getpipelinesnap(name, id):
     message = "Success"
-    result = []
+    result = None
     code = 200
     try:
         dump = dumpmgr.GetPipelineDump(id, name)
@@ -121,7 +140,7 @@ def getpipelinesnap(name, id):
 @app.route('/api/pipelinelog/<name>/<id>/<module>', methods=['GET'])
 def getpipelinelog(name, id, module):
     message = "Success"
-    result = []
+    result = None
     dtype = ""
     code = 200
     try:

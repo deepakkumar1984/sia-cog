@@ -5,7 +5,7 @@ from adapt.tools.text.trie import Trie
 from adapt.intent import IntentBuilder
 from adapt.parser import Parser
 from adapt.engine import IntentDeterminationEngine
-from Interface import projectmgr, constants
+from Interface import projectmgr, constants, modelcache
 from padatious.intent_container import IntentContainer
 import pickle
 import jsonpickle
@@ -113,6 +113,7 @@ def getIntentRecords(name=""):
     else:
         service = projectmgr.GetService(name, constants.ServiceTypes.LangIntent)
         result = json.loads(service.servicedata)
+        result["utter"] = json.loads(json.dumps(getUtter(name)))
 
     return result
 
@@ -151,35 +152,29 @@ def train():
         for e in entities:
             engine = buildEntity(engine, e["name"], e["keywords"])
 
-        intents = getIntentRecords()
+        intents = getIntentRecords("all")
         for i in intents:
             engine = buildIntent(engine, i["name"], i["required_entities"], i["optional_entities"])
             utterpath = "./data/__intent/utter/" + i["name"] + ".intent"
             if os.path.exists(utterpath):
                 container.load_file(i["name"], utterpath)
 
-        with open("./data/__intent/model.out", "wb") as f:
-            pickle.dump(engine, f)
-
         container.train()
-        with open("./data/__intent/container.json", "wb") as f:
-            jpicked = jsonpickle.encode(container)
-            json.dump(jpicked, f)
-
+        modelcache.store(constants.ServiceTypes.LangIntent, "intent", engine)
         projectmgr.EndJob(id, "Completed", "Completed")
     except Exception as e:
         projectmgr.EndJob(id, "Error", str(e))
 
+    return engine
+
 def predict(text, confidence=0.1):
-    modelpath = "./data/__intent/model.out"
     container = IntentContainer('intent_cache')
-    if not os.path.exists(modelpath):
-        raise Exception("Please train the model")
+    trainedEngine = modelcache.get(constants.ServiceTypes.LangIntent, "intent")
+    if trainedEngine is None:
+        trainedEngine = train()
+        trainedEngine = modelcache.get(constants.ServiceTypes.LangIntent, "intent")
 
-    with open(modelpath, "rb") as f:
-        trainedEngine = pickle.load(f)
-
-    intents = getIntentRecords()
+    intents = getIntentRecords("all")
     for i in intents:
         utterpath = "./data/__intent/utter/" + i["name"] + ".intent"
         if os.path.exists(utterpath):
@@ -203,6 +198,3 @@ def predict(text, confidence=0.1):
                 result.append({"intent_type": n.name, "confidence": n.conf})
 
     return result
-
-
-
