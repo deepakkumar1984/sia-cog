@@ -20,7 +20,7 @@ name = ""
 optionslist = {}
 jobid = ""
 
-def init(self, name, modeltype, jobid):
+def init(self, name, modeltype, jobid=None):
     self.projectfolder = "./data/" + name
     self.name = name
     self.jobid = jobid

@@ -125,7 +125,7 @@ def delfile(name):
     return jsonify({"statuscode": code, "message": message})
 
 @app.route('/api/ml/pipeline/<name>', methods=['POST'])
-def pipeline(name):
+def savepipelineinfo(name):
     message = "Success"
     code = 200
     try:
@@ -330,11 +330,12 @@ def jobs(id):
 def predict(name):
     message = "Success"
     code = 200
+    result = []
     try:
         start = datetime.now()
         data = json.loads(request.data)
-        servicedata = utility.getFileData("./data/" + name + "/service.json")
-        servicejson = json.loads(servicedata)
+        service = projectmgr.GetService(name, constants.ServiceTypes.MachineLearning)
+        servicejson = json.loads(service.servicedata)
 
         savePrediction = False
         if "save_prediction" in data:
@@ -345,7 +346,7 @@ def predict(name):
         elif servicejson["data_format"] == "csv":
             testfile = data['testfile']
 
-        pipeline.init(pipeline, name, servicejson["model_type"], "")
+        pipeline.init(pipeline, name, servicejson["model_type"])
         predictions = pipeline.Predict(testfile, savePrediction)
         predictions = json.loads(predictions)
         if servicejson["data_format"] == "csv":

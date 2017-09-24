@@ -11,7 +11,7 @@ model_type = ""
 jobid = ""
 lastpipeline = ""
 
-def init(self, srvname, model_type, jobid):
+def init(self, srvname, model_type, jobid=None):
     self.srvname = srvname
     self.model_type = model_type
     self.jobid = jobid
@@ -74,8 +74,7 @@ def Run():
 
 def Predict(filename, savePrediction = False):
     pipelinecomponents.init(pipelinecomponents, srvname, model_type, jobid)
-    pipelinefile = pipelinecomponents.projectfolder + '/pipeline.json'
-    pipelinejson = utility.getJsonData(pipelinefile)
+    pipelinejson = getPipelineData()
     resultset = {}
     initialX = []
     predType = "csv"
@@ -93,10 +92,10 @@ def Predict(filename, savePrediction = False):
             continue
 
         if module == "data_loadcsv":
-            p["input"]["filename"] = filename
+            p["options"]["filename"] = filename
 
         if module == "data_loadimg":
-            p["input"]["imagepath"] = filename
+            p["options"]["imagepath"] = filename
             predType = "img"
 
         if module == "data_handlemissing" or module == "data_filtercolumns":
@@ -109,12 +108,11 @@ def Predict(filename, savePrediction = False):
             module = "data_getx"
 
         if "model_" in module:
-            if module != "model_evalute" and module != "model_train":
+            if module != "model_evaluate" and module != "model_train":
                 continue
             else:
                 module = "model_predict"
                 name = "model_predict"
-                del input["model"]
                 del input["Y"]
 
         args = {}
