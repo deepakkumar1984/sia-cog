@@ -11,7 +11,7 @@ RUN ln -sf /dev/stderr /var/log/siacog.log
 RUN useradd -ms /bin/bash sia
 
 RUN echo 'building CPU sia-cog image'
-RUN apt-get install -y curl unzip
+RUN apt-get install -y curl
 RUN apt-get update && apt-get install -y python-setuptools python-pip python-dev git cmake build-essential wget unzip
 RUN apt-get install -y libopencv-dev libssl-dev libffi-dev libfann-dev swig tesseract-ocr python-tk openmpi-bin
 
