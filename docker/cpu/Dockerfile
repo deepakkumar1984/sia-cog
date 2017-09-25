@@ -10,6 +10,8 @@ RUN apt-get update
 WORKDIR /opt
 
 RUN git clone https://github.com/deepakkumar1984/sia-cog.git
+RUN wget https://github.com/deepakkumar1984/sia-cog-setup/files/1327381/SiaCog-Client_v1.0-beta.1.zip
+RUN unzip -d siacogclientv1 SiaCog-Client_v1.0-beta.1.zip
 WORKDIR /opt/sia-cog/vis
 RUN make
 
@@ -21,8 +23,17 @@ RUN mkdir weights
 
 RUN chown -R sia:sia /opt/sia-cog
 
+WORKDIR /opt/siacogclientv1
+RUN dotnet restore
+RUN rm -r SiaCog-Client_v1.0*
+RUN chown -R sia:sia /opt/siacogclientv1
+
 USER sia
 WORKDIR /opt/sia-cog
 CMD python runserver.py
 EXPOSE 5555
+
+WORKDIR /opt/siacogclientv1
+CMD dotnet SiaCog.Client.dll
+EXPOSE 5000
 
