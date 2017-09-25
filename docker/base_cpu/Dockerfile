@@ -12,7 +12,7 @@ RUN useradd -ms /bin/bash sia
 
 RUN echo 'building CPU sia-cog image'
 RUN apt-get update
-RUN apt-get install -y libcurl3
+RUN apt-get install -y curl
 RUN apt-get update && apt-get install -y python-setuptools python-pip python-dev git cmake build-essential wget unzip
 RUN apt-get install -y libopencv-dev libssl-dev libffi-dev libfann-dev swig tesseract-ocr python-tk openmpi-bin
 
