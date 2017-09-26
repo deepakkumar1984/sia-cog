@@ -1,4 +1,4 @@
-FROM f7b7be47d09f
+FROM deepakkumarb/sia-cog_base:cpu
 
 RUN echo 'building CPU sia-cog image'
 
