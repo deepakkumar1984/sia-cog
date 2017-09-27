@@ -1,7 +1,11 @@
 
 [![Join the chat at https://gitter.im/sia-cog/Lobby](https://badges.gitter.im/sia-cog/Lobby.svg)](https://gitter.im/sia-cog/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-We are trying to provide an easy interface in form of web API to build or host various machine learning algorithm or general visual/speech/language cognitive services without having knowledge of the programming language like Python or R.
+Developing this project to provide an easy interface in form of web API to build or host your own machine learning models (general + deep learning) along with vision, language intent analysis and chatbots services without having deep knowledge of programming languages like Python or R.
+
+
+Server and Web Client Setup: https://github.com/deepakkumar1984/sia-cog-setup
+
 
 #### Major Components Involved
 
