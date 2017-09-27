@@ -1,5 +1,5 @@
 before_install:
-- sudo apt-get update && apt-get install -y python-setuptools python-pip python-dev git cmake build-essential wget unzip
-- sudo apt-get install -y libopencv-dev libssl-dev libffi-dev libfann-dev swig tesseract-ocr python-tk openmpi-bin
+- sudo apt-get update
+- sudo apt-get install -y python-setuptools python-pip python-dev git cmake build-essential wget unzip libopencv-dev libssl-dev libffi-dev libfann-dev swig tesseract-ocr python-tk openmpi-bin
 - sudo pip install -e git+https://github.com/mycroftai/adapt#egg=adapt-parser
 language: python
