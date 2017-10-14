@@ -5,7 +5,7 @@ Routes and views for the flask application.
 from flask import jsonify
 from flask import request
 from datetime import datetime
-from Interface import app, utility, logmgr, projectmgr, constants
+from Interface import app, utility, logmgr, projectmgr, constants, modelcache
 from vis import objcls, objdet, cvmgr
 
 
@@ -55,7 +55,7 @@ def visiondelete(name):
 def visionpredict(name):
     message = "Success"
     code = 200
-    start = datetime.now()
+    start = datetime.utcnow()
     try:
         data = request.get_json()
         projectmgr.ValidateServiceExists(name, constants.ServiceTypes.Vision)
@@ -67,12 +67,20 @@ def visionpredict(name):
             target_x = servicejson['options']['target_size_x']
             target_y = servicejson['options']['target_size_y']
             model_name = servicejson['options']['model']
-            model = objcls.loadModel(model_name, target_x, target_y)
+            model = modelcache.get(constants.ServiceTypes.Vision, name)
+            if model is None:
+                model = objcls.loadModel(model_name, target_x, target_y)
+                modelcache.store(constants.ServiceTypes.Vision, name, model)
+
             result = objcls.predict(imagepath, target_x, target_y, model_name, model)
         elif servicejson["type"] == "det":
             model_name = servicejson['options']['model']
             isgpu = servicejson['options']['gpu']
-            model = objdet.loadModel(model_name, 10, isgpu)
+            model = modelcache.get(constants.ServiceTypes.Vision, model_name)
+            if model is None:
+                model = objdet.loadModel(model_name, 10, isgpu)
+                modelcache.store(constants.ServiceTypes.Vision, model_name, model)
+
             result = objdet.predict(imagepath, model)
         elif servicejson["type"] == "face":
             result = cvmgr.detectfaces(imagepath)

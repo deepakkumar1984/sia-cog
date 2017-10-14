@@ -132,17 +132,38 @@ def UpsertDeepModels(srvname, srvtype, modelname, modeldata, modelflow=None):
 
 def DeleteService(srvname, srvtype):
     try:
-        srv = GetService(srvname, srvtype)
+        srv = session.query(Service).filter(Service.servicetype==srvtype).filter(Service.servicename==srvname).one()
         session.delete(srv)
-        session.commit()
+        pd = session.query(Pipeline).filter(Pipeline.servicetype == srvtype).filter(Pipeline.servicename == srvname).all()
+        for p in pd:
+            session.delete(p)
+        models = session.query(DeepModel).filter(DeepModel.servicetype==srvtype).filter(DeepModel.servicename==srvname).all()
+        for m in models:
+            session.delete(m)
+
+        jobs = session.query(TrainingJob).filter(TrainingJob.servicetype==srvtype).filter(TrainingJob.servicename==srvname).all()
+        for j in jobs:
+            session.delete(j)
+
+        session.commit();
     except:
         session.rollback()
         raise
 
 def DeletePipeline(srvname, srvtype):
     try:
-        pd = GetPipeline(srvname, srvtype)
+        pd = session.query(Pipeline).filter(Pipeline.servicetype==srvtype).filter(Pipeline.servicename==srvname).one()
         session.delete(pd)
+        session.commit()
+    except NoResultFound as rex:
+        session.rollback()
+    except:
+        raise
+    
+def DeleteDeepModel(srvname, srvtype, modelname):
+    try:
+        dm = GetDeepModel(srvname, srvtype, modelname)
+        session.delete(dm)
         session.commit()
     except:
         raise

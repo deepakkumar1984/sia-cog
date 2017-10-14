@@ -10,7 +10,7 @@ import werkzeug
 from flask import jsonify
 from flask import request
 from Interface import utility, app, projectmgr, logmgr, constants
-from ml import backgroundproc, pipeline, scikitlearn, kerasfactory
+from ml import backgroundproc, pipeline, scikitlearn, mxnetfactory
 
 @app.route('/api/ml/create', methods=['POST'])
 def create():
@@ -54,10 +54,10 @@ def delete(name):
     try:
         directory = "./data/" + name
         projectmgr.ValidateServiceExists(name, constants.ServiceTypes.MachineLearning)
-        if os.path.exists(directory):
-            shutil.rmtree(directory)
 
         projectmgr.DeleteService(name, "ml")
+        if os.path.exists(directory):
+            shutil.rmtree(directory)
     except Exception as e:
         code = 500
         message = str(e)

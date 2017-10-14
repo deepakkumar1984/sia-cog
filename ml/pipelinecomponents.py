@@ -7,10 +7,10 @@ import pandas
 from keras import datasets
 from keras.models import model_from_json
 from pandas import read_csv
-from sklearn.model_selection import cross_validate
+from sklearn.model_selection import cross_validate, train_test_split, cross_val_predict
 from sklearn.preprocessing import Imputer
 from keras.utils import np_utils
-from ml import scikitlearn, kerasfactory
+from ml import scikitlearn, mxnetfactory
 from Interface import projectmgr
 from sklearn import preprocessing, feature_selection
 
@@ -73,6 +73,18 @@ def data_loadsample(pipeline):
         (X_train, Y_train), (X_test, Y_test) = datasets.boston_housing.load_data()
 
     return (X_train, Y_train), (X_test, Y_test)
+
+def data_testtrainsplit(X, Y, pipeline):
+    test_size = 0.25
+    random_state = 42
+    if "test_split" in pipeline["options"]:
+        test_size = pipeline["options"]["test_size"]
+
+    if "random_state" in pipeline["options"]:
+        random_state = pipeline["options"]["random_state"]
+
+    X_train, Y_train, X_test, Y_test = train_test_split(X, Y, test_size=test_size, random_state=random_state)
+    return X_train, Y_train, X_test, Y_test
 
 def data_getxy(dataframe, pipeline):
     try:
@@ -269,10 +281,10 @@ def model_evaluate(X, Y, pipeline):
         kfold = 10
         if "kfold" in pipeline['options']:
             kfold = int(pipeline["options"]["kfold"])
-            #kfold = KFold(splits, False, None)
 
         model = scikitlearn.getSKLearnModel(pipeline['options']['model_name'])
         valresult = cross_validate(model, X, Y, cv=kfold, scoring=scoring, return_train_score=True)
+
         model.fit(X, Y)
         for p in valresult:
             results.append({"param": p, "values": valresult[p].tolist(), "min": valresult[p].min, "max": valresult[p].max});
@@ -286,7 +298,7 @@ def model_evaluate(X, Y, pipeline):
     except Exception as e:
         raise Exception("model_evaluate: " + str(e))
 
-def model_train(X, Y, pipeline, more = False):
+def model_train(X, Y, pipeline, X_test=None, Y_test=None, more = False):
     try:
         result = None
         if model_type == "mlp":
@@ -295,17 +307,13 @@ def model_train(X, Y, pipeline, more = False):
                 raise Exception(pipeline['options']['model_name'] + ": Model not found!")
 
             modeljson = json.loads(deepmodel.modeldata)
-            modelObj = kerasfactory.createModel(modeljson)
-            modelObj.compile(loss=pipeline['options']['loss'], optimizer=pipeline['options']['optimizer'],
-                          metrics=pipeline['options']['scoring'])
+            modelObj = mxnetfactory.createModel(modeljson)
+            #modelObj.compile(loss=pipeline['options']['loss'], optimizer=pipeline['options']['optimizer'],
+            #              metrics=pipeline['options']['scoring'])
             epoches = pipeline["options"]["epoches"]
             batch_size = pipeline["options"]["batch_size"]
-            weightpath = projectfolder + "/weights.hdf5"
-            if more == "true":
-                if os.path.exists(weightpath):
-                    modelObj.load_weights(weightpath)
-            kerasfactory.init(kerasfactory, name, jobid)
-            result = kerasfactory.Train(modelObj, X, Y, weightpath, epoches, batch_size)
+            mxnetfactory.init(mxnetfactory, name, jobid)
+            result = mxnetfactory.Train(modelObj, X, Y, projectfolder, pipeline["options"], epoches, batch_size, X_test=None, Y_test=None, more=more)
             projectmgr.UpdateExecuteResult(jobid, json.dumps(result))
             picklefile = projectfolder + "/model.json"
             model_json = modelObj.to_json()

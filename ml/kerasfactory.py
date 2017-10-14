@@ -79,20 +79,26 @@ def buildModel(modelDef):
 
     return model
 
-def Train(model, X, Y, weightpath, epoch=32, batch_size=32, validation_split = None):
+def Train(model, X, Y, weightpath, epoch=32, batch_size=32, X_test=None, Y_test=None):
     if type(X) is pandas.DataFrame:
         X = X.values
 
     if type(Y) is pandas.DataFrame:
         Y = Y.values
 
+    if type(X_test) is pandas.DataFrame:
+        X_test = X_test.values
+
+    if type(Y_test) is pandas.DataFrame:
+        Y_test = Y_test.values
+
     seed = 7
     numpy.random.RandomState(seed)
     hist = Histories()
-    if validation_split is None:
+    if X_test is None:
         hist = model.fit(X, Y, epochs=epoch, batch_size=batch_size, verbose=1, callbacks=[hist])
     else:
-        hist = model.fit(X, Y, validation_split=validation_split, epochs=epoch, batch_size=batch_size, verbose=1, callbacks=[hist])
+        hist = model.fit(X, Y, epochs=epoch, batch_size=batch_size, validation_data=(X_test, Y_test), verbose=1, callbacks=[hist])
 
 
     model.save_weights(weightpath)

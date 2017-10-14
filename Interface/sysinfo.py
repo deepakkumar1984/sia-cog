@@ -2,7 +2,8 @@ import platform
 import psutil
 import pynvml
 import jsonpickle
-import math
+import subprocess
+
 def getSystemInfo():
     result = {"machine": platform.machine(),
               "platform": platform.platform(),
@@ -40,5 +41,28 @@ def getGPUUsage():
         result["devices"] = jsonpickle.encode(gpuData, unpicklable=False)
     except Exception as e:
         result = {"driver": "No GPU!", "gpu_count": 0, "devices": []}
+
+    return result
+
+def getModuleInfo():
+    result = []
+
+    pkglist = ["Flask", "Cython", "Keras", "mxnet", "tensorflow", "cntk", "scikit-learn", "pandas", "matplotlib",
+               "opencv-python", "pytesseract", "nltk", "ChatterBot", "padatious", "seaborn", "mpld3", "psutil",
+               "nvidia-ml-py"]
+
+    for p in pkglist:
+        try:
+            pkg = subprocess.check_output(["pip", "show", p])
+            params = pkg.split('\n')
+            modinfo = {}
+            for p in params:
+                kv = p.split(':')
+                if len(kv) > 1:
+                    if kv[0] != "Home-page":
+                        modinfo[kv[0]] = kv[1].strip()
+            result.append(modinfo)
+        except Exception as e:
+            result.append({"Name": p, "Error": str(e)})
 
     return result

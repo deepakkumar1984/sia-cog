@@ -7,8 +7,6 @@ from adapt.parser import Parser
 from adapt.engine import IntentDeterminationEngine
 from Interface import projectmgr, constants, modelcache
 from padatious.intent_container import IntentContainer
-import pickle
-import jsonpickle
 import os
 
 def createDataFolder():

@@ -8,12 +8,13 @@ from PIL import Image
 import jsonpickle
 import os
 import simplejson as json
+from Interface import modelcache
 
 modellist = []
 
-
 def loadModel(name, target_x, target_y):
     input_tensor = Input(shape=(target_x, target_y, 3))
+
     if name == "ResNet50":
         model = applications.resnet50.ResNet50(input_tensor=input_tensor)
     elif name == "VGG16":

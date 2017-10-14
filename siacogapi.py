@@ -29,6 +29,8 @@ def systeminfo(infotype):
             result = sysinfo.getCPUUsage()
         elif infotype == "gpu":
             result = sysinfo.getGPUUsage()
+        elif infotype == "module":
+            result = sysinfo.getModuleInfo()
     except Exception as e:
         message = str(e)
         code = 500
